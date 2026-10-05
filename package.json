@@ -80,7 +80,6 @@
     },
     "linux": {
       "target": [
-        "AppImage",
         "tar.gz"
       ],
       "category": "Utility",

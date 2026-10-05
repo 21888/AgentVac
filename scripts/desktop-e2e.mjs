@@ -85,9 +85,8 @@ await Promise.all(
   [userData, fixtureRoot, sqliteRoot].map((directory) => fs.mkdir(directory)),
 );
 const evidenceFile = path.join(
-  project,
-  "docs",
-  "native-ci",
+  process.env.AGENTVAC_NATIVE_EVIDENCE_DIR ||
+    path.join(project, "docs", "native-ci"),
   `next-${process.platform}-${process.arch}${selfTest ? "-self-test" : ""}.json`,
 );
 const results = {
@@ -101,6 +100,9 @@ const results = {
   inheritedXdgDataHome: process.env.XDG_DATA_HOME || null,
   trashConfigurationChanged: false,
   packagedArtifactTested: false,
+  sourceRevision: process.env.GITHUB_SHA || null,
+  ciRunId: process.env.GITHUB_RUN_ID || null,
+  ciRunAttempt: process.env.GITHUB_RUN_ATTEMPT || null,
   checks: {},
 };
 const planned = [

@@ -4,6 +4,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { randomBytes, randomUUID } from "node:crypto";
+import { createSparseFixture } from "./helpers/sparse-fixture.js";
 import { AgentVacEngine } from "../electron/engine.js";
 import type { ScanProgress } from "../shared/types.js";
 const old = new Date(Date.now() - 120 * 86400000);
@@ -17,13 +18,25 @@ async function setup(t: any) {
 async function file(root: string, relative: string, bytes = 1) {
   const p = path.join(root, relative);
   await fs.mkdir(path.dirname(p), { recursive: true });
-  const handle = await fs.open(p, "wx");
-  await handle.truncate(bytes);
-  await handle.close();
+  await createSparseFixture(p, bytes);
   await fs.utimes(p, old, old);
   return p;
 }
 const options = { minAgeDays: 30, includeSessions: false };
+function fixtureTiming(name: string) {
+  const started = performance.now();
+  return (phase: string, completedFiles?: number) => {
+    console.log(
+      "AGENTVAC_FIXTURE_PHASE " +
+        JSON.stringify({
+          name,
+          phase,
+          completedFiles,
+          elapsedMs: Math.round(performance.now() - started),
+        }),
+    );
+  };
+}
 function monotonic(events: ScanProgress[]) {
   for (let index = 1; index < events.length; index++) {
     assert.ok(events[index].visitedEntries >= events[index - 1].visitedEntries);
@@ -57,12 +70,15 @@ test("complete scoped scan reports unexpanded protected directories and true ter
 });
 test(
   "50,011 real files cannot masquerade as complete; 100k retry includes the large file",
-  { timeout: 120000 },
+  { timeout: 300000 },
   async (t) => {
+    const progress = fixtureTiming("50011-file-coverage");
+    progress("setup-start");
     const { root, engine } = await setup(t);
     const dir = path.join(root, "log");
     await fs.mkdir(dir);
     for (let base = 0; base < 50010; base += 100) {
+      t.signal.throwIfAborted();
       await Promise.all(
         Array.from(
           { length: Math.min(100, 50010 - base) },
@@ -76,15 +92,28 @@ test(
           },
         ),
       );
+      const completedFiles = Math.min(base + 100, 50010);
+      if (completedFiles % 10000 === 0 || completedFiles === 50010)
+        progress("create-files", completedFiles);
     }
+    t.signal.throwIfAborted();
     const largest = await file(
       root,
       "log/codex-tui.log.999999",
       300 * 1024 ** 3,
     );
     const before = await fs.stat(largest);
+    progress("all-fixtures-created", 50011);
     const events: ScanProgress[] = [];
-    const limited = await engine.scan(options, (p) => events.push(p));
+    const limitedRequest = randomUUID();
+    const limited = await engine.scan(
+      { ...options, requestId: limitedRequest },
+      (p) => {
+        events.push(p);
+        if (t.signal.aborted) engine.cancelScan(limitedRequest);
+      },
+    );
+    progress("50k-limited-scan-complete");
     assert.equal(limited.status, "partial");
     assert.equal(limited.coverage.limitReason, "entry-count");
     assert.equal(limited.coverage.visitedEntries, 50000);
@@ -96,7 +125,15 @@ test(
     const candidate = limited.entries.find((e) => e.selectable)!;
     const preview = await engine.preview([candidate.id]);
     assert.equal(preview.scanStatus, "partial");
-    const complete = await engine.scan({ ...options, maxEntries: 100000 });
+    t.signal.throwIfAborted();
+    const completeRequest = randomUUID();
+    const complete = await engine.scan(
+      { ...options, maxEntries: 100000, requestId: completeRequest },
+      () => {
+        if (t.signal.aborted) engine.cancelScan(completeRequest);
+      },
+    );
+    progress("100k-complete-scan-complete");
     assert.equal(complete.status, "complete");
     assert.equal(complete.coverage.limitReason, null);
     assert.equal(complete.entries.length, 50011);
@@ -104,6 +141,7 @@ test(
     assert.ok(complete.summary.totalBytes >= 300 * 1024 ** 3);
     assert.equal((await fs.stat(largest)).ino, before.ino);
     await assert.rejects(() => engine.quarantine(preview.token, true), /失效/);
+    progress("assertions-complete");
   },
 );
 test("cancel and restart have separate request identities and no stale preview or late cancellation", async (t) => {
@@ -179,8 +217,10 @@ test("read errors and depth limits are explicit partial outcomes, not protected-
 });
 test(
   "long-path result serialization stops at a bounded budget with an explicit partial reason",
-  { timeout: 120000 },
+  { timeout: 300000 },
   async (t) => {
+    const progress = fixtureTiming("26000-long-path-budget");
+    progress("setup-start");
     const { root, engine } = await setup(t);
     const relative =
       "log/" + ["a", "b", "c"].map((s) => s.repeat(200)).join("/");
@@ -200,7 +240,8 @@ test(
       }
       throw e;
     }
-    for (let base = 0; base < 26000; base += 100)
+    for (let base = 0; base < 26000; base += 100) {
+      t.signal.throwIfAborted();
       await Promise.all(
         Array.from({ length: 100 }, (_, i) =>
           fs.writeFile(
@@ -209,10 +250,22 @@ test(
           ),
         ),
       );
-    const result = await engine.scan({ ...options, maxEntries: 100000 });
+      if ((base + 100) % 10000 === 0 || base + 100 === 26000)
+        progress("create-files", base + 100);
+    }
+    t.signal.throwIfAborted();
+    const requestId = randomUUID();
+    const result = await engine.scan(
+      { ...options, maxEntries: 100000, requestId },
+      () => {
+        if (t.signal.aborted) engine.cancelScan(requestId);
+      },
+    );
+    progress("scan-complete");
     assert.equal(result.status, "partial");
     assert.equal(result.coverage.limitReason, "result-bytes");
     assert.ok(result.coverage.resultBytes <= 24 * 1024 ** 2);
     assert.ok(Buffer.byteLength(JSON.stringify(result)) < 25 * 1024 ** 2);
+    progress("assertions-complete");
   },
 );

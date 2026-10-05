@@ -1891,7 +1891,7 @@ onUnmounted(() => {
           <Icon name="x" :size="14" />
         </button>
       </div>
-      <template v-if="page === 'scan'">
+      <div v-if="page === 'scan'" class="scan-content">
         <section class="scan-heading">
           <div class="heading-copy">
             <span class="page-eyebrow">CODEX · 本地数据</span>
@@ -2726,7 +2726,7 @@ onUnmounted(() => {
             </div>
           </aside>
         </div>
-      </template>
+      </div>
       <section
         v-else-if="page === 'diagnostics'"
         class="utility-workspace"

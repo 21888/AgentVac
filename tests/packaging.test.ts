@@ -65,3 +65,11 @@ for (const platform of ["darwin", "linux", "win32"]) {
     }
   });
 }
+
+// electron-builder's current AppImage launcher can disable Chromium sandboxing.
+// Keep the supported Linux distribution on the verified tar payload instead.
+test("default Linux distribution excludes the sandbox-disabling AppImage launcher", () => {
+  const metadata = require("../package.json");
+  assert.deepEqual(metadata.build.linux.target, ["tar.gz"]);
+  assert.equal(JSON.stringify(metadata.build).includes("--no-sandbox"), false);
+});

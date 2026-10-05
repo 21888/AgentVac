@@ -3844,3 +3844,37 @@ select {
     padding-bottom: 12px;
   }
 }
+
+/* Let the visual overview scroll before banners can collapse the file list.
+   The toolbar, selection warning and action bar remain outside this region. */
+.scan-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+.scan-content > .workspace-grid {
+  flex-shrink: 0;
+  min-height: 380px;
+}
+/* Match the existing palette while keeping small action/safety text legible. */
+[data-theme="light"] .action-bar > .text-button,
+[data-theme="light"] .review-note {
+  color: var(--warning-ink);
+}
+[data-theme="dark"] .section-title > span {
+  color: var(--text-tertiary);
+}
+/* Keep cross-page selection scope and pagination in view while the overview
+   scrolls. Clip without creating an intermediate scroll container for sticky. */
+.scan-content > .workspace-grid,
+.scan-content .files-workspace {
+  overflow: clip;
+}
+.scan-content .table-footer:has(.bulk-selection-scope) {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  background: var(--bg);
+}

@@ -15,3 +15,7 @@ release-next/
 .qa/
 
 .build-cache/
+
+# Generated packaged acceptance profiles include synthetic recovery material.
+qa/packaged-acceptance/.runs/
+qa/packaged-acceptance/evidence/
