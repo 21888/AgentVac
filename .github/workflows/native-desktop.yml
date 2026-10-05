@@ -3,9 +3,6 @@ name: Source-native Electron fixture verification
 # Final/default state is manual only. A separately reviewed one-shot master marker
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
-  push:
-    branches: [master]
-    paths: [.github/agentvac-native-once.json]
   workflow_dispatch:
 
 permissions:

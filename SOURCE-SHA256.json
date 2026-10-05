@@ -3,7 +3,7 @@
   "releaseStatus": "unreleased-source-native-candidate",
   "generatedAt": "2026-10-05T20:27:39.956412+00:00",
   "productionDigest": "4ee7c17954ad435e5f64d8296676a76f9497457522aa65877b2db83f1a49a0bc",
-  "sourceDigest": "f13b0b662e4492f80145e4bdbfa20704d83931c5b69b50f3df695b3c1e534bed",
+  "sourceDigest": "2ed6175dbf963fb44813e65310c0069bb2f9561ce96cd3b000cf16658c2e040c",
   "files": [
     {
       "path": ".gitattributes",
@@ -12,8 +12,8 @@
     },
     {
       "path": ".github/workflows/native-desktop.yml",
-      "sha256": "608437ccd3d4df9df6234013cedca68110e77b0da9bf4783577ca482fe41920a",
-      "bytes": 5397
+      "sha256": "896af7a0c8aed84fbf1beedc22c16452b26a7e18d4dd8bee5055b6844503fd1a",
+      "bytes": 5319
     },
     {
       "path": ".gitignore",
@@ -754,12 +754,6 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
-    },
-    {
-      "path": ".github/agentvac-native-once.json",
-      "sha256": "35efc5aac5cacfd59434c80fe25049b345b9661fcb42c992ba011fa43ea8f5f2",
-      "bytes": 214
     }
-  ],
-  "workflowMode": "authorized-once-marker"
+  ]
 }
