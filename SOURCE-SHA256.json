@@ -1,8 +1,8 @@
 {
   "format": "agentvac-source-sha256-v1",
-  "scope": "one-shot-observed-argv-native-validation",
+  "scope": "frozen-process-integration-local-native-candidate",
   "baseCommit": "d105e98484713f077ce3f34c46ac74e992c6bfa8",
-  "sourceDigest": "295da31c8c5db58356d06cba2e6616581d28116f156bbb3c11628475657332a5",
+  "sourceDigest": "ca8d465779ee200242d5ccb50b6154aecc90d8b0a5057fa5c7234abc46b53822",
   "productionDigest": "5dfd3ddbad1a7002a879bad5aedf02efb2581fe15c71e819a15185bf3d47964d",
   "files": [
     {
@@ -12,8 +12,8 @@
     },
     {
       "path": ".github/workflows/native-desktop.yml",
-      "sha256": "04b0e1db0f2c684c83b5b3efb580998a0e70cea945350e3dd18ab41a1b831a9e",
-      "bytes": 5481
+      "sha256": "a198595979debd518fe38b29e6b41d543a3edf8565e686713b6a40afde5e48b8",
+      "bytes": 5378
     },
     {
       "path": ".gitignore",
@@ -914,11 +914,6 @@
       "path": "tests/runtime-image-identity.test.ts",
       "sha256": "da044536f4ce51c261f54a9068bbfaea72e9b4d95f817d31d011475972e12a64",
       "bytes": 2210
-    },
-    {
-      "path": ".github/agentvac-native-once-observed-argv-20261005.json",
-      "sha256": "81f909cd02934d071a9340077dc38514f08b53f1cb61c4ee252984e916ca1f92",
-      "bytes": 347
     }
   ]
 }

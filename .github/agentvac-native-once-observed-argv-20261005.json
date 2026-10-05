@@ -1,9 +1,0 @@
-{
-  "schema": 1,
-  "purpose": "observed-argv-source-native-validation-v1",
-  "sourceDigest": "ca8d465779ee200242d5ccb50b6154aecc90d8b0a5057fa5c7234abc46b53822",
-  "productionDigest": "5dfd3ddbad1a7002a879bad5aedf02efb2581fe15c71e819a15185bf3d47964d",
-  "standardRunnersOnly": true,
-  "restoreManualAfterTerminal": true,
-  "binaryRelease": false
-}
