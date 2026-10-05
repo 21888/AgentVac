@@ -1,7 +1,0 @@
-{
-  "purpose": "source-native-ci-fix-round-2-corrected",
-  "version": "0.2.0",
-  "productionDigest": "ea9f3e37a47314cb7f95fb5328af51f8cddd29c24af0f4bc562bcc9dc277ca3d",
-  "createdAt": "2026-10-05T21:59:51.832514+00:00",
-  "scope": "one public standard-runner diagnostic validation; restore manual configuration afterwards"
-}

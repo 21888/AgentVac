@@ -3,7 +3,7 @@
   "releaseStatus": "unreleased-source-native-candidate",
   "generatedAt": "2026-10-05T21:59:51.832514+00:00",
   "productionDigest": "ea9f3e37a47314cb7f95fb5328af51f8cddd29c24af0f4bc562bcc9dc277ca3d",
-  "sourceDigest": "7fe80f6bbb4b600cf84afad813e67e81cefbb52d86c136d4134a72921f783bf7",
+  "sourceDigest": "1eea91d9f5c2c1141ca3bf9c8268927b949c6198be61384c6d5b1449d8a26013",
   "files": [
     {
       "path": ".gitattributes",
@@ -12,8 +12,8 @@
     },
     {
       "path": ".github/workflows/native-desktop.yml",
-      "sha256": "9320cb121f6975f9334f7b48a646f21893ad8ca6d31557e4071805b25f2ade98",
-      "bytes": 5420
+      "sha256": "644e4ff1afffc86207564c09480f3bb22bca97508e63a200082c59c552932bf3",
+      "bytes": 5340
     },
     {
       "path": ".gitignore",
@@ -799,11 +799,6 @@
       "path": "tests/runtime-attribution.test.ts",
       "sha256": "06a075dbc305af59fc77e75be41f9e55fa7eee65f68370dcd76d5efe0a0a7b50",
       "bytes": 4239
-    },
-    {
-      "path": ".github/agentvac-native-once.json",
-      "sha256": "ae34079a46a2306e1da5f6c44a346edf2c866a1b64d236b18d54992589a4e25f",
-      "bytes": 325
     }
   ]
 }
