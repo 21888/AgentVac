@@ -22,6 +22,7 @@ import os from "node:os";
 import { isTrustedRendererEvent, rendererFileUrl } from "./renderer-origin.js";
 import { AppDataServices } from "./app-services.js";
 import { shutdownDiagnosticWorkers } from "./diagnostics.js";
+import { shutdownLinuxArgumentObservationWorkers } from "./process-argv-linux/host.js";
 import { PreferenceStore } from "./preferences.js";
 import {
   checkCodexProcesses,
@@ -100,6 +101,7 @@ app.on("before-quit", (event) => {
     preferences?.flush(),
     services?.flush(),
     shutdownDiagnosticWorkers(),
+    shutdownLinuxArgumentObservationWorkers(),
     conversations?.cancelAndDrain(),
   ]).finally(() => {
     flushedForQuit = true;

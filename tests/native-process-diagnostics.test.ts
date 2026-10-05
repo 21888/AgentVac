@@ -26,3 +26,28 @@ test("native process diagnostics identify known system-script ambiguity without 
   assert.ok(!JSON.stringify(report).includes("SECRET_CODE"));
   assert.ok(!JSON.stringify(report).includes("/usr/bin/"));
 });
+test("native guard diagnostics expose only stable observation/refusal codes", () => {
+  const report = summarizeProcessBlockers(
+    {
+      platform: "linux",
+      complete: true,
+      processes: [
+        {
+          pid: 50,
+          name: "MainThread",
+          commandLine: "node SECRET_SCRIPT SECRET_ARGUMENT",
+          argumentObservation: {
+            status: "unavailable",
+            pid: 50,
+            reason: "permission",
+          },
+        },
+      ],
+    },
+    claudeCodeAdapter,
+  );
+  assert.equal(report.blockers[0].argumentObservation, "unavailable");
+  assert.equal(report.blockers[0].argumentRefusal, "permission");
+  assert.equal(report.blockers[0].observedClassification, "unknown");
+  assert.doesNotMatch(JSON.stringify(report), /SECRET_/);
+});

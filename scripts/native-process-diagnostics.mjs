@@ -5,6 +5,19 @@ import {
   applicationExecutablePaths,
 } from "../electron/processes.ts";
 import { getAdapter } from "../electron/providers/index.ts";
+import { assessObservedRuntime } from "../electron/providers/observed-runtime.ts";
+const refusalCodes = new Set([
+  "unsupported",
+  "invalid-request",
+  "permission",
+  "exited",
+  "changed",
+  "truncated",
+  "invalid-data",
+  "cancelled",
+  "timeout",
+  "unavailable",
+]);
 export function summarizeProcessBlockers(snapshot, adapter) {
   const blockers = snapshot.processes
     .filter(
@@ -38,6 +51,18 @@ export function summarizeProcessBlockers(snapshot, adapter) {
         inlineRuntime: /(?:^|\s)(?:-e|-p|-c|--eval|--print)(?:=|\s|$)/.test(
           command,
         ),
+        argumentObservation: ["verified", "unavailable"].includes(
+          record.argumentObservation?.status,
+        )
+          ? record.argumentObservation.status
+          : "not-collected",
+        argumentRefusal:
+          record.argumentObservation?.status === "unavailable"
+            ? refusalCodes.has(record.argumentObservation.reason)
+              ? record.argumentObservation.reason
+              : "invalid-data"
+            : null,
+        observedClassification: assessObservedRuntime(record, adapter.id),
       };
     }),
   };

@@ -1,4 +1,10 @@
+import {
+  isGenericRuntimeCandidate,
+  processExecutableHints,
+} from "./runtime-evidence.js";
 import { hasUnambiguousRawScript } from "./runtime-attribution.js";
+import { assessObservedRuntime } from "./observed-runtime.js";
+import { knownProviderEntrypoint } from "./vendor-entrypoint.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Stats } from "node:fs";
@@ -380,11 +386,16 @@ function assessProcesses(snapshot: ProcessSnapshot) {
   const hosts =
     /^(?:cline(?:[ ._-].*)?|code(?: - insiders| - oss)?(?: helper(?: \([^)]*\))?)?|visual studio code(?: - insiders)?|cursor(?: helper(?: \([^)]*\))?)?|windsurf(?: helper(?: \([^)]*\))?)?|codium(?: helper(?: \([^)]*\))?)?|vscodium|idea(?:64)?|pycharm(?:64)?|webstorm(?:64)?|rustrover(?:64)?|goland(?:64)?|rider(?:64)?|clion(?:64)?|phpstorm(?:64)?|datagrip(?:64)?)(?:\.exe)?$/i;
   if (
-    names.some((name) => hosts.test(name)) ||
-    snapshot.processes.some((p) =>
-      /(?:saoudrizwan\.claude-dev|(?:^|[\\/\s])cline(?:[\\/\s._-]|$)|@cline[\\/]|\.vscode-server|\.vscode-server-insiders)/i.test(
-        p.commandLine ?? "",
+    snapshot.processes.some((record) =>
+      processExecutableHints(record).some((value) =>
+        hosts.test(slash(value).split("/").at(-1)!),
       ),
+    ) ||
+    snapshot.processes.some(
+      (p) =>
+        assessObservedRuntime(p, "cline") === "running" ||
+        (assessObservedRuntime(p, "cline") !== "attributed" &&
+          knownProviderEntrypoint("cline", p.commandLine ?? "")),
     )
   )
     return {
@@ -397,12 +408,10 @@ function assessProcesses(snapshot: ProcessSnapshot) {
   // all-clients-closed confirmation; custom embedded SDK imports are undetectable.
   if (
     snapshot.processes.some((record, index) => {
-      if (
-        !/^(?:node|nodejs|bun|deno|electron|java|javaw)(?:[.\d-].*)?(?:\.exe)?$/i.test(
-          names[index],
-        )
-      )
-        return false;
+      const observed = assessObservedRuntime(record, "cline");
+      if (observed === "unknown") return true;
+      if (observed === "attributed") return false;
+      if (!isGenericRuntimeCandidate(record)) return false;
       const args = record.commandLine?.trim();
       return (
         !args ||

@@ -1,10 +1,11 @@
-import { promises as fs } from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { ProcessStatus, ProviderId } from "../shared/types.js";
 import type { ProcessSnapshot, ProcessRecord } from "./providers/types.js";
 import { getAdapter } from "./providers/index.js";
+import { isGenericRuntimeCandidate } from "./providers/runtime-evidence.js";
+import { collectLinuxArgumentObservations } from "./process-argv-linux/host.js";
 const run = promisify(execFile);
 const limits = { timeout: 5000, maxBuffer: 4_000_000, windowsHide: true };
 export interface OwnedApplication {
@@ -174,6 +175,18 @@ export function parsePosixProcessSnapshot(
     complete = false;
   return { platform, complete, processes };
 }
+/** Darwin -e has legacy environment-output semantics. -A is explicit all-process selection. */
+export function posixInventoryArguments(
+  platform: NodeJS.Platform,
+  withParents: boolean,
+  field: "comm" | "args",
+): string[] {
+  if (platform !== "linux" && platform !== "darwin")
+    throw new Error("Unsupported process enumeration");
+  const fields =
+    (withParents ? "pid=,ppid=,stat=," : "pid=,stat=,") + field + "=";
+  return platform === "darwin" ? ["-A", "-o", fields] : ["-eo", fields];
+}
 /** Failed, malformed or changing enumeration never becomes an empty clear result. */
 export async function collectProcessSnapshot(
   ownedPids: readonly number[] = [process.pid],
@@ -231,36 +244,67 @@ export async function collectProcessSnapshot(
     if (platform !== "linux" && platform !== "darwin")
       throw Error("Unsupported process enumeration");
     const withParents = !!application;
-    const prefix = withParents ? "pid=,ppid=,stat=," : "pid=,stat=,";
     const snapshot = parsePosixProcessSnapshot(
-      (await run("/bin/ps", ["-eo", prefix + "comm="], { ...limits, signal }))
-        .stdout,
-      (await run("/bin/ps", ["-eo", prefix + "args="], { ...limits, signal }))
-        .stdout,
+      (
+        await run(
+          "/bin/ps",
+          posixInventoryArguments(platform, withParents, "comm"),
+          { ...limits, signal },
+        )
+      ).stdout,
+      (
+        await run(
+          "/bin/ps",
+          posixInventoryArguments(platform, withParents, "args"),
+          { ...limits, signal },
+        )
+      ).stdout,
       platform,
       application ? [] : ownedPids,
       withParents,
     );
-    if (application) {
-      for (const record of snapshot.processes)
-        if (record.pid && helperRole(record)) {
-          if (platform === "linux") {
-            // Read kernel executable identity, never follow it into a target file.
-            try {
-              record.executablePath = await fs.readlink(
-                `/proc/${record.pid}/exe`,
-              );
-            } catch {
-              /* unproven ownership remains visible */
-            }
-          } else if (
-            platform === "darwin" &&
-            path.posix.isAbsolute(record.name)
-          )
-            record.executablePath = record.name;
-        }
-      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
+    if (platform === "linux") {
+      // MainThread is Node 24's observed Linux comm name. It is a candidate for
+      // conservative inspection, never an ownership exception or clear result.
+      const candidates = snapshot.processes.filter(
+        (record) =>
+          !!record.pid &&
+          !ownedPids.includes(record.pid) &&
+          (isGenericRuntimeCandidate(record) ||
+            record.name === "MainThread" ||
+            helperRole(record)),
+      );
+      const selected = candidates.slice(0, 64);
+      const results = await collectLinuxArgumentObservations(
+        selected.map((record) => ({
+          pid: record.pid!,
+          ...(record.parentPid !== undefined
+            ? { expectedParentPid: record.parentPid }
+            : {}),
+          ...(record.executablePath
+            ? { expectedExecutablePath: record.executablePath }
+            : {}),
+        })),
+        signal,
+      );
+      for (let index = 0; index < candidates.length; index++) {
+        const record = candidates[index];
+        const observed = results[index];
+        record.argumentObservation =
+          observed?.pid === record.pid
+            ? observed
+            : {
+                status: "unavailable",
+                reason: index >= 64 ? "truncated" : "unavailable",
+                pid: record.pid!,
+              };
+        if (record.argumentObservation.status === "verified")
+          record.executablePath = record.argumentObservation.executablePath;
+      }
+      if (signal?.aborted) return { ...snapshot, complete: false };
     }
+    if (application)
+      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
     return snapshot;
   } catch {
     return { platform, complete: false, processes: [] };

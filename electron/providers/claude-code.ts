@@ -1,4 +1,10 @@
+import { knownProviderEntrypoint } from "./vendor-entrypoint.js";
+import {
+  isGenericRuntimeCandidate,
+  processExecutableHints,
+} from "./runtime-evidence.js";
 import { hasUnambiguousRawScript } from "./runtime-attribution.js";
+import { assessObservedRuntime } from "./observed-runtime.js";
 import { promises as fs, type Stats } from "node:fs";
 import path from "node:path";
 import type { Entry, ProcessStatus } from "../../shared/types.js";
@@ -261,7 +267,12 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
       uncertain = true;
     const runtimeName =
       /^(?:node|nodejs|bun|python(?:\d+(?:\.\d+)*)?)(?:[ ._-]|$)/i.test(name);
-    const entrypoints = [executable];
+    const entrypoints = [
+      executable,
+      ...(typeof process.executablePath === "string"
+        ? [process.executablePath]
+        : []),
+    ];
     let pythonModule = false;
     if (runtimeName) {
       // Only runtime entrypoints/loaders are evidence. Do not inspect inline
@@ -307,26 +318,24 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
         break;
       }
     }
-    const knownEntrypoint = entrypoints.some((token) => {
-      const normalized = token.replace(/\\/g, "/");
-      const basename = normalized.split("/").at(-1) ?? "";
-      return (
-        /^claude(?:-code)?(?:\.exe|\.cmd|\.js)?$/i.test(basename) ||
-        /^claude_agent_sdk(?:\.|$)/i.test(normalized) ||
-        /(?:^|\/)claude_agent_sdk(?:\/|$)/i.test(normalized) ||
-        /(?:^|\/)@anthropic-ai\/claude-(?:code|agent-sdk)(?:[-/]|$)/i.test(
-          normalized,
-        ) ||
-        /(?:^|\/)anthropic\.claude-code[-/]/i.test(normalized) ||
-        /\/claude\/versions\/[^/]+$/.test(normalized)
-      );
-    });
+    const knownEntrypoint = entrypoints.some((token) => knownProviderEntrypoint("claude-code", token));
     if (/^claude(?:[ ._-]|$)/i.test(name) || knownEntrypoint)
       return {
         status: "running",
         details:
           "检测到 Claude Code、Claude 桌面或其后台/扩展进程；请先退出后重新扫描。",
       };
+    const observed = assessObservedRuntime(process, "claude-code");
+    if (observed === "running")
+      return {
+        status: "running",
+        details: "检测到 Claude Code 原生入口或 SDK 加载器，请先退出。",
+      };
+    if (observed === "unknown") {
+      uncertain = true;
+      continue;
+    }
+    if (observed === "attributed") continue;
     // A complete, attributed unrelated script is not evidence of Claude.
     // Missing, inline or wrapper-only arguments remain uncertain. Custom SDK
     // embedding cannot be exhaustively identified by OS command lines.
@@ -334,7 +343,7 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
       /^(?:node|nodejs|bun|python(?:\d+(?:\.\d+)*)?)(?:[ ._-]|$)/i.test(name);
     const editor =
       /^(?:code(?:-insiders)?|cursor|windsurf|zed)(?:[ ._-]|$)/i.test(name);
-    if (runtime) {
+    if (runtime || isGenericRuntimeCandidate(process)) {
       const attributedScript = hasUnambiguousRawScript(
         command,
         snapshot.platform,

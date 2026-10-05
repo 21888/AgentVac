@@ -76,7 +76,12 @@ for (const target of targets.filter(
       `${target.platform}/${target.arch}: ${file} differs from tested build`,
     );
   const unpackedHelpers = {};
-  for (const name of ["diagnostic-supervisor.cjs", "diagnostic-worker.cjs"]) {
+  for (const name of [
+    "diagnostic-supervisor.cjs",
+    "diagnostic-worker.cjs",
+    "cursor-sql-worker.cjs",
+    "process-argv-worker.cjs",
+  ]) {
     const relative = "dist-electron/" + name;
     assert.equal(
       asar.statFile(archive, relative).unpacked,

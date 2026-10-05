@@ -1,4 +1,10 @@
+import { knownProviderEntrypoint } from "./vendor-entrypoint.js";
+import {
+  isGenericRuntimeCandidate,
+  processExecutableHints,
+} from "./runtime-evidence.js";
 import { hasUnambiguousRawScript } from "./runtime-attribution.js";
+import { assessObservedRuntime } from "./observed-runtime.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Entry, ProcessStatus } from "../../shared/types.js";
@@ -228,30 +234,20 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
     const normalizedName = record.name.trim().replaceAll("\\", "/");
     const name = normalizedName.split("/").at(-1)!;
     const command = record.commandLine?.trim() ?? "";
-    const cursorName =
-      /^cursor(?:(?:[-_](?:agent|server|helper))|(?: helper(?: \([^)]*\))?))?(?:\.exe|\.appimage)?$/i;
     const tokens: string[] = [];
     for (const token of command.matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)) {
       tokens.push(token[1] ?? token[2] ?? token[3]);
       if (tokens.length > 256)
         return unknown("进程参数超出可归属范围；清理已阻止。");
     }
-    const cursorExecutable = (token: string) => {
-      const normalized = token.replaceAll("\\", "/");
-      return (
-        cursorName.test(normalized.split("/").at(-1) ?? "") ||
-        /(?:^|\/)(?:Cursor\.app|cursor|cursor-agent|\.cursor-server)\//i.test(
-          normalized,
-        ) ||
-        /(?:^|\/)\.local\/bin\/agent$/i.test(normalized)
-      );
-    };
+    const cursorExecutable = (token: string) => knownProviderEntrypoint("cursor", token);
     // Only executable/entrypoint positions may identify Cursor. Quoted prose,
     // source code passed to node -e, and arbitrary later arguments are not an
     // executable identity (and previously caused false positives).
     const executable = tokens[0] ?? "";
     const runtime = /^(?:node|nodejs|electron|bun)(?:\.exe)?$/i;
     const isRuntime =
+      isGenericRuntimeCandidate(record) ||
       runtime.test(name) ||
       runtime.test(executable.replaceAll("\\", "/").split("/").at(-1) ?? "");
     const entrypoints: string[] = [];
@@ -302,6 +298,7 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
     }
     const runtimeEntrypoint = isRuntime && entrypoints.some(cursorExecutable);
     if (
+      processExecutableHints(record).some(cursorExecutable) ||
       cursorExecutable(normalizedName) ||
       cursorExecutable(executable) ||
       runtimeEntrypoint
@@ -310,6 +307,17 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
         status: "running",
         details: "检测到 Cursor 编辑器、辅助进程或 CLI；请完全退出后再清理。",
       };
+    const observed = assessObservedRuntime(record, "cursor");
+    if (observed === "running")
+      return {
+        status: "running",
+        details: "检测到 Cursor 原生入口或加载器，请先退出。",
+      };
+    if (observed === "unknown") {
+      ambiguous = true;
+      continue;
+    }
+    if (observed === "attributed") continue;
     // Without arguments, generic Electron/Node processes cannot be attributed
     // safely. A truncated snapshot is handled above, not treated as empty.
     if (

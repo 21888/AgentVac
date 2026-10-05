@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 export const requiredNativeChecks = [
   "fixture-disk-and-diagnostic-data",
@@ -37,6 +38,43 @@ export function validateNativeEvidence(result, expected) {
 }
 
 export const requiredProviderChecks = ["claude-code", "cline", "cursor"];
+export function validateDriverEvidence(result, expected) {
+  if (!result || typeof result !== "object")
+    return ["Missing compiled driver evidence"];
+  const problems = [];
+  for (const [field, value] of Object.entries(expected))
+    if (!value || result[field] !== value)
+      problems.push(`Mismatched driver ${field}`);
+  if (
+    result.format !== "agentvac-native-driver-execution-v1" ||
+    result.mode !== "plain-compiled-same-harness" ||
+    result.argvSource !== "node-normalized-process-argv" ||
+    result.unchangedProductionGuards !== true ||
+    result.nodeOptionsPresent !== false ||
+    !Array.isArray(result.execArgv) ||
+    result.execArgv.length ||
+    !Array.isArray(result.argv) ||
+    result.argv.length !== 2 ||
+    result.argv[0] !== result.executable ||
+    typeof result.argv[1] !== "string" ||
+    !result.argv[1]
+      .replaceAll("\\", "/")
+      .endsWith("/.qa/native-harness/native-provider-driver.mjs") ||
+    !/^[a-f0-9]{64}$/.test(result.bundleSha256 ?? "") ||
+    !/^[a-f0-9]{64}$/.test(result.workerSha256 ?? "") ||
+    !Array.isArray(result.sourceFiles) ||
+    !result.sourceFiles.length ||
+    result.sourceFiles.length > 256 ||
+    result.sourceDigest !==
+      createHash("sha256")
+        .update(JSON.stringify(result.sourceFiles))
+        .digest("hex")
+  )
+    problems.push(
+      "Compiled driver provenance missing or unexpected execution mode",
+    );
+  return problems;
+}
 export function validateProviderEvidence(result, expected) {
   if (!result || typeof result !== "object")
     return ["Missing provider evidence"];
@@ -281,6 +319,32 @@ async function main() {
     platform: process.platform,
     arch: process.env.AGENTVAC_EXPECTED_ARCH,
   };
+  const driver = JSON.parse(
+    await fs.readFile(
+      path.join(
+        directory,
+        `provider-driver-${process.platform}-${process.arch}.json`,
+      ),
+      "utf8",
+    ),
+  );
+  problems.push(...validateDriverEvidence(driver, expected));
+  const currentBundle = createHash("sha256")
+    .update(
+      await fs.readFile(
+        path.resolve(".qa/native-harness/native-provider-driver.mjs"),
+      ),
+    )
+    .digest("hex");
+  if (driver.bundleSha256 !== currentBundle)
+    problems.push("Compiled driver bundle changed after execution");
+  const currentWorker = createHash("sha256")
+    .update(
+      await fs.readFile(path.resolve("dist-electron/process-argv-worker.cjs")),
+    )
+    .digest("hex");
+  if (driver.workerSha256 !== currentWorker)
+    problems.push("Process observation worker changed after execution");
   const conversations = JSON.parse(
     await fs.readFile(
       path.join(

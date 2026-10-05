@@ -11,6 +11,9 @@ export interface ProcessDiagnosticSummary {
     pid: number | null;
     hasCommand: boolean;
     inlineRuntime: boolean;
+    argumentObservation: string;
+    argumentRefusal: string | null;
+    observedClassification: string;
   }[];
 }
 export function summarizeProcessBlockers(

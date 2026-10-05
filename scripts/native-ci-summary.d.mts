@@ -5,6 +5,10 @@ export function validateNativeEvidence(
 ): string[];
 
 export const requiredProviderChecks: readonly string[];
+export function validateDriverEvidence(
+  result: unknown,
+  expected: Record<string, string | undefined>,
+): string[];
 export function validateProviderEvidence(
   result: unknown,
   expected: Record<string, string | undefined>,

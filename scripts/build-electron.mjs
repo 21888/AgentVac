@@ -6,6 +6,7 @@ await build({
     "diagnostic-supervisor": "electron/diagnostic-supervisor.ts",
     "diagnostic-worker": "electron/diagnostic-worker.ts",
     "cursor-sql-worker": "electron/conversations/cursor-sql-worker.ts",
+    "process-argv-worker": "electron/process-argv-linux/worker.ts",
   },
   bundle: true,
   platform: "node",

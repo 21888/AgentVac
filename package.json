@@ -93,7 +93,8 @@
     "asarUnpack": [
       "dist-electron/diagnostic-supervisor.cjs",
       "dist-electron/diagnostic-worker.cjs",
-      "dist-electron/cursor-sql-worker.cjs"
+      "dist-electron/cursor-sql-worker.cjs",
+      "dist-electron/process-argv-worker.cjs"
     ]
   },
   "desktopName": "app.agentvac.desktop",

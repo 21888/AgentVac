@@ -4,6 +4,9 @@ name: Source-native Electron fixture verification
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/agentvac-native-once-observed-argv-20261005.json"]
 
 permissions:
   contents: read
@@ -66,7 +69,7 @@ jobs:
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         timeout-minutes: 3
-        run: npm run build
+        run: npm run build && node scripts/build-native-provider-harness.mjs
       - name: Verify native filesystem committed-unit crash recovery
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         timeout-minutes: 2
@@ -91,11 +94,11 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
         timeout-minutes: 4
         run: |
-          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-provider-openbox.log 2>&1 & node --import tsx "$GITHUB_WORKSPACE/scripts/native-provider-regression.mjs"'
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-provider-openbox.log 2>&1 & node "$GITHUB_WORKSPACE/.qa/native-harness/native-provider-driver.mjs"'
       - name: Native provider quarantine and restart recovery on Windows or macOS
         if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
         timeout-minutes: 4
-        run: node --import tsx "${{ github.workspace }}/scripts/native-provider-regression.mjs"
+        run: node "${{ github.workspace }}/.qa/native-harness/native-provider-driver.mjs"
       - name: Native conversation readers and explicit-source consent on Linux
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
         timeout-minutes: 3

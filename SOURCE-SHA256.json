@@ -1,9 +1,9 @@
 {
-  "version": "0.2.0",
-  "releaseStatus": "unreleased-source-native-candidate",
-  "generatedAt": "2026-10-05T21:59:51.832514+00:00",
-  "productionDigest": "ea9f3e37a47314cb7f95fb5328af51f8cddd29c24af0f4bc562bcc9dc277ca3d",
-  "sourceDigest": "1eea91d9f5c2c1141ca3bf9c8268927b949c6198be61384c6d5b1449d8a26013",
+  "format": "agentvac-source-sha256-v1",
+  "scope": "one-shot-observed-argv-native-validation",
+  "baseCommit": "d105e98484713f077ce3f34c46ac74e992c6bfa8",
+  "sourceDigest": "295da31c8c5db58356d06cba2e6616581d28116f156bbb3c11628475657332a5",
+  "productionDigest": "5dfd3ddbad1a7002a879bad5aedf02efb2581fe15c71e819a15185bf3d47964d",
   "files": [
     {
       "path": ".gitattributes",
@@ -12,8 +12,8 @@
     },
     {
       "path": ".github/workflows/native-desktop.yml",
-      "sha256": "644e4ff1afffc86207564c09480f3bb22bca97508e63a200082c59c552932bf3",
-      "bytes": 5340
+      "sha256": "04b0e1db0f2c684c83b5b3efb580998a0e70cea945350e3dd18ab41a1b831a9e",
+      "bytes": 5481
     },
     {
       "path": ".gitignore",
@@ -292,8 +292,8 @@
     },
     {
       "path": "electron/main.ts",
-      "sha256": "17e0e30bda37810d92215ce34cad3f6c10661786ccb119a15509eb680bbb445c",
-      "bytes": 18002
+      "sha256": "4baf010b30330e6391594cfafe8fffb81c914ee8c1ebb185fc1630ad7a3ccab0",
+      "bytes": 18137
     },
     {
       "path": "electron/preferences.ts",
@@ -307,18 +307,18 @@
     },
     {
       "path": "electron/processes.ts",
-      "sha256": "95d9e51a23a1d54ebf42e120f75d1b574e629a7b01b1cdd153bb22167b6c598b",
-      "bytes": 12685
+      "sha256": "0860bef99f2f33e2a489c0612edc8cd4ec8d98c88a2f3ec7e0584d1c386d85e3",
+      "bytes": 14318
     },
     {
       "path": "electron/providers/claude-code.ts",
-      "sha256": "ddeb204f8011fb8159513c163999f071d051c515da42f40c6fea67b396e5da24",
-      "bytes": 21434
+      "sha256": "5f396cb122b32a136e1dace3597d71b734f90b690bc86b6f5c965100d565ae55",
+      "bytes": 21661
     },
     {
       "path": "electron/providers/cline.ts",
-      "sha256": "5535ff1c78459eab0f57e314765d295362dce17c4e66df18de075e73fd720b5a",
-      "bytes": 19539
+      "sha256": "223a36314b6f269e6c6c8c5f9ba68fe36b0a0eef73f6387804303bdacae5a745",
+      "bytes": 19966
     },
     {
       "path": "electron/providers/codex.ts",
@@ -327,8 +327,8 @@
     },
     {
       "path": "electron/providers/cursor.ts",
-      "sha256": "88d9e18a6166c8d471ae5ce9fb5759ad031a673283766b884535967c02ce528c",
-      "bytes": 18044
+      "sha256": "431b4408346abaa6cedb76e6742bef16100816182916e309f35a854e5a4c808f",
+      "bytes": 18320
     },
     {
       "path": "electron/providers/index.ts",
@@ -342,8 +342,8 @@
     },
     {
       "path": "electron/providers/types.ts",
-      "sha256": "40c46a0e64b1a3f8b57253610e91711ebf7962d29e82c5c5daeeab52bb21137c",
-      "bytes": 2456
+      "sha256": "1149e176cb0a0789a3ef6f46a3d0fc5ce8fa8de1a8ccc2ad333cb0f750834102",
+      "bytes": 2652
     },
     {
       "path": "electron/recovery-keys.ts",
@@ -372,8 +372,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "e77fb429c0a327baf5d33fdb08c83d010baeb4cbb94f92778793846b318721ff",
-      "bytes": 3479
+      "sha256": "098479d39b688b84381b8f204432b3e67c6c9cc9436f270ae33ec13cd26f6165",
+      "bytes": 3526
     },
     {
       "path": "scripts/accessibility-regression.mjs",
@@ -407,8 +407,8 @@
     },
     {
       "path": "scripts/build-electron.mjs",
-      "sha256": "7ea60aed4cc58388f6143ced937665925067016ef5e5282690ea389d78d22559",
-      "bytes": 496
+      "sha256": "2c4e90e7d07c51d9ba0cc8afd3e2618647b61338d5a1b8b20ec974f14c2e6525",
+      "bytes": 564
     },
     {
       "path": "scripts/bulk-selection-regression.mjs",
@@ -452,13 +452,13 @@
     },
     {
       "path": "scripts/native-ci-summary.d.mts",
-      "sha256": "5bf00a707c043f4fa6881e75b0f7674d0942e7f5e9440d99935866dec0440d12",
-      "bytes": 722
+      "sha256": "fcbf49039ff75fa34ec1f5598c4cfa362a030d8755b9538731cd3cf0216d98a9",
+      "bytes": 842
     },
     {
       "path": "scripts/native-ci-summary.mjs",
-      "sha256": "e0488ef0a760003630d5e8a9f7ee46571138a83c9c6dfc14fb83448342cd2ea6",
-      "bytes": 11178
+      "sha256": "d08c07f2c11cf6528989c4954cd5be766410e79a45c7c7f7070f61f30b9d694c",
+      "bytes": 13483
     },
     {
       "path": "scripts/native-conversation-acl.mjs",
@@ -497,8 +497,8 @@
     },
     {
       "path": "scripts/verify-packages.mjs",
-      "sha256": "bf6d94bed41177b7a2046e3171f2a0f8af6626ad9ba334427e958a8032fc935e",
-      "bytes": 5045
+      "sha256": "33240f1de34c59e9363ffa06b4cb24d577f7be08008a3c4f40d561128f080bf0",
+      "bytes": 5118
     },
     {
       "path": "shared/app-data.ts",
@@ -757,18 +757,18 @@
     },
     {
       "path": "scripts/native-process-diagnostics.d.mts",
-      "sha256": "8b9767afeb06a76af59f839cc6b7d1feccaf0eb3fc494e3fc3a2a0c6a13ec519",
-      "bytes": 670
+      "sha256": "f5fb67352f489c1b3c3b68cb373790e03c9e2dbe270aeeb0ec4e5a5c41958db7",
+      "bytes": 775
     },
     {
       "path": "scripts/native-process-diagnostics.mjs",
-      "sha256": "f638802b87bad3b0c9c7bde9274b961b5749836131cb6f5dafef49d4533ac014",
-      "bytes": 2005
+      "sha256": "136a436ec1b8100c3b10fde7c25195baa7ce5a71e9402af00b85bc0ff183fc2e",
+      "bytes": 2808
     },
     {
       "path": "tests/native-process-diagnostics.test.ts",
-      "sha256": "29aaac873301325952e5a8430b50b036eaed9785d10567d0a6aee15e45ede58c",
-      "bytes": 1144
+      "sha256": "ee80f0964be82bc29fcf0211a2f4cfac5db05679cbc62e98389bb05020b0f696",
+      "bytes": 1925
     },
     {
       "path": "tests/native-process-recheck.test.ts",
@@ -799,6 +799,126 @@
       "path": "tests/runtime-attribution.test.ts",
       "sha256": "06a075dbc305af59fc77e75be41f9e55fa7eee65f68370dcd76d5efe0a0a7b50",
       "bytes": 4239
+    },
+    {
+      "path": "docs/NATIVE-PROCESS-VALIDATION.md",
+      "sha256": "9318f1223707d112825e9a5b9087701a3fe222e3d9024b3cf24c9dad88cada07",
+      "bytes": 3407
+    },
+    {
+      "path": "electron/process-argv-linux/README.md",
+      "sha256": "d241cc994d85adff75eb4cfc92aff3fe028f365401b154372aae4e7313f45866",
+      "bytes": 5551
+    },
+    {
+      "path": "electron/process-argv-linux/collector-core.ts",
+      "sha256": "b9b7691a92d3fcf9f50f8825600fc320629e59537a3a52cbae566ec1d4c1f1dd",
+      "bytes": 9243
+    },
+    {
+      "path": "electron/process-argv-linux/collector.ts",
+      "sha256": "a1825668221fd5c03f32413c4f2378c178ad420183a0ff039fd747fc27c09ae5",
+      "bytes": 744
+    },
+    {
+      "path": "electron/process-argv-linux/host-internal.ts",
+      "sha256": "c382319f9d2605ffb94688e1203df6d305aa4aa7c47d4ff7db482f4bbac7dd29",
+      "bytes": 6346
+    },
+    {
+      "path": "electron/process-argv-linux/host-path.ts",
+      "sha256": "19e65705fa8ae7dd758421867c3c1534cbb5ced1a08185889f303639bf2d316f",
+      "bytes": 966
+    },
+    {
+      "path": "electron/process-argv-linux/host.ts",
+      "sha256": "ef2d5e6bfdadbfcc27fbb35c90d6656312aea73c840b5222ce7afe832340f97e",
+      "bytes": 1608
+    },
+    {
+      "path": "electron/process-argv-linux/proc.ts",
+      "sha256": "dfb8d4256f1dab72055dad4577bd8ef98d46e83b7f8eb78afa17f34d75664228",
+      "bytes": 7992
+    },
+    {
+      "path": "electron/process-argv-linux/protocol.ts",
+      "sha256": "50f0c2fa975b7a2302f00029c4eaf7087ce7d5bce4cefed1dea3f218b6817413",
+      "bytes": 8444
+    },
+    {
+      "path": "electron/process-argv-linux/strict-json.ts",
+      "sha256": "a5caecb0c3428e091efb9ed112ba87809860e1ab9a416573a010ecc8cc6a4101",
+      "bytes": 3545
+    },
+    {
+      "path": "electron/process-argv-linux/types.ts",
+      "sha256": "6faec7193b8dca9b8112fd6a33bde8248827a0ef5c9477a31f3670b4e42ddf8b",
+      "bytes": 1255
+    },
+    {
+      "path": "electron/process-argv-linux/worker.ts",
+      "sha256": "ad39449d3565afecb5240ebf8e89565443a6818e909f8bb97bf0298713cdc28d",
+      "bytes": 2657
+    },
+    {
+      "path": "electron/providers/observed-runtime.ts",
+      "sha256": "d4d5d8c7e78dc4e01aecce0aefa0c5cbc5e9d8d9bf2f02b51da161aeb35e1dba",
+      "bytes": 4454
+    },
+    {
+      "path": "electron/providers/runtime-evidence.ts",
+      "sha256": "e8001f7d16c1ffda24709c19d66d3d2938df6ba87687b00014ac7f672f47b829",
+      "bytes": 963
+    },
+    {
+      "path": "electron/providers/vendor-entrypoint.ts",
+      "sha256": "ec11b62d331759c9d08f2ce4c036353580b944a60278e81146214d2fd131df78",
+      "bytes": 1288
+    },
+    {
+      "path": "scripts/build-native-provider-harness.d.mts",
+      "sha256": "2d7665473e5542c3207877c108477ec056010603640f9c1fa269a9d46694d4cf",
+      "bytes": 256
+    },
+    {
+      "path": "scripts/build-native-provider-harness.mjs",
+      "sha256": "318a2ac3bf85286af5e4e6e5e82189957c38351033ea7b44cf8fa0a6c03e255c",
+      "bytes": 2597
+    },
+    {
+      "path": "scripts/native-driver-provenance.mjs",
+      "sha256": "f3da9cebc18199e374f0afe413dc6ff7cd1b5b6bba51c8005542cf9f8fd55304",
+      "bytes": 2883
+    },
+    {
+      "path": "scripts/native-provider-driver.mjs",
+      "sha256": "3a8422da80149cfc57ba724300c80015d34fd3c9e36beba930b4cb1a850dac58",
+      "bytes": 714
+    },
+    {
+      "path": "tests/linux-process-argv-host.test.ts",
+      "sha256": "24ea635020073194ab91c56c5c48f8b1fd1cc53beab072dd5fe55b6b1570675f",
+      "bytes": 21936
+    },
+    {
+      "path": "tests/native-provider-driver.test.ts",
+      "sha256": "38cf2ca65c8e7636d868681224cdb3a5a0413467d1c5c112d998a9e979d11f41",
+      "bytes": 6194
+    },
+    {
+      "path": "tests/observed-runtime.test.ts",
+      "sha256": "601a305d7534226f567700fefcae38de3578322e9982881d375909fff8451d5f",
+      "bytes": 6062
+    },
+    {
+      "path": "tests/runtime-image-identity.test.ts",
+      "sha256": "da044536f4ce51c261f54a9068bbfaea72e9b4d95f817d31d011475972e12a64",
+      "bytes": 2210
+    },
+    {
+      "path": ".github/agentvac-native-once-observed-argv-20261005.json",
+      "sha256": "81f909cd02934d071a9340077dc38514f08b53f1cb61c4ee252984e916ca1f92",
+      "bytes": 347
     }
   ]
 }

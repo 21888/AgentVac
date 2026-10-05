@@ -1,5 +1,6 @@
 import type { CleanupUnitDefinition, UnitKind } from "../cleanup-units.js";
 import type { Entry, ProcessStatus, ProviderId } from "../../shared/types.js";
+import type { ArgumentResult } from "../process-argv-linux/types.js";
 
 export interface ProviderDiscoveryInputs {
   home: string;
@@ -18,6 +19,8 @@ export interface ProcessRecord {
   executablePath?: string;
   name: string;
   commandLine?: string;
+  /** Main-process-only stable OS observation; never accepted from renderer input. */
+  argumentObservation?: ArgumentResult;
 }
 export interface ProcessSnapshot {
   platform: NodeJS.Platform;
