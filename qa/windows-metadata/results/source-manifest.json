@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "status": "source-staged-not-native-accepted",
+  "sourceTreeSha256": "d999a79bcf418480e8fd8efa144b5917a900d01cbb1cbd1f916ec738d97c1fa2",
+  "sources": {
+    ".gitattributes": "7f7a91fa46dfb949f7b76e5fa129d30a2b753676e8bbd267b344e8daf11fe576",
+    "include/core.hpp": "004309fe27a192ffe318050de7451c0ad6b8432e360d11ce57ccc59824428b7c",
+    "protocol.mjs": "54bf9bcfd4d003b9a76e957979b3129dca08a76673e1abcc5de307aa8bc236ff",
+    "restricted-protocol.mjs": "b52e6d0642efcbe2ac07d8a71544c86094e184ca6ff2031cc130b3cf14dd3ea2",
+    "scripts/build-windows.ps1": "b192989ae000e73abdd0c628f818dbc34ec26fbab62e3e6d73ca1d0a5ad67ab6",
+    "scripts/native-smoke.mjs": "6b8f38702813e2e1c9be28d1887683c0aea85710860656f1724e8e50bbc46588",
+    "scripts/source-manifest.mjs": "323fca060fbb8f0547e860373c6d6732457c4d84ddaec0532ad0c183d07b9c9e",
+    "smoke-results.mjs": "bb9aaddc274dbdca58d228b89c443be5fd2081ea3c2440ef1e024350c02bb856",
+    "src/helper.manifest": "ed744b8557e77fdbc476e0b29f5c2ae700e087a0db89d63cd1da4d86bf6ce2e6",
+    "src/native-helper.cpp": "ce44d9e30ca513308d217c5d282392c9fa633148dafc273f393e5557bdbdebae",
+    "src/restricted-fixture-launcher.cpp": "21fd09aed0b3a48929385b395bdf6796806357b4ff9e7cc37781137bc8aa400b",
+    "transport.mjs": "5b7ce6ccf3c47f11c121566dae1368ecb502edb053a7bf38d100c08a0d7f1f4d"
+  },
+  "policySourceSha256": "497f00ba1caedfccb02e0ac69a1812cfaf6b37b301334c177cffb71f4f6a8dfd",
+  "nativeWindows": "NOT_RUN"
+}

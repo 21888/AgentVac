@@ -1,0 +1,10 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const root=new URL('../',import.meta.url);
+const inputs=['.gitattributes','include/core.hpp','src/native-helper.cpp','src/restricted-fixture-launcher.cpp','src/helper.manifest','protocol.mjs','restricted-protocol.mjs','smoke-results.mjs','transport.mjs','scripts/build-windows.ps1','scripts/native-smoke.mjs','scripts/source-manifest.mjs'].sort();
+const sources={};
+for(const relative of inputs)sources[relative]=createHash('sha256').update(await readFile(new URL(relative,root))).digest('hex');
+const sourceTreeSha256=createHash('sha256').update(inputs.map(p=>`${p}\0${sources[p]}\n`).join('')).digest('hex');
+const result={schema:1,status:'source-staged-not-native-accepted',sourceTreeSha256,sources,policySourceSha256:'497f00ba1caedfccb02e0ac69a1812cfaf6b37b301334c177cffb71f4f6a8dfd',nativeWindows:'NOT_RUN'};
+await writeFile(new URL('results/source-manifest.json',root),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({sourceTreeSha256,nativeWindows:'NOT_RUN'}));

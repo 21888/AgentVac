@@ -1,0 +1,2 @@
+# Preserve reviewed source bytes across Windows checkout for exact hash pins.
+* -text

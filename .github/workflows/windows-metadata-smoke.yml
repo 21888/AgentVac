@@ -1,0 +1,50 @@
+name: Standalone Windows metadata research smoke
+# Default is manual only. A reviewed temporary marker may trigger one source-only research run.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/agentvac-windows-metadata-once-20261005.json"]
+permissions:
+  contents: read
+concurrency:
+  group: agentvac-windows-metadata-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  metadata-smoke:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - name: Checkout reviewed source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - name: Build source in installed Microsoft toolchain
+        shell: cmd
+        run: |
+          call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=x64 -host_arch=x64
+          if errorlevel 1 exit /b 1
+          set "AGENTVAC_SDK_VERSION=%WindowsSDKVersion:\=%"
+          "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -File qa\windows-metadata\scripts\build-windows.ps1 -CompilerPath "%VCToolsInstallDir%bin\Hostx64\x64\cl.exe" -Architecture x64 -ExpectedSdkVersion "%AGENTVAC_SDK_VERSION%"
+          if errorlevel 1 exit /b 1
+      - name: Pure native core tests
+        shell: pwsh
+        run: |
+          & .\qa\windows-metadata\build\windows-x64\core-tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Partial read-only metadata and protocol smoke
+        shell: pwsh
+        run: |
+          $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+          try {
+            $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+            $env:AGENTVAC_SMOKE_ADMIN_ROLE = if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { '1' } else { '0' }
+          } finally { $identity.Dispose() }
+          & 'C:\Program Files\nodejs\node.exe' .\qa\windows-metadata\scripts\native-smoke.mjs 'd999a79bcf418480e8fd8efa144b5917a900d01cbb1cbd1f916ec738d97c1fa2'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# No setup/install, npm, provider data, secrets, uploads, release, packaging,
+# permissions, owner, reparse, drive-map, UAC or account changes. A nonzero partial
+# result remains visible; do not use continue-on-error or reinterpret it as PASS.
