@@ -1,3 +1,4 @@
+import { hasUnambiguousRawScript } from "./runtime-attribution.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Stats } from "node:fs";
@@ -407,8 +408,11 @@ function assessProcesses(snapshot: ProcessSnapshot) {
         !args ||
         /[\r\n\0]/.test(args) ||
         /(?:^|\s)(?:-e|--eval|--print|-p|--require|-r)(?:\s|=|$)/.test(args) ||
-        !/(?:^|\s)["']?(?:[a-z]:[\\/]|\/)[^\r\n]*?\.(?:[cm]?js|tsx?|jar)["']?(?=\s|$)/i.test(
+        !hasUnambiguousRawScript(
           args,
+          snapshot.platform,
+          names[index],
+          /\.(?:[cm]?js|tsx?|jar)$/i,
         )
       );
     })

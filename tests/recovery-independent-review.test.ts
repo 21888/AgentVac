@@ -67,7 +67,10 @@ test("Cline scratch interrupted unlink can resume despite its owned new director
   const unlink = fs.unlink;
   let interrupted = false;
   fs.unlink = async (p) => {
-    if (!interrupted && String(p).endsWith("/0/index")) {
+    if (
+      !interrupted &&
+      String(p).endsWith(path.sep + path.join("0", "index"))
+    ) {
       interrupted = true;
       throw new Error("synthetic ordinary interruption");
     }
@@ -221,7 +224,10 @@ test("Cline signed scratch resume does not bypass protection for new target data
   const unlink = fs.unlink;
   let interrupted = false;
   fs.unlink = async (p) => {
-    if (!interrupted && String(p).endsWith("/0/index")) {
+    if (
+      !interrupted &&
+      String(p).endsWith(path.sep + path.join("0", "index"))
+    ) {
       interrupted = true;
       throw new Error("synthetic ordinary interruption");
     }

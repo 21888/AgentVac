@@ -34,8 +34,8 @@ async function fixture(
   t: { after(fn: () => Promise<void>): void },
   wal = false,
 ) {
-  const base = await fs.mkdtemp(
-    path.join(os.tmpdir(), "agentvac-cursor-test-"),
+  const base = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-cursor-test-")),
   );
   await initializeCursorSnapshotStorage(path.join(base, "snapshot-storage"));
   const root = path.join(base, "Cursor");

@@ -6,7 +6,9 @@ import os from "node:os";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
-  inspectCursorSnapshotWindowsAcl,
+  inspectCursorSnapshotWindowsAclDetailed,
+  inspectCursorSnapshotWindowsLocalityDetailed,
+  canonicalizeCursorSnapshotWindowsPath,
   CURSOR_WINDOWS_ACL_POLICY,
 } from "../electron/conversations/cursor-windows-acl.ts";
 import {
@@ -24,13 +26,26 @@ const result = {
   changesPermissions: false,
   copiesProviderData: false,
   checks: {},
+  diagnostics: {},
   status: "NOT_APPLICABLE",
 };
 let fixture;
 try {
   if (process.platform === "win32") {
+    const temporaryParent = canonicalizeCursorSnapshotWindowsPath(os.tmpdir());
+    assert.ok(temporaryParent, "Local temporary metadata target unavailable");
+    const parentLocality =
+      await inspectCursorSnapshotWindowsLocalityDetailed(temporaryParent);
+    result.diagnostics.localTemporaryParent = parentLocality;
+    result.checks.localTemporaryParentVerified =
+      parentLocality.outcome === "verified-local";
+    assert.equal(
+      result.checks.localTemporaryParentVerified,
+      true,
+      "Local temporary parent could not be verified",
+    );
     fixture = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "AgentVac-ACL-Fixture-"),
+      path.join(await fs.realpath(temporaryParent), "AgentVac-ACL-Fixture-"),
     );
     const child = path.join(fixture, "child");
     await fs.mkdir(child);
@@ -39,32 +54,43 @@ try {
     const before = createHash("sha256")
       .update(await fs.readFile(file))
       .digest("hex");
-    result.checks.privateDirectory = await inspectCursorSnapshotWindowsAcl(
-      fixture,
-      true,
-    );
-    result.checks.inheritedChildDirectory =
-      await inspectCursorSnapshotWindowsAcl(child, true);
-    result.checks.inheritedFile = await inspectCursorSnapshotWindowsAcl(
-      file,
-      false,
-    );
+    const inspect = async (name, target, isDirectory, expectedOutcome) => {
+      const detail = await inspectCursorSnapshotWindowsAclDetailed(
+        target,
+        isDirectory,
+      );
+      result.diagnostics[name] = detail;
+      result.checks[name] = detail.outcome === expectedOutcome;
+    };
+    await inspect("privateDirectory", fixture, true, "verified-private");
+    await inspect("inheritedChildDirectory", child, true, "verified-private");
+    await inspect("inheritedFile", file, false, "verified-private");
     const publicRoot = process.env.PUBLIC;
     assert.ok(
       publicRoot && path.win32.isAbsolute(publicRoot),
       "Public directory metadata target unavailable",
     );
-    result.checks.publicDirectoryRejected =
-      !(await inspectCursorSnapshotWindowsAcl(publicRoot, true));
+    // A timeout, failed helper or malformed output does not prove that a public
+    // directory was measured and rejected by the ACL policy.
+    await inspect("publicDirectoryRejected", publicRoot, true, "acl-rejected");
     result.checks.sourceUnchanged =
       createHash("sha256")
         .update(await fs.readFile(file))
         .digest("hex") === before;
-    await initializeCursorSnapshotStorage(
-      path.join(fixture, "gated-snapshot-root"),
-    );
-    result.checks.runtimeInitializationPassed =
-      getCursorSnapshotStorageAvailability().available;
+    const initializationStarted = performance.now();
+    try {
+      await initializeCursorSnapshotStorage(
+        path.join(fixture, "gated-snapshot-root"),
+      );
+      result.checks.runtimeInitializationPassed =
+        getCursorSnapshotStorageAvailability().available;
+    } catch {
+      result.checks.runtimeInitializationPassed = false;
+    }
+    result.diagnostics.runtimeInitialization = {
+      elapsedMs: Math.round(performance.now() - initializationStarted),
+      reason: getCursorSnapshotStorageAvailability().reason,
+    };
     for (const [name, value] of Object.entries(result.checks))
       assert.equal(value, true, `Required native ACL check failed: ${name}`);
     result.status = "PASS";

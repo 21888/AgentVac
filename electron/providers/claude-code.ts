@@ -1,3 +1,4 @@
+import { hasUnambiguousRawScript } from "./runtime-attribution.js";
 import { promises as fs, type Stats } from "node:fs";
 import path from "node:path";
 import type { Entry, ProcessStatus } from "../../shared/types.js";
@@ -251,15 +252,28 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
         ),
     );
     const executable = tokens[0] ?? "";
+    // Unsupported Python-family executable variants can still host SDK code.
+    // Do not treat a name-grammar miss as proof of an unrelated process.
+    if (
+      /^python[a-z0-9_.-]*$/i.test(name) &&
+      !/^python(?:\d+(?:\.\d+)*)?(?:\.exe)?$/i.test(name)
+    )
+      uncertain = true;
     const runtimeName =
       /^(?:node|nodejs|bun|python(?:\d+(?:\.\d+)*)?)(?:[ ._-]|$)/i.test(name);
     const entrypoints = [executable];
+    let pythonModule = false;
     if (runtimeName) {
       // Only runtime entrypoints/loaders are evidence. Do not inspect inline
       // source strings or arguments passed to an unrelated application.
       for (let i = 1; i < tokens.length; i++) {
         const token = tokens[i];
         if (/^(?:-e|-p|-c|--eval|--print)(?:=|$)/.test(token)) break;
+        if (/^python/i.test(name) && token === "-m") {
+          pythonModule = true;
+          if (tokens[i + 1]) entrypoints.push(tokens[i + 1]);
+          break;
+        }
         if (
           /^(?:--require|-r|--import|--loader|--experimental-loader)$/.test(
             token,
@@ -274,6 +288,19 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
           entrypoints.push(token.slice(token.indexOf("=") + 1));
           continue;
         }
+        // Python warning/implementation options have a separate operand; it is
+        // never the script entrypoint. Unsupported/module Python invocations
+        // remain uncertain below unless a known SDK entrypoint is detected.
+        if (
+          /^python/i.test(name) &&
+          (token === "-W" ||
+            token === "-X" ||
+            token === "--check-hash-based-pycs")
+        ) {
+          uncertain = true;
+          if (tokens[i + 1]) i++;
+          continue;
+        }
         if (token.startsWith("-")) continue;
         if (token === "run" && /^bun/i.test(name)) continue;
         entrypoints.push(token);
@@ -285,6 +312,8 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
       const basename = normalized.split("/").at(-1) ?? "";
       return (
         /^claude(?:-code)?(?:\.exe|\.cmd|\.js)?$/i.test(basename) ||
+        /^claude_agent_sdk(?:\.|$)/i.test(normalized) ||
+        /(?:^|\/)claude_agent_sdk(?:\/|$)/i.test(normalized) ||
         /(?:^|\/)@anthropic-ai\/claude-(?:code|agent-sdk)(?:[-/]|$)/i.test(
           normalized,
         ) ||
@@ -306,18 +335,15 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
     const editor =
       /^(?:code(?:-insiders)?|cursor|windsurf|zed)(?:[ ._-]|$)/i.test(name);
     if (runtime) {
-      const attributedScript =
-        /(?:^|[\s"'])[\w./\\:@ -]+\.(?:[cm]?[jt]s|py)(?=$|[\s"'])/i.test(
-          command,
-        );
-      const attributedPythonModule =
-        /^python/i.test(name) &&
-        /(?:^|\s)-m\s+[A-Za-z_][A-Za-z0-9_.]*(?:\s|$)/.test(command);
+      const attributedScript = hasUnambiguousRawScript(
+        command,
+        snapshot.platform,
+        name,
+      );
       const inlineCode = /(?:^|\s)(?:-e|-p|-c|--eval|--print)(?:=|\s|$)/.test(
         command,
       );
-      if ((!attributedScript && !attributedPythonModule) || inlineCode)
-        uncertain = true;
+      if (!attributedScript || pythonModule || inlineCode) uncertain = true;
     }
     if (editor && !command.trim()) uncertain = true;
     if (

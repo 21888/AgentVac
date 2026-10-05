@@ -35,3 +35,18 @@ System-trash disposal validates the complete retained unit and rejects unknown c
 ## Synthetic verification
 
 `tests/cleanup-units.test.ts` covers exact counts, whole-unit roundtrips, optional-member changes, age bounds, unknown entries, links, depth limits, process uncertainty, provider/key mismatches, imported keys, read-only rescue, nonoverwriting conflicts, ordinary rollback and interrupted rename/link/unlink/rmdir recovery. Provider suites add source-backed layout and rebuild cases. The Cursor suite includes injected real-directory replacement and signed stored-layout substitution regressions. All fixtures are temporary synthetic data.
+
+## Exact filesystem identity and journal compatibility
+
+New cleanup-unit snapshots record device and inode/file IDs as canonical unsigned
+64-bit decimal strings from one `BigIntStats` observation. This avoids rounding
+large NTFS identifiers. The current authenticated v3 decoder also accepts safe
+nonnegative numeric legacy IDs (inode must be positive), comparing their exact
+values without rewriting signed journal bytes. Unsafe numeric identities,
+noncanonical strings, out-of-range IDs and zero inodes fail closed.
+
+Older app builds may reject new string-ID v3 unit journals. Keep a compatible
+AgentVac build and the recovery key when retaining those archives; do not edit
+signed journals or downgrade expecting new unit archives to be readable. File
+bytes, no-overwrite behavior and legacy v1/v2 file recovery remain separate and
+unchanged. Native Windows verification of this correction is a required gate.

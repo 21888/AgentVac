@@ -27,7 +27,9 @@ async function withTranscript(
     relative: string,
   ) => Promise<void>,
 ) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-reader-"));
+  const root = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-reader-")),
+  );
   const relative =
     provider === "codex"
       ? `sessions/2026/09/01/rollout-2026-09-01T10-00-00-${SID}.jsonl`
@@ -592,7 +594,9 @@ test("Claude progress fan-out reconstruction remains bounded and selects the sou
 });
 
 test("bounded JSONL preserves split UTF-8, rejects malformed bytes, and resumes by byte boundary", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-"));
+  const root = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-")),
+  );
   try {
     await fs.writeFile(
       path.join(root, "fixture.jsonl"),
@@ -632,7 +636,9 @@ test("bounded JSONL preserves split UTF-8, rejects malformed bytes, and resumes 
 });
 
 test("oversized JSONL line is discarded, subsequent records remain accessible", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-"));
+  const root = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-")),
+  );
   try {
     await fs.writeFile(
       path.join(root, "fixture.jsonl"),
@@ -654,7 +660,9 @@ test("oversized JSONL line is discarded, subsequent records remain accessible", 
 });
 
 test("safe opener rejects traversal, symlinks, hardlinks and stale snapshots", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-"));
+  const root = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-jsonl-")),
+  );
   try {
     await fs.writeFile(path.join(root, "fixture.jsonl"), "{}\n");
     await assert.rejects(openConversationFile(root, "../fixture.jsonl"), {

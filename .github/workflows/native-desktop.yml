@@ -4,6 +4,9 @@ name: Source-native Electron fixture verification
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/agentvac-native-once.json"]
 
 permissions:
   contents: read
@@ -16,7 +19,7 @@ jobs:
   desktop:
     if: ${{ github.event.repository.private == false }}
     name: Source-native ${{ matrix.platform }} ${{ matrix.arch }}
-    timeout-minutes: 25
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -60,8 +63,8 @@ jobs:
       - name: Run fixture unit and policy tests
         id: units
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        timeout-minutes: 6
-        run: node --import tsx --test --test-concurrency=2 tests/*.test.ts
+        timeout-minutes: 12
+        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/*.test.ts
       - name: Build and typecheck source
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}

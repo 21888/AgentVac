@@ -5,6 +5,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { AppDataServices } from "../electron/app-services.ts";
+import { nativeProcessObservation } from "./native-process-diagnostics.mjs";
 const project = await fs.realpath(path.resolve("."));
 const qa = path.join(project, ".qa");
 await fs.mkdir(qa, { recursive: true });
@@ -165,6 +166,10 @@ async function runProvider(provider, anchor) {
     ids[provider],
   );
   assert.equal(context.provider, provider);
+  console.log(
+    "AGENTVAC_PROCESS_PREFLIGHT " +
+      JSON.stringify(await nativeProcessObservation(application, provider)),
+  );
   await page.reload();
   await page.waitForFunction(
     () => document.querySelector(".primary-nav button")?.disabled === false,
@@ -187,6 +192,15 @@ async function runProvider(provider, anchor) {
   assert.equal(preview.root, roots[provider]);
   assert.equal(preview.totalFiles, row.cleanupUnit.fileCount);
   if (preview.processStatus.status !== "clear") {
+    console.log(
+      "AGENTVAC_PROCESS_GUARD " +
+        JSON.stringify({
+          provider,
+          previewStatus: preview.processStatus.status,
+          details: preview.processStatus.details,
+          observation: await nativeProcessObservation(application, provider),
+        }),
+    );
     await assert.rejects(
       page.evaluate(
         (token) => window.agentvac.quarantine(token, true),
@@ -314,6 +328,18 @@ try {
       checks[provider] = await runProvider(provider, anchor);
     } catch (error) {
       checks[provider] = { status: "FAIL", reason: String(error) };
+      if (application) {
+        try {
+          console.log(
+            "AGENTVAC_PROCESS_GUARD " +
+              JSON.stringify(
+                await nativeProcessObservation(application, provider),
+              ),
+          );
+        } catch {
+          console.log("AGENTVAC_PROCESS_GUARD_UNAVAILABLE");
+        }
+      }
       await close();
     }
     console.log(

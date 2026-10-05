@@ -1,3 +1,4 @@
+import { hasUnambiguousRawScript } from "./runtime-attribution.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Entry, ProcessStatus } from "../../shared/types.js";
@@ -312,7 +313,16 @@ function assessProcesses(snapshot: ProcessSnapshot): ProcessStatus {
     // Without arguments, generic Electron/Node processes cannot be attributed
     // safely. A truncated snapshot is handled above, not treated as empty.
     if (
-      (isRuntime && (!command || inline || !attributed)) ||
+      (isRuntime &&
+        (!command ||
+          inline ||
+          !attributed ||
+          !hasUnambiguousRawScript(
+            command,
+            snapshot.platform,
+            name,
+            /\.(?:[cm]?[jt]s)$/i,
+          ))) ||
       /^agent(?:\.exe)?$/i.test(name)
     )
       ambiguous = true;

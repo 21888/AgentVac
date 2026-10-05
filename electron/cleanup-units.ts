@@ -1,5 +1,5 @@
 import { promises as fs, constants } from "node:fs";
-import type { Stats } from "node:fs";
+import type { BigIntStats, Stats } from "node:fs";
 import path from "node:path";
 import { validRelative } from "./providers/paths.js";
 import type { ProviderAdapter } from "./providers/types.js";
@@ -10,9 +10,10 @@ export interface CleanupUnitDefinition {
   kind: "directory" | "bundle";
   members: { path: string; kind: UnitKind; optional?: boolean }[];
 }
+type UnitFileId = string | number;
 export interface UnitFingerprint {
-  dev: number;
-  ino: number;
+  dev: UnitFileId;
+  ino: UnitFileId;
   size: number;
   mtimeMs: number;
   ctimeMs: number;
@@ -27,7 +28,7 @@ export interface UnitNode {
 export interface UnitSnapshot {
   definition: CleanupUnitDefinition;
   nodes: UnitNode[];
-  parents: { path: string; dev: number; ino: number }[];
+  parents: { path: string; dev: UnitFileId; ino: UnitFileId }[];
   absent: string[];
   size: number;
   fileCount: number;
@@ -35,34 +36,83 @@ export interface UnitSnapshot {
   mtimeMs: number;
 }
 export interface UnitRestoreState {
-  directories: { path: string; dev: number; ino: number }[];
+  directories: { path: string; dev: UnitFileId; ino: UnitFileId }[];
   completedMembers: string[];
   linked?: { path: string; fingerprint: UnitFingerprint }[];
 }
 export interface UnitRecord {
   snapshot: UnitSnapshot;
   stored?: UnitSnapshot;
-  container?: { dev: number; ino: number };
+  container?: { dev: UnitFileId; ino: UnitFileId };
   restore?: UnitRestoreState;
 }
 export const UNIT_MAX_NODES = 5000;
 export const UNIT_MAX_DEPTH = 12;
-export const unitFingerprint = (s: Stats): UnitFingerprint => ({
-  dev: s.dev,
-  ino: s.ino,
-  size: s.size,
-  mtimeMs: s.mtimeMs,
-  ctimeMs: s.ctimeMs,
-  nlink: s.nlink,
-  mode: s.mode,
+// NTFS file IDs can exceed Number.MAX_SAFE_INTEGER. New identities are exact
+// canonical decimal strings; only already-safe numeric legacy journals are valid.
+const MAX_FILE_ID = (1n << 64n) - 1n;
+function validFileId(value: unknown, inode = false): value is UnitFileId {
+  if (typeof value === "number")
+    return Number.isSafeInteger(value) && value >= (inode ? 1 : 0);
+  return (
+    typeof value === "string" &&
+    /^(0|[1-9][0-9]{0,19})$/.test(value) &&
+    BigInt(value) <= MAX_FILE_ID &&
+    (!inode || value !== "0")
+  );
+}
+function exactFileId(value: bigint | UnitFileId, inode = false): string {
+  if (typeof value === "bigint") {
+    if (value < (inode ? 1n : 0n) || value > MAX_FILE_ID)
+      throw new Error("清理单元文件身份不可用。");
+    return value.toString();
+  }
+  if (!validFileId(value, inode)) throw new Error("清理单元文件身份不可用。");
+  return String(value);
+}
+const sameFileId = (a: UnitFileId, b: UnitFileId) =>
+  validFileId(a) && validFileId(b) && String(a) === String(b);
+type UnitStat = UnitFingerprint &
+  Pick<Stats, "isFile" | "isDirectory" | "isSymbolicLink">;
+// Match Node's floating millisecond Stats representation for safe legacy records,
+// deriving timestamps and identity from one no-follow sample rather than two reads.
+const milliseconds = (ns: bigint) =>
+  Number(ns / 1_000_000_000n) * 1000 + Number(ns % 1_000_000_000n) / 1_000_000;
+export const unitFingerprint = (
+  s: Stats | BigIntStats | UnitStat,
+): UnitFingerprint => ({
+  dev: exactFileId(s.dev),
+  ino: exactFileId(s.ino, true),
+  size: Number(s.size),
+  mtimeMs:
+    typeof s.mtimeMs === "bigint"
+      ? milliseconds((s as BigIntStats).mtimeNs)
+      : s.mtimeMs,
+  ctimeMs:
+    typeof s.ctimeMs === "bigint"
+      ? milliseconds((s as BigIntStats).ctimeNs)
+      : s.ctimeMs,
+  nlink: Number(s.nlink),
+  mode: Number(s.mode),
 });
+async function unitLstat(p: string): Promise<UnitStat> {
+  const stat = await fs.lstat(p, { bigint: true });
+  return {
+    ...unitFingerprint(stat),
+    isFile: () => stat.isFile(),
+    isDirectory: () => stat.isDirectory(),
+    isSymbolicLink: () => stat.isSymbolicLink(),
+  };
+}
 const identical = (a: UnitFingerprint, b: UnitFingerprint) =>
-  Object.keys(a).every(
-    (k) => a[k as keyof UnitFingerprint] === b[k as keyof UnitFingerprint],
+  Object.keys(a).every((k) =>
+    k === "dev" || k === "ino"
+      ? sameFileId(a[k], b[k])
+      : a[k as keyof UnitFingerprint] === b[k as keyof UnitFingerprint],
   );
 const identity = (a: UnitFingerprint, b: UnitFingerprint) =>
-  a.dev === b.dev &&
-  a.ino === b.ino &&
+  sameFileId(a.dev, b.dev) &&
+  sameFileId(a.ino, b.ino) &&
   a.size === b.size &&
   a.mtimeMs === b.mtimeMs &&
   a.mode === b.mode;
@@ -89,7 +139,7 @@ export async function unitSyncDirectory(p: string) {
 }
 export async function unitExists(p: string) {
   try {
-    return await fs.lstat(p);
+    return await unitLstat(p);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;
@@ -101,7 +151,9 @@ export async function unitPlainParents(p: string, leaf = false) {
   let current = root;
   for (const part of parts.slice(0, parts.length - (leaf ? 0 : 1))) {
     current = path.join(current, part);
-    const stat = await fs.lstat(current);
+    // This is a type/no-link check of ancestry outside the signed unit root.
+    // Filesystem IDs here are not recorded or used as ownership evidence.
+    const stat = await fs.lstat(current, { bigint: true });
     if (!stat.isDirectory() || stat.isSymbolicLink())
       throw new Error("清理单元路径含链接或非目录。");
   }
@@ -188,13 +240,14 @@ export async function assertUnitPolicy(
       !node.fingerprint ||
       Object.keys(node.fingerprint).sort().join() !==
         [...fpKeys].sort().join() ||
-      !fpKeys.every((k) =>
+      !validFileId(node.fingerprint.dev) ||
+      !validFileId(node.fingerprint.ino, true) ||
+      !["size", "mtimeMs", "ctimeMs", "nlink", "mode"].every((k) =>
         Number.isFinite(node.fingerprint[k as keyof UnitFingerprint]),
       ) ||
-      !["dev", "ino", "size", "nlink", "mode"].every(
+      !(["size", "nlink", "mode"] as const).every(
         (k) =>
-          Number.isSafeInteger(node.fingerprint[k as keyof UnitFingerprint]) &&
-          node.fingerprint[k as keyof UnitFingerprint] >= 0,
+          Number.isSafeInteger(node.fingerprint[k]) && node.fingerprint[k] >= 0,
       ) ||
       (node.kind === "file" && node.fingerprint.nlink !== 1) ||
       !adapter.unitEntryAllowed?.(current.policy, node.path, node.kind)
@@ -256,8 +309,8 @@ export async function assertUnitPolicy(
     snapshot.parents.some(
       (p) =>
         !expectedParents.has(p.path) ||
-        !Number.isSafeInteger(p.dev) ||
-        !Number.isSafeInteger(p.ino),
+        !validFileId(p.dev) ||
+        !validFileId(p.ino, true),
     )
   )
     throw new Error("清理单元父目录身份不完整。");
@@ -304,10 +357,12 @@ export async function assertUnitRecord(
   }
   if (
     record.container &&
-    (!Number.isSafeInteger(record.container.dev) ||
-      !Number.isSafeInteger(record.container.ino) ||
-      record.container.dev !==
-        record.snapshot.parents.find((p) => p.path === "")!.dev)
+    (!validFileId(record.container.dev) ||
+      !validFileId(record.container.ino, true) ||
+      !sameFileId(
+        record.container.dev,
+        record.snapshot.parents.find((p) => p.path === "")!.dev,
+      ))
   )
     throw new Error("隔离容器身份无效。");
   const state = record.restore;
@@ -334,11 +389,10 @@ export async function assertUnitRecord(
     );
     if (
       !original ||
-      !Number.isSafeInteger(directory.dev) ||
-      !Number.isSafeInteger(directory.ino) ||
-      directory.ino < 0 ||
-      directory.dev !== original.fingerprint.dev ||
-      directory.ino === original.fingerprint.ino
+      !validFileId(directory.dev) ||
+      !validFileId(directory.ino, true) ||
+      !sameFileId(directory.dev, original.fingerprint.dev) ||
+      sameFileId(directory.ino, original.fingerprint.ino)
     )
       throw new Error("恢复目录身份无效。");
   }
@@ -358,7 +412,11 @@ export async function assertUnitRecord(
         !linked.fingerprint ||
         Object.keys(linked.fingerprint).sort().join() !==
           Object.keys(node.fingerprint).sort().join() ||
-        !Object.values(linked.fingerprint).every(Number.isFinite) ||
+        !validFileId(linked.fingerprint.dev) ||
+        !validFileId(linked.fingerprint.ino, true) ||
+        !["size", "mtimeMs", "ctimeMs", "nlink", "mode"].every((k) =>
+          Number.isFinite(linked.fingerprint[k as keyof UnitFingerprint]),
+        ) ||
         linked.fingerprint.nlink !== 2 ||
         !identity(linked.fingerprint, node.fingerprint)
       )
@@ -373,7 +431,7 @@ export async function captureUnit(
   check: (relative: string) => void = () => {},
 ): Promise<UnitSnapshot> {
   validateUnitDefinition(definition);
-  const rootStat = await fs.lstat(root);
+  const rootStat = await unitLstat(root);
   const nodes: UnitNode[] = [],
     absent: string[] = [];
   const parents: UnitSnapshot["parents"] = [];
@@ -384,7 +442,7 @@ export async function captureUnit(
       if (!parents.some((p) => p.path === relative)) {
         const p = relative ? full(root, relative) : root;
         await unitPlainParents(p, true);
-        const stat = await fs.lstat(p);
+        const stat = await unitLstat(p);
         parents.push({ path: relative, dev: stat.dev, ino: stat.ino });
       }
       if (current === ".") break;
@@ -402,13 +460,13 @@ export async function captureUnit(
       throw new Error("清理单元超出 5000 项或 12 层安全界限。");
     const p = full(root, relative);
     await unitPlainParents(p);
-    const stat = await fs.lstat(p);
+    const stat = await unitLstat(p);
     const kind: UnitKind = stat.isDirectory() ? "directory" : "file";
     if (
       stat.isSymbolicLink() ||
       (!stat.isDirectory() && !stat.isFile()) ||
       (stat.isFile() && stat.nlink !== 1) ||
-      stat.dev !== rootStat.dev ||
+      !sameFileId(stat.dev, rootStat.dev) ||
       (expected && expected !== kind) ||
       !adapter.unitEntryAllowed?.(definition.policy, relative, kind)
     )
@@ -424,7 +482,9 @@ export async function captureUnit(
     if (kind === "directory") {
       for await (const child of await fs.opendir(p))
         await visit(relative + "/" + child.name, depth + 1);
-      if (!identical(unitFingerprint(await fs.lstat(p)), unitFingerprint(stat)))
+      if (
+        !identical(unitFingerprint(await unitLstat(p)), unitFingerprint(stat))
+      )
         throw new Error("目录自扫描后发生变化。");
     }
   };
@@ -485,12 +545,12 @@ async function verifyUnitParents(root: string, snapshot: UnitSnapshot) {
       throw new Error("单元父目录非法。");
     const p = parent.path ? full(root, parent.path) : root;
     await unitPlainParents(p, true);
-    const stat = await fs.lstat(p);
+    const stat = await unitLstat(p);
     if (
       !stat.isDirectory() ||
       stat.isSymbolicLink() ||
-      stat.dev !== parent.dev ||
-      stat.ino !== parent.ino
+      !sameFileId(stat.dev, parent.dev) ||
+      !sameFileId(stat.ino, parent.ino)
     )
       throw new Error("清理单元父目录已被替换。");
   }
@@ -498,11 +558,11 @@ async function verifyUnitParents(root: string, snapshot: UnitSnapshot) {
 async function verifyContainer(dir: string, id: string, record: UnitRecord) {
   const p = unitStoragePath(dir, id);
   await unitPlainParents(p, true);
-  const stat = await fs.lstat(p);
+  const stat = await unitLstat(p);
   if (
     !record.container ||
-    stat.dev !== record.container.dev ||
-    stat.ino !== record.container.ino
+    !sameFileId(stat.dev, record.container.dev) ||
+    !sameFileId(stat.ino, record.container.ino)
   )
     throw new Error("隔离单元容器身份已变化。");
 }
@@ -531,7 +591,7 @@ async function verifyTree(
     const node = expected.get(relative);
     if (!node) throw new Error("隔离单元含未知成员。");
     await unitPlainParents(p);
-    const stat = await fs.lstat(p),
+    const stat = await unitLstat(p),
       actual = unitFingerprint(stat);
     if (
       stat.isSymbolicLink() ||
@@ -658,15 +718,15 @@ export async function ownedRestorePaths(
     if (!node) throw new Error("恢复目标含未知成员，不能解除活动保护。");
     const p = full(root, relative);
     await unitPlainParents(p);
-    const stat = await fs.lstat(p);
+    const stat = await unitLstat(p);
     if (node.kind === "directory") {
       const created = state.directories.find((d) => d.path === relative);
       if (
         !created ||
         !stat.isDirectory() ||
         stat.isSymbolicLink() ||
-        stat.dev !== created.dev ||
-        stat.ino !== created.ino
+        !sameFileId(stat.dev, created.dev) ||
+        !sameFileId(stat.ino, created.ino)
       )
         throw new Error("恢复目标目录不是已签名的自有目录。");
       owned.add(relative);
@@ -709,7 +769,7 @@ export async function moveUnit(
   await guard();
   await verifyUnitParents(root, record.snapshot);
   await fs.mkdir(wrapper, { mode: 0o700 });
-  const container = await fs.lstat(wrapper);
+  const container = await unitLstat(wrapper);
   record.container = { dev: container.dev, ino: container.ino };
   await unitSyncDirectory(dir);
   await checkpoint();
@@ -779,12 +839,12 @@ export async function restoreUnit(
     )) {
       const p = full(root, created.path);
       await unitPlainParents(p, true);
-      const stat = await fs.lstat(p);
+      const stat = await unitLstat(p);
       if (
         !stat.isDirectory() ||
         stat.isSymbolicLink() ||
-        stat.dev !== created.dev ||
-        stat.ino !== created.ino
+        !sameFileId(stat.dev, created.dev) ||
+        !sameFileId(stat.ino, created.ino)
       )
         throw new Error("恢复目标父目录被替换；源数据仍保留。");
     }
@@ -812,8 +872,8 @@ export async function restoreUnit(
       if (
         !stat.isDirectory() ||
         stat.isSymbolicLink() ||
-        stat.dev !== node.fingerprint.dev ||
-        stat.ino !== node.fingerprint.ino
+        !sameFileId(stat.dev, node.fingerprint.dev) ||
+        !sameFileId(stat.ino, node.fingerprint.ino)
       )
         throw new Error("隔离源父目录被替换；数据未删除。");
     }
@@ -885,17 +945,17 @@ export async function restoreUnit(
           throw error;
         }
         await unitSyncDirectory(path.dirname(p));
-        const stat = await fs.lstat(p);
+        const stat = await unitLstat(p);
         created = { path: node.path, dev: stat.dev, ino: stat.ino };
         state.directories.push(created);
         await checkpoint(); // A crash before this checkpoint leaves an explicit conflict, never adopts an unowned dir.
       }
-      const stat = await fs.lstat(p);
+      const stat = await unitLstat(p);
       if (
         !stat.isDirectory() ||
         stat.isSymbolicLink() ||
-        stat.dev !== created.dev ||
-        stat.ino !== created.ino
+        !sameFileId(stat.dev, created.dev) ||
+        !sameFileId(stat.ino, created.ino)
       )
         throw new Error("恢复目标目录被替换；不会覆盖。");
     }
@@ -908,7 +968,7 @@ export async function restoreUnit(
       await unitPlainParents(dest);
       const a = await unitExists(source),
         b = await unitExists(dest);
-      const matches = (stat: Stats | null) =>
+      const matches = (stat: UnitStat | null) =>
         !!stat &&
         stat.isFile() &&
         !stat.isSymbolicLink() &&
@@ -941,7 +1001,7 @@ export async function restoreUnit(
           state.linked ??= [];
           state.linked.push({
             path: node.path,
-            fingerprint: unitFingerprint(await fs.lstat(source)),
+            fingerprint: unitFingerprint(await unitLstat(source)),
           });
         }
       }
@@ -980,7 +1040,7 @@ export async function restoreUnit(
       await verifyStoredParents(index, member.path, node.path);
       await unitPlainParents(dest);
       const a = await unitExists(source),
-        b = await fs.lstat(dest);
+        b = await unitLstat(dest);
       if (
         !b.isFile() ||
         !identity(unitFingerprint(b), node.fingerprint) ||
@@ -1008,8 +1068,8 @@ export async function restoreUnit(
         if (
           !sourceStat.isDirectory() ||
           sourceStat.isSymbolicLink() ||
-          sourceStat.dev !== node.fingerprint.dev ||
-          sourceStat.ino !== node.fingerprint.ino
+          !sameFileId(sourceStat.dev, node.fingerprint.dev) ||
+          !sameFileId(sourceStat.ino, node.fingerprint.ino)
         )
           throw new Error("隔离目录标识已变化。");
         await fs.rmdir(source);
@@ -1018,13 +1078,13 @@ export async function restoreUnit(
       const dest = full(root, node.path);
       // Preserve directory permissions and modification time after exact reconstruction.
       const created = state.directories.find((d) => d.path === node.path),
-        destStat = await fs.lstat(dest);
+        destStat = await unitLstat(dest);
       if (
         !created ||
         !destStat.isDirectory() ||
         destStat.isSymbolicLink() ||
-        destStat.dev !== created.dev ||
-        destStat.ino !== created.ino
+        !sameFileId(destStat.dev, created.dev) ||
+        !sameFileId(destStat.ino, created.ino)
       )
         throw new Error("恢复目录标识已变化。");
       await fs.chmod(dest, node.fingerprint.mode & 0o777);

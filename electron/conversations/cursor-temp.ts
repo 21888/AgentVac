@@ -2,7 +2,11 @@ import { promises as fs, type Stats } from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { openConversationFile } from "./safe-read.js";
-import { inspectCursorSnapshotWindowsAcl } from "./cursor-windows-acl.js";
+import {
+  inspectCursorSnapshotWindowsAcl,
+  inspectCursorSnapshotWindowsLocality,
+  canonicalizeCursorSnapshotWindowsPath,
+} from "./cursor-windows-acl.js";
 
 const ROOT_MARKER = "owner.json";
 const SESSION = /^session-([0-9a-f]{32})$/;
@@ -19,8 +23,11 @@ const own = (s: Stats) =>
   (process.platform === "win32" || (s.mode & 0o077) === 0);
 let runtime: Promise<{ root: string; session: string }> | undefined;
 let availabilityReason:
-  "not-initialized" | "windows-acl-unverified" | "storage-unavailable" | null =
-  "not-initialized";
+  | "not-initialized"
+  | "windows-acl-unverified"
+  | "windows-locality-unverified"
+  | "storage-unavailable"
+  | null = "not-initialized";
 const fail = () => new Error("CURSOR_PRIVATE_SNAPSHOT_STORAGE_UNAVAILABLE");
 export function getCursorSnapshotStorageAvailability() {
   return { available: !!runtime, reason: availabilityReason };
@@ -191,6 +198,17 @@ async function initializeCursorSnapshotStorageInner(
 ): Promise<CursorSnapshotStorageStatus> {
   runtime = undefined;
   availabilityReason = "storage-unavailable";
+  if (process.platform === "win32") {
+    const canonical = canonicalizeCursorSnapshotWindowsPath(root);
+    if (
+      !canonical ||
+      !(await inspectCursorSnapshotWindowsLocality(canonical, true))
+    ) {
+      availabilityReason = "windows-locality-unverified";
+      throw fail();
+    }
+    root = canonical;
+  }
   if (
     !path.isAbsolute(root) ||
     path.normalize(root) !== root ||

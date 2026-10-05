@@ -307,7 +307,7 @@ test("interrupted source unlink resumes from authenticated owned restore links",
     unlink = fs.unlink;
   let injected = false;
   fs.unlink = async (p) => {
-    if (!injected && String(p).endsWith("/0/a.bin")) {
+    if (!injected && String(p).endsWith(path.sep + path.join("0", "a.bin"))) {
       injected = true;
       throw new Error("synthetic unlink interruption");
     }
@@ -486,7 +486,7 @@ test("interruption after removing a stored directory resumes safely with target 
   let injected = false;
   fs.rmdir = async (p) => {
     await rmdir(p);
-    if (!injected && String(p).endsWith("/0/nested")) {
+    if (!injected && String(p).endsWith(path.sep + path.join("0", "nested"))) {
       injected = true;
       throw new Error("synthetic crash after rmdir");
     }
@@ -563,7 +563,7 @@ test("owned-restore activity exception rejects newly added target data and prese
   );
   const unlink = fs.unlink;
   fs.unlink = async (p) => {
-    if (String(p).endsWith("/0/a.bin"))
+    if (String(p).endsWith(path.sep + path.join("0", "a.bin")))
       throw new Error("synthetic source unlink failure");
     return unlink(p);
   };

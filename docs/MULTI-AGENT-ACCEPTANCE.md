@@ -49,3 +49,15 @@ Official support identifies four regenerable cache folders. Whole-folder policie
 - Record the exact production source revision/snapshot for each aggregate and GUI run. Retest after integrated changes.
 - Do not reuse historical cross-platform native passes as evidence for this branch.
 - No publication, remote branch/push, paid CI or release is authorized by this development phase.
+
+### Conservative runtime attribution
+
+Raw POSIX process listings do not preserve argument boundaries. Claude Code,
+Cline and Cursor therefore do not treat a script-looking later argument, loader
+value, split path or whitespace fragment as proof that a generic runtime is
+unrelated. Only the minimal executable-plus-one-absolute-script form can be
+attributed from raw text; other runtime forms remain unknown unless a known
+vendor entrypoint is positively identified. Windows uses its own absolute-path
+rules. This may block an unrelated runtime or the source-native test driver.
+Blocked mutation is never counted as native acceptance. Lossless OS argument
+collection and platform-specific validation remain separate engineering work.

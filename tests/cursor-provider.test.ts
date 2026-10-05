@@ -436,7 +436,7 @@ test("Cursor process guard never clears incomplete, empty, malformed or unattrib
         complete: true,
         processes: [{ name: "node", commandLine }],
       }).status,
-      commandLine.startsWith("node /tests/") ? "clear" : "unknown",
+      "unknown",
       commandLine,
     );
   assert.equal(
@@ -1325,6 +1325,7 @@ test("Cursor signed recovery data cannot substitute an unknown stored cache layo
     node.fingerprint = unitFingerprint(
       await fs.lstat(
         path.join(location, path.posix.relative("GPUCache", node.path)),
+        { bigint: true },
       ),
     );
   // Signing does not expand a provider's allowlist. This also models imported

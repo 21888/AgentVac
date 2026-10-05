@@ -154,6 +154,11 @@ export function parsePosixProcessSnapshot(
       pid,
       name: first.value,
       commandLine: second.value,
+      // macOS comm is OS-derived. Populate it before helper-role parsing because
+      // ps renders executable paths containing spaces without shell quoting.
+      ...(platform === "darwin" && path.posix.isAbsolute(first.value)
+        ? { executablePath: first.value }
+        : {}),
       ...(withParents ? { parentPid: second.parentPid } : {}),
     });
   }
@@ -173,6 +178,7 @@ export function parsePosixProcessSnapshot(
 export async function collectProcessSnapshot(
   ownedPids: readonly number[] = [process.pid],
   application?: OwnedApplication,
+  signal?: AbortSignal,
 ): Promise<ProcessSnapshot> {
   const platform = process.platform;
   try {
@@ -186,7 +192,7 @@ export async function collectProcessSnapshot(
           "-Command",
           "Get-CimInstance Win32_Process -ErrorAction Stop | Select-Object ProcessId,ParentProcessId,ExecutablePath,Name,CommandLine | ConvertTo-Json -Compress",
         ],
-        limits,
+        { ...limits, signal },
       );
       const parsed: unknown = JSON.parse(stdout);
       const rows = Array.isArray(parsed) ? parsed : [parsed];
@@ -227,8 +233,10 @@ export async function collectProcessSnapshot(
     const withParents = !!application;
     const prefix = withParents ? "pid=,ppid=,stat=," : "pid=,stat=,";
     const snapshot = parsePosixProcessSnapshot(
-      (await run("/bin/ps", ["-eo", prefix + "comm="], limits)).stdout,
-      (await run("/bin/ps", ["-eo", prefix + "args="], limits)).stdout,
+      (await run("/bin/ps", ["-eo", prefix + "comm="], { ...limits, signal }))
+        .stdout,
+      (await run("/bin/ps", ["-eo", prefix + "args="], { ...limits, signal }))
+        .stdout,
       platform,
       application ? [] : ownedPids,
       withParents,
@@ -258,13 +266,71 @@ export async function collectProcessSnapshot(
     return { platform, complete: false, processes: [] };
   }
 }
+/** Retry only incomplete observations, never a complete running/unknown result.
+ * A shared abort deadline also bounds OS commands across retries. */
+export async function collectStableProcessSnapshot(
+  collect: (signal: AbortSignal) => Promise<ProcessSnapshot>,
+  options: {
+    signal?: AbortSignal;
+    deadlineMs?: number;
+    retryDelayMs?: number;
+  } = {},
+): Promise<ProcessSnapshot> {
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const budget = Math.max(1, Math.min(options.deadlineMs ?? 5500, 5500));
+  const timer = setTimeout(cancel, budget);
+  timer.unref();
+  options.signal?.addEventListener("abort", cancel, { once: true });
+  if (options.signal?.aborted) cancel();
+  let last: ProcessSnapshot = {
+    platform: process.platform,
+    complete: false,
+    processes: [],
+  };
+  try {
+    for (
+      let attempt = 0;
+      attempt < 3 && !controller.signal.aborted;
+      attempt++
+    ) {
+      try {
+        last = await collect(controller.signal);
+      } catch {
+        last = { ...last, complete: false };
+      }
+      if (controller.signal.aborted) return { ...last, complete: false };
+      if (last.complete) return last;
+      if (attempt < 2)
+        await new Promise<void>((resolve) => {
+          const finish = () => {
+            clearTimeout(wait);
+            controller.signal.removeEventListener("abort", finish);
+            resolve();
+          };
+          const wait = setTimeout(
+            finish,
+            Math.max(0, Math.min(options.retryDelayMs ?? 75, 75)),
+          );
+          controller.signal.addEventListener("abort", finish, { once: true });
+          if (controller.signal.aborted) finish();
+        });
+    }
+    return { ...last, complete: false };
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", cancel);
+  }
+}
 export async function checkProviderProcesses(
   provider: ProviderId,
   ownedPids?: readonly number[],
   application?: OwnedApplication,
 ): Promise<ProcessStatus> {
   const adapter = getAdapter(provider);
-  const snapshot = await collectProcessSnapshot(ownedPids, application);
+  const snapshot = await collectStableProcessSnapshot((signal) =>
+    collectProcessSnapshot(ownedPids, application, signal),
+  );
   if (!snapshot.complete)
     return {
       status: "unknown",

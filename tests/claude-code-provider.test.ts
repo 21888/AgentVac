@@ -716,7 +716,7 @@ test("Claude ordinary scan performs no file-content reads", async (t) => {
   open.mock.restore();
 });
 
-test("Claude process matching clears attributed unrelated runtimes and ignores later literal arguments", () => {
+test("Claude process matching clears minimal attributed unrelated runtimes", () => {
   for (const record of [
     { name: "node", commandLine: "/usr/bin/node /work/server.js" },
     {
@@ -724,12 +724,7 @@ test("Claude process matching clears attributed unrelated runtimes and ignores l
       commandLine:
         '"C:\\Program Files\\nodejs\\node.exe" "C:\\work\\server.js"',
     },
-    { name: "python3", commandLine: "/usr/bin/python3 -m http.server" },
-    {
-      name: "node",
-      commandLine:
-        "/usr/bin/node /work/test.js 'claude-code' '/x/@anthropic-ai/claude-code/cli.js'",
-    },
+    { name: "python3", commandLine: "/usr/bin/python3 /work/unrelated.py" },
     { name: "bash", commandLine: "/bin/bash -c 'echo claude-code'" },
     {
       name: "AgentVac",
@@ -737,7 +732,10 @@ test("Claude process matching clears attributed unrelated runtimes and ignores l
     },
   ])
     assert.equal(
-      adapter.assessProcesses(processes([record])).status,
+      adapter.assessProcesses({
+        ...processes([record]),
+        platform: record.name.endsWith(".exe") ? "win32" : "linux",
+      }).status,
       "clear",
       JSON.stringify(record),
     );
@@ -1161,6 +1159,118 @@ test("Claude unsupported platforms and malformed command-line snapshots fail clo
     adapter.assessProcesses(
       processes([{ name: "bash", commandLine: "/bin/bash\0hidden" }]),
     ).status,
+    "unknown",
+  );
+});
+
+// POSIX ps cannot preserve argv boundaries; no new suffixless attribution may
+// turn these ambiguous or platform-relative paths into proof of an unrelated host.
+test("raw POSIX Python text cannot authorize suffixless or Windows-looking entrypoints", () => {
+  for (const commandLine of [
+    "/usr/bin/python3 /tmp/synthetic application/claude_agent_sdk/launch",
+    "/usr/bin/python3 C:\\work\\application",
+    "/usr/bin/python3 /tmp/synthetic --hidden/claude_agent_sdk/launch",
+  ])
+    assert.equal(
+      adapter.assessProcesses({
+        platform: "linux",
+        complete: true,
+        processes: [{ name: "python3", commandLine }],
+      }).status,
+      "unknown",
+    );
+});
+
+test("unsupported Python-family names do not clear inline or unattributed code", () => {
+  for (const name of ["python3t", "pythonw3.13", "pythonw3.exe"]) {
+    assert.equal(
+      adapter.assessProcesses({
+        platform: "linux",
+        complete: true,
+        processes: [{ name, commandLine: name + " -c arbitrary" }],
+      }).status,
+      "unknown",
+    );
+  }
+});
+
+test("known Python SDK direct/module operands remain running before unrelated attribution", () => {
+  for (const commandLine of [
+    "python3 -m claude_agent_sdk",
+    "python3 -m claude_agent_sdk.cli",
+    "python3 /opt/claude_agent_sdk/__main__.py",
+    "python3 -W ignore /opt/claude_agent_sdk/__main__.py",
+    "python3 -X utf8 /opt/claude_agent_sdk/__main__.py",
+  ])
+    assert.equal(
+      adapter.assessProcesses({
+        platform: "linux",
+        complete: true,
+        processes: [{ name: "python3", commandLine }],
+      }).status,
+      "running",
+    );
+  assert.equal(
+    adapter.assessProcesses({
+      platform: "linux",
+      complete: true,
+      processes: [
+        {
+          name: "python3",
+          commandLine:
+            "python3 /work/unrelated.py /opt/claude_agent_sdk/__main__.py",
+        },
+      ],
+    }).status,
+    "unknown",
+  );
+  assert.equal(
+    adapter.assessProcesses({
+      platform: "linux",
+      complete: true,
+      processes: [{ name: "python3", commandLine: "python3 -m http.server" }],
+    }).status,
+    "unknown",
+  );
+});
+
+test("Python-specific options never create new clear states and later -m stays a script literal", () => {
+  for (const commandLine of [
+    "python3 -W claude /opt/unrelated.py",
+    "python3 -X claude /opt/unrelated.py",
+  ])
+    assert.equal(
+      adapter.assessProcesses({
+        platform: "linux",
+        complete: true,
+        processes: [{ name: "python3", commandLine }],
+      }).status,
+      "unknown",
+    );
+  assert.equal(
+    adapter.assessProcesses({
+      platform: "linux",
+      complete: true,
+      processes: [
+        {
+          name: "python3",
+          commandLine: "python3 /opt/unrelated.py -m claude_agent_sdk",
+        },
+      ],
+    }).status,
+    "unknown",
+  );
+});
+
+test("raw POSIX later literals stay unknown rather than being attributed to a SDK or an unrelated script", () => {
+  const commandLine =
+    "/usr/bin/node /work/test.js 'claude-code' '/x/@anthropic-ai/claude-code/cli.js'";
+  assert.equal(
+    adapter.assessProcesses({
+      platform: "linux",
+      complete: true,
+      processes: [{ name: "node", commandLine }],
+    }).status,
     "unknown",
   );
 });

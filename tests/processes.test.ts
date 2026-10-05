@@ -165,3 +165,109 @@ test("parent-aware process snapshots expose kernel PPID and flag reparented ambi
     false,
   );
 });
+
+test("macOS OS-derived helper executable is available before role parsing of unquoted spaces", () => {
+  const exe = "/Applications/AgentVac Test.app/Contents/MacOS/AgentVac";
+  const app = {
+    pid: 100,
+    executablePaths: applicationExecutablePaths(exe, "darwin"),
+  };
+  const helperExe = app.executablePaths[2];
+  const parsed = parsePosixProcessSnapshot(
+    `100 1 S ${exe}\n101 100 S ${helperExe}`,
+    `100 1 S ${exe}\n101 100 S ${helperExe} --type=gpu-process`,
+    "darwin",
+    [],
+    true,
+  );
+  assert.deepEqual(
+    excludeOwnedApplicationProcesses(parsed, [100], app).processes,
+    [],
+  );
+  const foreign = parsePosixProcessSnapshot(
+    `101 999 S ${helperExe}`,
+    `101 999 S ${helperExe} --type=gpu-process`,
+    "darwin",
+    [],
+    true,
+  );
+  assert.equal(
+    excludeOwnedApplicationProcesses(foreign, [100], app).processes.length,
+    1,
+  );
+});
+
+import { collectStableProcessSnapshot } from "../electron/processes.js";
+import { claudeCodeAdapter } from "../electron/providers/claude-code.js";
+test("fresh-inventory retry accepts only a newly complete snapshot and sees a newly started writer", async () => {
+  let calls = 0;
+  const snapshot = await collectStableProcessSnapshot(
+    async () => ({
+      platform: "linux",
+      complete: ++calls > 1,
+      processes: [{ name: "claude", commandLine: "/usr/bin/claude" }],
+    }),
+    { retryDelayMs: 0 },
+  );
+  assert.equal(calls, 2);
+  assert.equal(snapshot.complete, true);
+  assert.equal(claudeCodeAdapter.assessProcesses(snapshot).status, "running");
+});
+test("complete unknown/running inventories never get retried into a clear observation", async () => {
+  for (const row of [
+    { name: "claude", commandLine: "claude" },
+    { name: "node", commandLine: "node -e unknown" },
+  ]) {
+    let calls = 0;
+    const result = await collectStableProcessSnapshot(
+      async () => {
+        calls++;
+        return { platform: "linux", complete: true, processes: [row] };
+      },
+      { retryDelayMs: 0 },
+    );
+    assert.equal(calls, 1);
+    assert.notEqual(claudeCodeAdapter.assessProcesses(result).status, "clear");
+  }
+});
+test("incomplete inventory retry has a three-attempt cap, cancellation and an OS-call deadline", async () => {
+  let calls = 0;
+  const bad = await collectStableProcessSnapshot(
+    async () => {
+      calls++;
+      return { platform: "linux", complete: false, processes: [] };
+    },
+    { retryDelayMs: 0 },
+  );
+  assert.equal(calls, 3);
+  assert.equal(bad.complete, false);
+  const abort = new AbortController();
+  abort.abort();
+  calls = 0;
+  const cancelled = await collectStableProcessSnapshot(
+    async () => {
+      calls++;
+      return { platform: "linux", complete: true, processes: [] };
+    },
+    { signal: abort.signal },
+  );
+  assert.equal(calls, 0);
+  assert.equal(cancelled.complete, false);
+  let sawAbort = false;
+  const timed = await collectStableProcessSnapshot(
+    (signal) =>
+      new Promise((resolve) =>
+        signal.addEventListener(
+          "abort",
+          () => {
+            sawAbort = true;
+            resolve({ platform: "linux", complete: true, processes: [] });
+          },
+          { once: true },
+        ),
+      ),
+    { deadlineMs: 20 },
+  );
+  assert.equal(sawAbort, true);
+  assert.equal(timed.complete, false);
+});

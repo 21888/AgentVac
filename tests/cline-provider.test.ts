@@ -530,18 +530,17 @@ test("Cline fail-closed process detection recognizes editors, extension paths an
   );
 });
 
-test("Cline permits attributable unrelated development processes while rejecting eval-only ambiguity", () => {
+test("Cline permits minimal attributed unrelated scripts while rejecting raw-argument ambiguity", () => {
   for (const record of [
     {
       name: "node",
-      commandLine: "/usr/bin/node /workspace/project/dev-server.mjs --watch",
+      commandLine: "/usr/bin/node /workspace/project/dev-server.mjs",
     },
     {
       name: "node.exe",
       commandLine:
         '"C:\\Program Files\\nodejs\\node.exe" "C:\\work\\site\\server.js"',
     },
-    { name: "java", commandLine: "/usr/bin/java -jar /opt/company/server.jar" },
     {
       name: "AgentVac",
       commandLine: "/Applications/AgentVac.app/Contents/MacOS/AgentVac",
@@ -549,7 +548,7 @@ test("Cline permits attributable unrelated development processes while rejecting
   ])
     assert.equal(
       clineAdapter.assessProcesses({
-        platform: "linux",
+        platform: record.name.endsWith(".exe") ? "win32" : "linux",
         complete: true,
         processes: [record],
       }).status,
@@ -558,6 +557,8 @@ test("Cline permits attributable unrelated development processes while rejecting
   for (const commandLine of [
     "node -e 'require(\"@cline/core\")'",
     "node -e 'console.log(1)'",
+    "node /workspace/project/dev-server.mjs --watch",
+    "/usr/bin/java -jar /opt/company/server.jar",
     "node server.js",
     "bun run dev",
     "java",

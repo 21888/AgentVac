@@ -168,9 +168,12 @@ app
         provider === "cursor" &&
         !getCursorSnapshotStorageAvailability().available
           ? getCursorSnapshotStorageAvailability().reason ===
-            "windows-acl-unverified"
-            ? "当前 Windows 私有副本目录未通过实际权限验证，暂不能读取 Cursor 数据库会话。"
-            : "无法建立已验证的私有本地数据库副本目录，暂不能读取 Cursor 数据库会话。"
+            "windows-locality-unverified"
+            ? "Windows 私有副本目录尚未确认为本机固定磁盘路径，暂不能读取 Cursor 数据库会话；不会改用其他目录。"
+            : getCursorSnapshotStorageAvailability().reason ===
+                "windows-acl-unverified"
+              ? "当前 Windows 私有副本目录未通过实际权限验证，暂不能读取 Cursor 数据库会话。"
+              : "无法建立已验证的私有本地数据库副本目录，暂不能读取 Cursor 数据库会话。"
           : undefined,
     });
     preferences = new PreferenceStore(app.getPath("userData"));
