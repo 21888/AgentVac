@@ -11,7 +11,7 @@ import {
 } from "electron";
 import path from "node:path";
 import os from "node:os";
-import { pathToFileURL } from "node:url";
+import { isTrustedRendererEvent, rendererFileUrl } from "./renderer-origin.js";
 import { AppDataServices } from "./app-services.js";
 import { shutdownDiagnosticWorkers } from "./diagnostics.js";
 import { PreferenceStore } from "./preferences.js";
@@ -41,10 +41,9 @@ const devUrl =
   !app.isPackaged && process.env.AGENTVAC_DEV_URL === "http://127.0.0.1:5173"
     ? process.env.AGENTVAC_DEV_URL
     : undefined;
-const trusted = (url: string) =>
-  devUrl
-    ? new URL(url).origin === new URL(devUrl).origin
-    : url === pathToFileURL(path.join(__dirname, "../dist/index.html")).href;
+const localRendererUrl = rendererFileUrl(
+  path.join(__dirname, "../dist/index.html"),
+);
 function register(
   name: string,
   handler: (...args: any[]) => Promise<unknown>,
@@ -52,9 +51,12 @@ function register(
 ) {
   ipcMain.handle("agentvac:" + name, async (event, ...args) => {
     if (
-      event.sender !== window.webContents ||
-      event.senderFrame !== window.webContents.mainFrame ||
-      !trusted(event.senderFrame.url)
+      !isTrustedRendererEvent(
+        event,
+        window.webContents,
+        localRendererUrl,
+        devUrl,
+      )
     )
       throw new Error("不可信 IPC 来源。");
     if (quitting) throw new Error("应用正在退出，请等待文件写入完成。");
@@ -352,7 +354,9 @@ app
       if (problem) throw new Error(problem);
     });
     if (devUrl) await window.loadURL(devUrl);
-    else await window.loadFile(path.join(__dirname, "../dist/index.html"));
+    // loadFile uses legacy URL formatting, which differs for paths such as
+    // Windows short-name TEMP directories (RUNNER~1). Load the exact allowlist URL.
+    else await window.loadURL(localRendererUrl);
     app.on("activate", () => {
       if (window && !window.isDestroyed()) window.show();
     });
