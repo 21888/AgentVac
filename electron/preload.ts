@@ -1,7 +1,25 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { AgentVacAPI } from "../shared/types.js";
 const api: AgentVacAPI = {
+  chooseConversationSource: (kind) =>
+    ipcRenderer.invoke("agentvac:choose-conversation-source", kind),
+  resetConversationSource: () =>
+    ipcRenderer.invoke("agentvac:reset-conversation-source"),
+  getConversationAccess: () =>
+    ipcRenderer.invoke("agentvac:conversation-access"),
+  setConversationAccess: (allowed) =>
+    ipcRenderer.invoke("agentvac:conversation-consent", allowed),
+  listConversations: (request) =>
+    ipcRenderer.invoke("agentvac:conversation-list", request),
+  readConversation: (request) =>
+    ipcRenderer.invoke("agentvac:conversation-read", request),
+  cancelConversationRequest: (id) =>
+    ipcRenderer.invoke("agentvac:conversation-cancel", id),
+  previewConversationArchive: (ids) =>
+    ipcRenderer.invoke("agentvac:conversation-preview", ids),
   getContext: () => ipcRenderer.invoke("agentvac:context"),
+  setProvider: (provider) =>
+    ipcRenderer.invoke("agentvac:set-provider", provider),
   getAppData: () => ipcRenderer.invoke("agentvac:app-data"),
   activateWorkspace: (id) =>
     ipcRenderer.invoke("agentvac:activate-workspace", id),
@@ -46,5 +64,7 @@ const api: AgentVacAPI = {
     ipcRenderer.invoke("agentvac:restore", id, confirmedClosed),
   trash: (id, confirmed) => ipcRenderer.invoke("agentvac:trash", id, confirmed),
   openQuarantine: () => ipcRenderer.invoke("agentvac:open-quarantine"),
+  openBatchQuarantine: (id) =>
+    ipcRenderer.invoke("agentvac:open-batch-quarantine", id),
 };
 contextBridge.exposeInMainWorld("agentvac", api);

@@ -1,8 +1,8 @@
 {
   "name": "agentvac",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "A conservative, reversible Codex data cleanup desktop app",
+  "description": "Conservative local cleanup with provider-bound previews and reversible quarantine",
   "author": "AgentVac contributors",
   "license": "MIT",
   "type": "module",
@@ -29,7 +29,8 @@
     "test:app-data": "npm run build && node --import tsx scripts/app-data-regression.mjs",
     "test:scan": "npm run build && node --import tsx scripts/scan-regression.mjs",
     "test:performance": "node --import tsx scripts/benchmark-batch.mjs",
-    "test:desktop:built": "node scripts/desktop-e2e.mjs"
+    "test:desktop:built": "node scripts/desktop-e2e.mjs",
+    "test:providers": "npm run build && node --import tsx scripts/multi-provider-regression.mjs"
   },
   "devDependencies": {
     "@sparticuz/chromium": "^153.0.0",
@@ -91,7 +92,8 @@
     "afterExtract": "scripts/after-extract.cjs",
     "asarUnpack": [
       "dist-electron/diagnostic-supervisor.cjs",
-      "dist-electron/diagnostic-worker.cjs"
+      "dist-electron/diagnostic-worker.cjs",
+      "dist-electron/cursor-sql-worker.cjs"
     ]
   },
   "desktopName": "app.agentvac.desktop",

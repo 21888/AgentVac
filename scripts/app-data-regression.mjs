@@ -126,6 +126,7 @@ try {
     browser = await chromium.launch({
       executablePath: process.env.AGENTVAC_BROWSER,
       headless: true,
+      chromiumSandbox: true,
     });
   else if (process.platform === "linux") {
     const { default: serverless } = await import("@sparticuz/chromium");

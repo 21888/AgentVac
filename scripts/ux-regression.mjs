@@ -59,8 +59,8 @@ let holdNextScan = false;
 let releaseScanGate = null;
 let gateCancelled = false;
 let processStatus = {
-  status: "unknown",
-  details: "测试夹具：无法自动检测进程。",
+  status: "clear",
+  details: "测试夹具：完整检查未检测到进程。",
 };
 const key = randomBytes(32);
 const report = [];
@@ -73,7 +73,7 @@ try {
     browser = await chromium.launch({
       executablePath: process.env.AGENTVAC_BROWSER,
       headless: true,
-      args: ["--no-sandbox"],
+      chromiumSandbox: true,
     });
   else if (process.platform === "linux") {
     const { default: serverless } = await import("@sparticuz/chromium");

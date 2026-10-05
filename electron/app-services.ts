@@ -1,3 +1,7 @@
+import { adapters, getAdapter, isProviderId } from "./providers/index.js";
+import { checkProviderProcesses } from "./processes.js";
+import type { ProviderId, CandidateView } from "../shared/types.js";
+export type { CandidateView } from "../shared/types.js";
 import { promises as fs, constants, type Stats } from "node:fs";
 import path from "node:path";
 import {
@@ -33,10 +37,6 @@ import {
 import type { AppContext, ProcessStatus } from "../shared/types.js";
 
 /** JSON-safe views. Secret buffers and native adapters never cross IPC. */
-export interface CandidateView extends DiagnosticCandidate {
-  id: string;
-  verified: false;
-}
 export interface DemoView {
   path: string;
   status: "absent" | "ready" | "preparing" | "blocked";
@@ -44,6 +44,12 @@ export interface DemoView {
   message: string;
 }
 export interface AppDataView {
+  providers?: {
+    id: ProviderId;
+    label: string;
+    scope: string;
+    supportsSessionCleanup?: boolean;
+  }[];
   workspaces: WorkspaceListing;
   recovery: RecoveryKeyringDescription;
   candidates: CandidateView[];
@@ -78,6 +84,8 @@ export interface AppDiagnosticsView extends Omit<
 }
 export interface AppDataServiceOptions extends CandidateInputs {
   processCheck?: () => Promise<ProcessStatus>;
+  providerProcessCheck?: (provider: ProviderId) => Promise<ProcessStatus>;
+  platform?: NodeJS.Platform;
   /** Production injects OS Trash. No deletion or rename fallback exists here. */
   trashItem?: (directory: string) => Promise<void>;
 }
@@ -202,6 +210,7 @@ export class AppDataServices {
   private readonly defaultCandidates: DiagnosticCandidate[];
   private context: AppContext = {
     root: null,
+    provider: "codex",
     demo: false,
     platform: process.platform,
   };
@@ -249,15 +258,19 @@ export class AppDataServices {
     const listing = await this.workspaces.load();
     this.initialized = true;
     // Reopen only the latest Codex selection, using metadata only. No fallback scan.
-    const latest = listing.entries.find((entry) => entry.kind === "codex");
+    const latest = listing.entries.find((entry) => isProviderId(entry.kind));
     if (listing.issue) this.addIssue(WORKSPACE_ERROR);
     else if (latest) {
       if (latest.status !== "available") this.addIssue(latest.message);
       else
         try {
           if (latest.demo) await this.requireReadyDemo(latest.path);
-          const candidate = await this.newEngine(latest.path, latest.demo);
-          await this.requireWorkspace(latest.id, "codex");
+          const candidate = await this.newEngine(
+            latest.path,
+            latest.demo,
+            latest.kind as ProviderId,
+          );
+          await this.requireWorkspace(latest.id, latest.kind);
           this.setCurrent(candidate, latest.id);
         } catch {
           this.addIssue("上次选择的目录未能安全重新打开；请选择目录后继续。");
@@ -270,7 +283,7 @@ export class AppDataServices {
   }
   engine(): AgentVacEngine {
     if (!this.currentEngine)
-      throw new Error("请先选择 Codex 数据目录或载入演示。");
+      throw new Error("请先选择当前提供方的数据目录或载入 Codex 演示。");
     return this.currentEngine;
   }
   async getAppData(): Promise<AppDataView> {
@@ -280,6 +293,14 @@ export class AppDataServices {
   }
   private async view(): Promise<AppDataView> {
     return {
+      providers: adapters.map(
+        ({ id, label, scope, supportsSessionCleanup }) => ({
+          id,
+          label,
+          scope,
+          supportsSessionCleanup: supportsSessionCleanup === true,
+        }),
+      ),
       workspaces: await this.workspaces.list(),
       recovery: this.recovery.describe(),
       candidates: this.candidateViews(),
@@ -295,6 +316,10 @@ export class AppDataServices {
     // Reserve the queue synchronously so flush also sees newly admitted work.
     const task = this.writes.then(async () => {
       await this.initialize();
+      if (this.currentEngine?.isBusy)
+        throw new Error(
+          "文件扫描或操作正在进行，不能切换提供方、目录或恢复上下文。",
+        );
       return action();
     });
     this.writes = task.then(
@@ -304,22 +329,31 @@ export class AppDataServices {
     return task;
   }
   private setCurrent(engine: AgentVacEngine, id: string): void {
+    this.currentEngine?.invalidate();
     this.currentEngine = engine;
     this.selectedId = id;
     this.context = {
       root: engine.root,
+      provider: engine.provider,
       demo: engine.demo,
       platform: process.platform,
     };
   }
-  private clearCurrent(): void {
+  private clearCurrent(provider = this.context.provider): void {
+    this.currentEngine?.invalidate();
     this.currentEngine = undefined;
     this.selectedId = undefined;
-    this.context = { root: null, demo: false, platform: process.platform };
+    this.context = {
+      root: null,
+      provider,
+      demo: false,
+      platform: process.platform,
+    };
   }
   private async newEngine(
     root: string,
     demo: boolean,
+    provider: ProviderId = "codex",
   ): Promise<AgentVacEngine> {
     const key = this.recovery.describe().canSign
       ? (this.recovery.primaryKey() ?? null)
@@ -328,8 +362,13 @@ export class AppDataServices {
       root,
       key,
       demo,
-      this.options.processCheck,
+      () =>
+        this.options.providerProcessCheck?.(provider) ??
+        (provider === "codex" && this.options.processCheck
+          ? this.options.processCheck()
+          : checkProviderProcesses(provider)),
       this.recovery.trustedKeys(),
+      getAdapter(provider),
     );
     await engine.initialize();
     return engine;
@@ -353,24 +392,48 @@ export class AppDataServices {
     if (entry.status !== "available") throw new Error(entry.message);
     return entry;
   }
-  async selectCodexRoot(root: string, demo = false): Promise<AppContext> {
-    return this.exclusive(() => this.selectRoot(root, demo));
+  async setProvider(provider: ProviderId): Promise<AppContext> {
+    getAdapter(provider);
+    return this.exclusive(async () => {
+      if (this.context.provider !== provider) {
+        this.cancelDiagnosis();
+        this.clearCurrent(provider);
+      }
+      return this.getContext();
+    });
   }
-  private async selectRoot(root: string, demo: boolean): Promise<AppContext> {
+  async selectProviderRoot(
+    root: string,
+    provider = this.context.provider,
+  ): Promise<AppContext> {
+    getAdapter(provider);
+    return this.exclusive(() => this.selectRoot(root, false, provider));
+  }
+  async selectCodexRoot(root: string, demo = false): Promise<AppContext> {
+    return this.exclusive(() => this.selectRoot(root, demo, "codex"));
+  }
+  private async selectRoot(
+    root: string,
+    demo: boolean,
+    provider: ProviderId = "codex",
+  ): Promise<AppContext> {
+    getAdapter(provider);
+    if (demo && provider !== "codex")
+      throw new Error("演示仅支持 Codex 合成数据。");
     if (typeof demo !== "boolean") throw new Error("演示标识无效。");
     if (demo) await this.requireReadyDemo(root);
     else if (root === this.demoPath)
       throw new Error("请使用载入演示打开演示工作区。");
     await this.healthyListing();
     const before = await plainDirectory(root);
-    const candidate = await this.newEngine(root, demo);
+    const candidate = await this.newEngine(root, demo, provider);
     const saved = await this.workspaces.remember({
       path: root,
       demo,
-      kind: "codex",
-      name: workspaceName(root, demo, "codex"),
+      kind: provider,
+      name: workspaceName(root, demo, provider),
     });
-    await this.requireWorkspace(saved.id, "codex");
+    await this.requireWorkspace(saved.id, provider);
     if (!sameIdentity(before, await plainDirectory(root)))
       throw new Error("所选目录在验证过程中已改变；当前选择未改变。");
     this.setCurrent(candidate, saved.id);
@@ -379,8 +442,8 @@ export class AppDataServices {
   async activateWorkspace(id: string): Promise<AppContext> {
     return this.exclusive(async () => {
       const entry = await this.requireWorkspace(id);
-      if (entry.kind === "codex")
-        return this.selectRoot(entry.path, entry.demo);
+      if (isProviderId(entry.kind))
+        return this.selectRoot(entry.path, entry.demo, entry.kind);
       await this.workspaces.remember(entry);
       await this.healthyListing();
       return this.getContext();
@@ -415,8 +478,15 @@ export class AppDataServices {
       if (typeof id !== "string") throw new Error("候选目录标识无效。");
       const candidate = this.candidates.get(id);
       if (!candidate) throw new Error("候选目录标识未知；不会访问提供的路径。");
-      if (candidate.kind === "codex-home")
-        return this.selectRoot(candidate.path, false);
+      if (
+        candidate.kind === "codex-home" ||
+        candidate.kind === "provider-home"
+      ) {
+        const provider = candidate.provider ?? "codex";
+        if (provider !== this.context.provider)
+          throw new Error("建议目录属于其他提供方，请先切换提供方。");
+        return this.selectRoot(candidate.path, false, provider);
+      }
       await this.rememberDiagnostic(
         candidate.path,
         candidate.kind === "sqlite-home" ? "sqlite" : "logs",
@@ -426,20 +496,47 @@ export class AppDataServices {
   }
   private replaceCandidates(hints: DiagnosticCandidate[]): void {
     this.candidates.clear();
-    for (const candidate of [...this.defaultCandidates, ...hints].slice(
-      0,
-      64,
-    )) {
+    const providerCandidates: CandidateView[] = adapters
+      .filter((a) => a.id !== "codex")
+      .flatMap((adapter) =>
+        adapter
+          .discover({
+            home: this.options.home,
+            env: this.options.env,
+            platform: this.options.platform ?? process.platform,
+          })
+          .map((candidate) => ({
+            ...candidate,
+            kind: "provider-home" as const,
+            id: "",
+            verified: false as const,
+          })),
+      );
+    for (const candidate of [
+      ...this.defaultCandidates.map((c) => ({
+        ...c,
+        provider: "codex" as const,
+      })),
+      ...hints.map((c) => ({ ...c, provider: "codex" as const })),
+      ...providerCandidates,
+    ].slice(0, 64)) {
       const id = createHash("sha256")
         .update(
-          JSON.stringify([candidate.kind, candidate.path, candidate.source]),
+          JSON.stringify([
+            candidate.kind,
+            candidate.path,
+            candidate.source,
+            candidate.provider,
+          ]),
         )
         .digest("hex");
       this.candidates.set(id, { ...candidate, id, verified: false });
     }
   }
   private candidateViews(): CandidateView[] {
-    return [...this.candidates.values()].map((entry) => ({ ...entry }));
+    return [...this.candidates.values()]
+      .filter((entry) => (entry.provider ?? "codex") === this.context.provider)
+      .map((entry) => ({ ...entry }));
   }
   async forgetWorkspace(id: string): Promise<AppDataView> {
     return this.exclusive(async () => {
@@ -465,9 +562,13 @@ export class AppDataServices {
       this.clearCurrent();
       if (id)
         try {
-          const current = await this.requireWorkspace(id, "codex");
+          const current = await this.requireWorkspace(id);
+          if (!isProviderId(current.kind)) throw new Error("目录提供方无效。");
           if (current.demo) await this.requireReadyDemo(current.path);
-          this.setCurrent(await this.newEngine(current.path, current.demo), id);
+          this.setCurrent(
+            await this.newEngine(current.path, current.demo, current.kind),
+            id,
+          );
         } catch {
           this.addIssue(
             "恢复钥匙已导入，但原目录已改变或不可用；请重新选择目录。",
@@ -534,6 +635,14 @@ export class AppDataServices {
         const selected = await Promise.all(
           ids.map((id) => this.requireWorkspace(id)),
         );
+        if (
+          selected.some(
+            (entry) => !["codex", "sqlite", "logs"].includes(entry.kind),
+          )
+        )
+          throw new Error(
+            "深入空间诊断目前仅支持 Codex；其他提供方不会打开数据库。",
+          );
         let gate: AppDeepCheckResult | undefined;
         if (deep?.enabled === true) {
           if (deep.confirmedClosed !== true)

@@ -1,3 +1,6 @@
+import type { ConversationAPI } from "./conversations.js";
+export type * from "./conversations.js";
+export type ProviderId = "codex" | "claude-code" | "cline" | "cursor";
 import type {
   AppDataView,
   AppDiagnosticsView,
@@ -12,11 +15,19 @@ export interface Preferences {
 }
 export type Risk = "safe" | "review" | "protected";
 export interface AppContext {
+  provider: ProviderId;
   root: string | null;
   demo: boolean;
   platform: string;
 }
+export interface CleanupUnitSummary {
+  kind: "directory" | "bundle";
+  members: string[];
+  fileCount: number;
+  directoryCount: number;
+}
 export interface Entry {
+  cleanupUnit?: CleanupUnitSummary;
   id: string;
   path: string;
   category: "log" | "cache" | "session" | "protected";
@@ -45,6 +56,7 @@ export interface ScanCoverage {
   resultBytes: number;
 }
 export interface ScanProgress {
+  provider: ProviderId;
   requestId: string;
   root: string;
   phase: "scanning" | "complete" | "partial" | "cancelled" | "error";
@@ -56,6 +68,7 @@ export interface ScanProgress {
   currentPath?: string;
 }
 export interface ScanResult extends ScanOptions {
+  provider: ProviderId;
   id: string;
   root: string;
   demo: boolean;
@@ -78,6 +91,10 @@ export interface ProcessStatus {
   details: string;
 }
 export interface Preview {
+  totalFiles?: number;
+  totalDirectories?: number;
+  provider: ProviderId;
+  root: string;
   token: string;
   items: Entry[];
   totalBytes: number;
@@ -92,10 +109,12 @@ export interface OperationResult {
   bytes: number;
 }
 export interface Batch {
+  provider: ProviderId;
   id: string;
   createdAt: string;
   root: string;
   items: {
+    cleanupUnit?: CleanupUnitSummary;
     id: string;
     path: string;
     size: number;
@@ -104,6 +123,7 @@ export interface Batch {
   }[];
 }
 export interface RecoveryInspection {
+  provider: ProviderId;
   root: string;
   readOnly: true;
   truncated: boolean;
@@ -120,8 +140,9 @@ export interface RecoveryInspection {
     irregularEntries: number;
   }[];
 }
-export interface AgentVacAPI {
+export interface AgentVacAPI extends ConversationAPI {
   getContext(): Promise<AppContext>;
+  setProvider(provider: ProviderId): Promise<AppContext>;
   getAppData(): Promise<AppDataView>;
   activateWorkspace(id: string): Promise<AppContext>;
   activateCandidate(id: string): Promise<AppContext>;
@@ -152,4 +173,5 @@ export interface AgentVacAPI {
   restore(batchId: string, confirmedClosed: boolean): Promise<OperationResult>;
   trash(batchId: string, confirmed: boolean): Promise<OperationResult>;
   openQuarantine(): Promise<void>;
+  openBatchQuarantine(batchId: string): Promise<void>;
 }

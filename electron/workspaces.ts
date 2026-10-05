@@ -2,7 +2,8 @@ import { promises as fs, constants, type Stats } from "node:fs";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 
-export type WorkspaceKind = "codex" | "sqlite" | "logs";
+export type WorkspaceKind =
+  import("../shared/types.js").ProviderId | "sqlite" | "logs";
 export type WorkspaceStatus =
   "available" | "missing" | "moved" | "unsafe" | "error";
 export interface WorkspaceSelection {
@@ -80,7 +81,9 @@ function exact(v: Record<string, unknown>, keys: string[]): boolean {
 function selection(v: unknown): v is WorkspaceSelection {
   if (!isRecord(v)) return false;
   return (
-    ["codex", "sqlite", "logs"].includes(v.kind as string) &&
+    ["codex", "claude-code", "cline", "cursor", "sqlite", "logs"].includes(
+      v.kind as string,
+    ) &&
     typeof v.demo === "boolean" &&
     typeof v.name === "string" &&
     v.name.length > 0 &&

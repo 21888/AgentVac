@@ -112,14 +112,14 @@ test("scan requires explicit root and validates age range", async (t) => {
     engine.scan({ minAgeDays: 4000, includeSessions: false }),
   );
 });
-test("sessions are protected by default, old review sessions only when opted in", async (t) => {
+test("Codex sessions remain protected even with the legacy review opt-in", async (t) => {
   const { root, engine } = await setup(t);
   await file(root, "sessions/2025/rollout.jsonl");
   let s = await scan(engine);
   assert.equal(s.entries[0].selectable, false);
   s = await scan(engine, true);
-  assert.equal(s.entries[0].risk, "review");
-  assert.equal(s.entries[0].selectable, true);
+  assert.equal(s.entries[0].risk, "protected");
+  assert.equal(s.entries[0].selectable, false);
 });
 test("recent sessions stay protected even after review opt in", async (t) => {
   const { root, engine } = await setup(t);
@@ -408,7 +408,7 @@ test("intrinsically protected recent files retain their actual protection reason
   );
 });
 
-test("explicit session review quarantines and restores exact bytes without touching index or credentials", async (t) => {
+test("legacy session review cannot bypass new dependency protection or alter credentials", async (t) => {
   const { root, engine, key } = await setup(
     t,
     async () => ({ status: "clear", details: "fixture process check" }),
@@ -430,20 +430,9 @@ test("explicit session review quarantines and restores exact bytes without touch
   assert.equal(before.entries.find((e) => e.path === rel)?.selectable, false);
   const reviewed = await scan(engine, true);
   const session = reviewed.entries.find((e) => e.path === rel)!;
-  assert.equal(session.risk, "review");
-  const preview = await engine.preview([session.id]);
-  await assert.rejects(() => engine.quarantine(preview.token, false));
-  const fresh = await engine.preview([session.id]);
-  const quarantined = await engine.quarantine(fresh.token, true);
-  assert.equal(quarantined.completed, 1);
-  assert.equal(quarantined.failed.length, 0);
-  await assert.rejects(() => fs.stat(original), { code: "ENOENT" });
-  const restarted = new AgentVacEngine(root, key, false, async () => ({
-    status: "clear",
-    details: "fixture process check",
-  }));
-  const restored = await restarted.restore(quarantined.batchId, true);
-  assert.equal(restored.completed, 1);
+  assert.equal(session.risk, "protected");
+  await assert.rejects(engine.preview([session.id]));
+  assert.equal((await engine.history()).length, 0);
   assert.equal(await fs.readFile(original, "utf8"), content);
   for (const p of protectedFiles)
     assert.equal(

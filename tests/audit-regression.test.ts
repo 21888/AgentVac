@@ -231,10 +231,11 @@ test("restore competing destination creation never overwrites", async (t) => {
   }
   assert.equal(await fs.readFile(file, "utf8"), "competing fixture");
 });
-test("unknown process check still requires explicit quarantine/restore closure acknowledgement", async (t) => {
+test("unknown process check fails closed even with explicit closure acknowledgement", async (t) => {
   const { root, key } = await fixture(t);
+  let state: "unknown" | "clear" = "unknown";
   const engine = new AgentVacEngine(root, key, false, async () => ({
-    status: "unknown",
+    status: state,
     details: "fixture",
   }));
   const s = await engine.scan({ minAgeDays: 30, includeSessions: false });
@@ -245,8 +246,16 @@ test("unknown process check still requires explicit quarantine/restore closure a
   v = await engine.preview(
     s.entries.filter((x) => x.selectable).map((x) => x.id),
   );
+  await assert.rejects(engine.quarantine(v.token, true), /无法确认进程状态/);
+  state = "clear";
+  v = await engine.preview(
+    s.entries.filter((x) => x.selectable).map((x) => x.id),
+  );
   const r = await engine.quarantine(v.token, true);
   await assert.rejects(engine.restore(r.batchId, false), /确认/);
+  state = "unknown";
+  await assert.rejects(engine.restore(r.batchId, true), /无法确认进程状态/);
+  state = "clear";
   assert.equal((await engine.restore(r.batchId, true)).completed, 1);
 });
 test("journal creation failure before move leaves all source bytes intact", async (t) => {
@@ -575,14 +584,14 @@ test("scan and preview never open generated source contents", async (t) => {
   };
   try {
     const s = await engine.scan({ minAgeDays: 30, includeSessions: true });
-    assert.equal(s.entries.filter((x) => x.selectable).length, 2);
+    assert.equal(s.entries.filter((x) => x.selectable).length, 1);
     assert.equal(
       (
         await engine.preview(
           s.entries.filter((x) => x.selectable).map((x) => x.id),
         )
       ).items.length,
-      2,
+      1,
     );
   } finally {
     fs.open = open;

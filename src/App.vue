@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import ConversationWorkspace from "./ConversationWorkspace.vue";
+import type {
+  ConversationAPI,
+  ConversationArchivePreview,
+} from "../shared/conversations";
+import { version as appVersion } from "../package.json";
 import {
   computed,
   defineComponent,
@@ -11,6 +17,7 @@ import {
 } from "vue";
 import type {
   AppContext,
+  ProviderId,
   Entry,
   ScanResult,
   ScanProgress,
@@ -155,10 +162,59 @@ async function loadThemePreference() {
   }
 }
 
-const page = ref<"scan" | "diagnostics" | "history" | "manage" | "rules">(
-  "scan",
+const page = ref<
+  "scan" | "conversations" | "diagnostics" | "history" | "manage" | "rules"
+>("scan");
+const conversationRevision = ref(0);
+const conversationArchiveIds = ref<string[]>([]);
+const conversationArchiveTitles = ref<string[]>([]);
+const context = ref<AppContext>({
+  root: null,
+  provider: "codex",
+  demo: false,
+  platform: "",
+});
+const providerOptions = [
+  { id: "codex", label: "Codex" },
+  { id: "claude-code", label: "Claude Code" },
+  { id: "cline", label: "Cline" },
+  { id: "cursor", label: "Cursor" },
+] as const;
+const selectedProvider = computed(() => context.value.provider ?? "codex");
+const providerName = (id: ProviderId | undefined) =>
+  providerOptions.find((item) => item.id === (id ?? "codex"))?.label ??
+  "未知提供方";
+const providerLabel = computed(
+  () =>
+    providerOptions.find((item) => item.id === selectedProvider.value)?.label ??
+    "Codex",
 );
-const context = ref<AppContext>({ root: null, demo: false, platform: "" });
+const supportsSessionCleanup = computed(
+  () =>
+    appData.value?.providers?.find((item) => item.id === selectedProvider.value)
+      ?.supportsSessionCleanup ?? false,
+);
+const providerScope = computed(
+  () =>
+    appData.value?.providers?.find((item) => item.id === selectedProvider.value)
+      ?.scope ??
+    "旧轮转日志可隔离；会话需单独复核。数据库、配置和未知文件始终保留。",
+);
+const isCleanupWorkspace = (kind: string) =>
+  providerOptions.some((item) => item.id === kind);
+const isCleanupCandidate = (kind: string) =>
+  kind === "codex-home" || kind === "provider-home";
+async function chooseProvider(event: Event) {
+  const requested = (event.target as HTMLSelectElement).value as ProviderId;
+  if (busy.value || requested === selectedProvider.value) return;
+  const stayInConversations = page.value === "conversations";
+  await run("切换提供方", async () => {
+    resetRoot(await window.agentvac.setProvider(requested));
+    page.value = stayInConversations ? "conversations" : "scan";
+    await refreshAppData();
+    notice.value = `已切换到 ${providerLabel.value}；请选择对应数据目录。`;
+  });
+}
 const scanResult = ref<ScanResult | null>(null);
 const scanState = ref<
   "idle" | "scanning" | "complete" | "partial" | "cancelled" | "error"
@@ -240,6 +296,7 @@ const shownRecoveryBatches = computed(
 watch(recoveryInspection, () => {
   recoveryPage.value = 1;
 });
+const canOpenBatch = typeof window.agentvac?.openBatchQuarantine === "function";
 const systemTrashAvailable =
   typeof window.agentvac?.openSystemTrash === "function";
 const adminAction = ref<"import-keys" | "export-keys" | "reset-demo" | null>(
@@ -268,9 +325,17 @@ const suggestedCandidates = computed(() => {
         (workspace) =>
           workspace.status === "available" &&
           workspace.path === candidate.path &&
-          { codex: "codex-home", sqlite: "sqlite-home", logs: "log-dir" }[
-            workspace.kind
-          ] === candidate.kind,
+          (!candidate.provider ||
+            workspace.kind === candidate.provider ||
+            ["sqlite", "logs"].includes(workspace.kind)) &&
+          {
+            codex: "codex-home",
+            "claude-code": "provider-home",
+            cline: "provider-home",
+            cursor: "provider-home",
+            sqlite: "sqlite-home",
+            logs: "log-dir",
+          }[workspace.kind] === candidate.kind,
       ),
   );
 });
@@ -303,6 +368,9 @@ const configCandidates = computed(() =>
 );
 const workspaceKindLabels = {
   codex: "Codex 数据",
+  "claude-code": "Claude Code 数据",
+  cline: "Cline 数据",
+  cursor: "Cursor 数据",
   sqlite: "SQLite 位置",
   logs: "日志位置",
 };
@@ -315,6 +383,7 @@ const workspaceStatusLabels = {
 };
 const candidateKindLabels = {
   "codex-home": "Codex 数据目录",
+  "provider-home": "助手数据目录",
   "sqlite-home": "SQLite 目录",
   "log-dir": "日志目录",
 };
@@ -430,6 +499,12 @@ let timer: ReturnType<typeof setInterval> | undefined;
 const apiAvailable = ref(typeof window !== "undefined" && !!window.agentvac);
 const navigation = [
   { id: "scan", icon: "file", label: "文件", accessible: "文件" },
+  {
+    id: "conversations",
+    icon: "session",
+    label: "对话管理",
+    accessible: "对话管理",
+  },
   {
     id: "diagnostics",
     icon: "storage",
@@ -707,7 +782,7 @@ const quarantinedCount = computed(() =>
   ),
 );
 const processRunning = computed(
-  () => preview.value?.processStatus?.status === "running",
+  () => !!preview.value && preview.value.processStatus?.status !== "clear",
 );
 const previewExpired = computed(
   () => !!preview.value && now.value > Date.parse(preview.value.expiresAt),
@@ -884,7 +959,7 @@ async function run(label: string, action: () => Promise<void>) {
     } else {
       error.value = message;
       const knownBeforeWrite =
-        /检测到 Codex 正在运行|预览已失效|请先确认已退出全部 Codex/.test(
+        /检测到 .+ 正在运行|无法确认进程状态|预览已失效|请先确认已退出全部|当前或活动数据保护范围/.test(
           message,
         );
       operationInterrupted.value =
@@ -901,13 +976,39 @@ async function run(label: string, action: () => Promise<void>) {
     cancelPending.value = false;
   }
 }
+function retainedBatchPath(batch: Batch) {
+  const separator = batch.root.includes("\\") ? "\\" : "/";
+  return (
+    batch.root.replace(/[\\/]$/, "") +
+    separator +
+    ".agentvac-quarantine" +
+    separator +
+    batch.id
+  );
+}
+async function openBatch(batch: Batch) {
+  await run("打开留存批次", async () => {
+    await window.agentvac.openBatchQuarantine(batch.id);
+    notice.value =
+      "已打开此批次的留存文件夹；请保留全部文件，不要编辑签名清单。";
+  });
+}
 async function refreshHistory() {
   batches.value = await window.agentvac.history();
 }
 function resetRoot(next: AppContext) {
+  conversationArchiveIds.value = [];
+  conversationArchiveTitles.value = [];
+  conversationRevision.value++;
   resetScanFeedback();
   scanLimit.value = 50000;
   context.value = next;
+  diagnosticResult.value = null;
+  diagnosticWorkspaceIds.value = new Set();
+  restoreTarget.value = null;
+  trashTarget.value = null;
+  confirmedClosed.value = false;
+  acknowledged.value = false;
   scanResult.value = null;
   selected.value = new Set();
   query.value = "";
@@ -965,6 +1066,8 @@ function receiveScanProgress(progress: ScanProgress) {
     !activeScanRequestId.value ||
     progress.requestId !== activeScanRequestId.value ||
     progress.root !== context.value.root ||
+    (progress.provider !== undefined &&
+      progress.provider !== selectedProvider.value) ||
     (scanProgress.value && progress.elapsedMs < scanProgress.value.elapsedMs)
   )
     return;
@@ -985,6 +1088,7 @@ function elapsedLabel(milliseconds: number) {
 async function performScan(limit: 50000 | 100000 = scanLimit.value) {
   const requestId = crypto.randomUUID();
   const root = context.value.root;
+  const provider = selectedProvider.value;
   activeScanRequestId.value = requestId;
   scanLimit.value = limit;
   scanProgress.value = null;
@@ -1000,7 +1104,11 @@ async function performScan(limit: 50000 | 100000 = scanLimit.value) {
       maxEntries: limit,
       requestId,
     });
-    if (activeScanRequestId.value !== requestId || context.value.root !== root)
+    if (
+      activeScanRequestId.value !== requestId ||
+      context.value.root !== root ||
+      selectedProvider.value !== provider
+    )
       throw new Error("扫描范围已变化，请重新扫描。");
     scanResult.value = result;
     scanState.value = result.status ?? "complete";
@@ -1205,7 +1313,41 @@ function goToPage(nextPage: number) {
     if (scrollArea) scrollArea.scrollTop = 0;
   });
 }
+function showConversationPreview(result: ConversationArchivePreview) {
+  rememberModalTrigger();
+  error.value = "";
+  operationInterrupted.value = false;
+  conversationArchiveIds.value = result.conversations.map((item) => item.id);
+  conversationArchiveTitles.value = result.conversations.map(
+    (item) => item.title,
+  );
+  preview.value = result.preview;
+  acknowledged.value = false;
+  confirmedClosed.value = false;
+  now.value = Date.now();
+}
+let conversationBusyLabel = "";
+function setConversationBusy(label: string) {
+  if (label) {
+    if (busy.value && busy.value !== conversationBusyLabel) return;
+    conversationBusyLabel = label;
+    busy.value = label;
+  } else {
+    if (busy.value === conversationBusyLabel) busy.value = "";
+    conversationBusyLabel = "";
+  }
+}
 async function showPreview() {
+  if (conversationArchiveIds.value.length) {
+    await run("重新检查所选对话", async () => {
+      showConversationPreview(
+        await (
+          window.agentvac as typeof window.agentvac & ConversationAPI
+        ).previewConversationArchive(conversationArchiveIds.value),
+      );
+    });
+    return;
+  }
   if (!selected.value.size) return;
   if (!modalOpen.value) rememberModalTrigger();
   await run("检查所选项目", async () => {
@@ -1218,6 +1360,7 @@ async function showPreview() {
 async function quarantine() {
   if (!canQuarantine.value || !preview.value) return;
   const token = preview.value.token;
+  const conversationOperation = conversationArchiveIds.value.length > 0;
   await run("正在隔离", async () => {
     const result = await window.agentvac.quarantine(
       token,
@@ -1227,8 +1370,11 @@ async function quarantine() {
     selected.value = new Set();
     operation.value = { ...result, type: "quarantine" };
     await refreshHistory();
-    await performScan();
+    if (conversationOperation) conversationRevision.value++;
+    else await performScan();
   });
+  if (conversationOperation && operationInterrupted.value)
+    conversationRevision.value++;
 }
 function requestTrash(batch: Batch) {
   if (busy.value || !canSign.value) return;
@@ -1283,6 +1429,8 @@ async function openQuarantine() {
 }
 function closeModal() {
   if (busy.value) return;
+  conversationArchiveIds.value = [];
+  conversationArchiveTitles.value = [];
   preview.value = null;
   restoreTarget.value = null;
   trashTarget.value = null;
@@ -1337,7 +1485,7 @@ async function activateWorkspace(workspace: WorkspaceDescription) {
   const trigger = document.activeElement;
   await run("切换已选目录", async () => {
     const next = await window.agentvac.activateWorkspace(workspace.id);
-    if (workspace.kind === "codex") {
+    if (isCleanupWorkspace(workspace.kind)) {
       resetRoot(next);
       await refreshHistory();
       page.value = "scan";
@@ -1346,10 +1494,9 @@ async function activateWorkspace(workspace: WorkspaceDescription) {
       page.value = "diagnostics";
     }
     await refreshAppData();
-    notice.value =
-      workspace.kind === "codex"
-        ? "目录已连接，点击开始扫描后读取文件元数据。"
-        : "诊断位置已确认；请在空间诊断中勾选并读取。";
+    notice.value = isCleanupWorkspace(workspace.kind)
+      ? "目录已连接，点击开始扫描后读取文件元数据。"
+      : "诊断位置已确认；请在空间诊断中勾选并读取。";
   });
   await restoreUtilityFocus(trigger);
 }
@@ -1358,16 +1505,15 @@ async function activateCandidate(candidate: AppDataView["candidates"][number]) {
   const trigger = document.activeElement;
   await run("确认建议位置", async () => {
     const next = await window.agentvac.activateCandidate(candidate.id);
-    if (candidate.kind === "codex-home") {
+    if (isCleanupCandidate(candidate.kind)) {
       resetRoot(next);
       await refreshHistory();
       page.value = "scan";
     }
     await refreshAppData();
-    notice.value =
-      candidate.kind === "codex-home"
-        ? "已连接你选择的建议目录，尚未扫描文件。"
-        : "已添加诊断位置，尚未读取其中内容。";
+    notice.value = isCleanupCandidate(candidate.kind)
+      ? "已连接你选择的建议目录，尚未扫描文件。"
+      : "已添加诊断位置，尚未读取其中内容。";
   });
   await restoreUtilityFocus(trigger);
 }
@@ -1381,7 +1527,11 @@ async function forgetWorkspace(workspace: WorkspaceDescription) {
     diagnosticWorkspaceIds.value = next;
     notice.value = "已移除这条最近目录记录，目录与文件未删除。";
     const current = await window.agentvac.getContext();
-    if (current.root !== context.value.root) resetRoot(current);
+    if (
+      current.root !== context.value.root ||
+      current.provider !== context.value.provider
+    )
+      resetRoot(current);
   });
   await restoreUtilityFocus(trigger);
 }
@@ -1758,7 +1908,9 @@ onUnmounted(() => {
           }}</span>
         </div>
         <p v-if="context.demo">独立测试数据</p>
-        <p v-else>{{ context.root ? "Codex 本地数据" : "等待连接本地目录" }}</p>
+        <p v-else>
+          {{ context.root ? providerLabel + " 本地数据" : "等待连接本地目录" }}
+        </p>
         <span v-if="context.demo" class="demo-pill">演示模式</span>
       </div>
       <div class="theme-switcher" role="group" aria-label="外观主题">
@@ -1781,17 +1933,34 @@ onUnmounted(() => {
       </div>
       <div class="sidebar-footer">
         <span><Icon name="lock" :size="12" />仅本地运行</span
-        ><small>v0.1.0</small>
+        ><small>v{{ appVersion }}</small>
       </div>
     </aside>
     <main class="main-area" :inert="modalOpen">
       <header class="toolbar">
+        <label class="provider-control">
+          <span class="visually-hidden">数据提供方</span>
+          <select
+            aria-label="数据提供方"
+            :value="selectedProvider"
+            :disabled="!!busy || !apiAvailable || modalOpen"
+            @change="chooseProvider"
+          >
+            <option
+              v-for="provider in providerOptions"
+              :key="provider.id"
+              :value="provider.id"
+            >
+              {{ provider.label }}
+            </option>
+          </select>
+        </label>
         <div class="path-control">
           <Icon name="folder" :size="17" /><input
             :value="context.root || ''"
             readonly
             aria-label="当前目录路径"
-            placeholder="选择 Codex 数据目录"
+            :placeholder="`选择 ${providerLabel} 数据目录`"
           /><button
             class="icon-button"
             title="复制目录路径"
@@ -1807,7 +1976,9 @@ onUnmounted(() => {
           :disabled="!!busy || !apiAvailable"
           @click="chooseRoot"
         >
-          {{ context.root ? "切换目录" : "选择 Codex 目录" }}</button
+          {{
+            context.root ? "切换目录" : "选择 " + providerLabel + " 目录"
+          }}</button
         ><template v-if="page === 'scan'"
           ><button
             v-if="isScanning"
@@ -1852,6 +2023,10 @@ onUnmounted(() => {
           <Icon name="refresh" :size="15" />刷新状态
         </button>
       </header>
+      <p class="provider-scope" role="note">
+        <span class="provider-badge">{{ providerLabel }}</span
+        >{{ providerScope }}
+      </p>
       <div v-if="!apiAvailable" class="message-banner warning">
         <Icon name="info" :size="16" /><span
           >界面预览模式。请通过 Electron 启动应用以操作本地文件。</span
@@ -1891,10 +2066,22 @@ onUnmounted(() => {
           <Icon name="x" :size="14" />
         </button>
       </div>
-      <div v-if="page === 'scan'" class="scan-content">
+      <ConversationWorkspace
+        v-if="page === 'conversations'"
+        :key="`${selectedProvider}:${context.root}`"
+        :context="context"
+        :busy="!!busy"
+        :can-sign="canSign"
+        :revision="conversationRevision"
+        @choose-root="chooseRoot"
+        @history="navigate('history')"
+        @archive-preview="showConversationPreview"
+        @busy-change="setConversationBusy"
+      />
+      <div v-else-if="page === 'scan'" class="scan-content">
         <section class="scan-heading">
           <div class="heading-copy">
-            <span class="page-eyebrow">CODEX · 本地数据</span>
+            <span class="page-eyebrow">{{ providerLabel }} · 本地数据</span>
             <h1 tabindex="-1">空间分析</h1>
           </div>
           <div
@@ -2256,7 +2443,7 @@ onUnmounted(() => {
                 ><input
                   v-model="includeSessions"
                   type="checkbox"
-                  :disabled="!!busy"
+                  :disabled="!supportsSessionCleanup || !!busy"
                 />包括历史会话 <span class="review-note">需审阅</span></label
               ><button
                 v-if="context.root"
@@ -2363,9 +2550,11 @@ onUnmounted(() => {
                             :name="categoryIcons[entry.category]"
                             :size="18" /></span
                         ><span class="file-label"
-                          ><strong :title="fileName(entry.path)">{{
-                            fileName(entry.path)
-                          }}</strong
+                          ><strong :title="fileName(entry.path)"
+                            >{{ fileName(entry.path)
+                            }}<span v-if="entry.cleanupUnit" class="unit-tag"
+                              >整组</span
+                            ></strong
                           ><small :title="entry.path">{{
                             parentPath(entry.path)
                           }}</small></span
@@ -2431,7 +2620,7 @@ onUnmounted(() => {
                         ? "本次结果已丢弃，没有保留可选旧条目。可点击顶部重新扫描。"
                         : context.root
                           ? "选择扫描条件后，点击顶部「开始扫描」。"
-                          : "选择 Codex 数据目录，或先用独立测试目录体验。"
+                          : `选择 ${providerLabel} 数据目录，或先用独立 Codex 测试目录体验。`
                   }}
                 </p>
                 <div v-if="!context.root" class="onboarding-actions">
@@ -2440,7 +2629,8 @@ onUnmounted(() => {
                     :disabled="!!busy || !apiAvailable"
                     @click="chooseRoot"
                   >
-                    <Icon name="folder" :size="15" />连接真实 Codex 目录
+                    <Icon name="folder" :size="15" />连接真实
+                    {{ providerLabel }} 目录
                   </button>
                   <button
                     class="button secondary"
@@ -2453,8 +2643,8 @@ onUnmounted(() => {
                 <div
                   v-if="
                     !context.root &&
-                    suggestedCandidates.some(
-                      (item) => item.kind === 'codex-home',
+                    suggestedCandidates.some((item) =>
+                      isCleanupCandidate(item.kind),
                     )
                   "
                   class="onboarding-candidates"
@@ -2462,7 +2652,7 @@ onUnmounted(() => {
                   <span>建议位置，尚未读取：</span>
                   <button
                     v-for="candidate in suggestedCandidates
-                      .filter((item) => item.kind === 'codex-home')
+                      .filter((item) => isCleanupCandidate(item.kind))
                       .slice(0, 2)"
                     :key="candidate.id"
                     class="text-button"
@@ -2661,6 +2851,17 @@ onUnmounted(() => {
                   />{{ riskLabels[inspectedEntry.risk] }}
                 </h3>
                 <p>{{ inspectedEntry.reason }}</p>
+                <p v-if="inspectedEntry.cleanupUnit" class="unit-note">
+                  完整整理组：{{
+                    inspectedEntry.cleanupUnit.fileCount
+                  }}
+                  个文件、{{
+                    inspectedEntry.cleanupUnit.directoryCount
+                  }}
+                  个目录。成员：{{
+                    inspectedEntry.cleanupUnit.members.join(" + ")
+                  }}
+                </p>
                 <p
                   v-if="inspectedEntry.category === 'session'"
                   class="inspector-warning"
@@ -2721,7 +2922,7 @@ onUnmounted(() => {
             <div class="inspector-footnote">
               <Icon name="shield" :size="15" />
               <p>
-                认证、配置、数据库、缓存与未知文件默认保护。隔离不会释放磁盘空间。
+                认证、配置、主数据库与未知文件保持保护。仅明确识别的会话或缓存组可复核；隔离不会释放磁盘空间。
               </p>
             </div>
           </aside>
@@ -2781,13 +2982,15 @@ onUnmounted(() => {
                 :disabled="!!busy"
                 @click="chooseRoot"
               >
-                选择 Codex 数据目录
+                选择 {{ providerLabel }} 数据目录
               </button>
             </div>
             <fieldset v-else class="diagnostic-roots" tabindex="0">
               <legend class="visually-hidden">选择诊断目录</legend>
               <label
-                v-for="workspace in availableWorkspaces"
+                v-for="workspace in availableWorkspaces.filter((item) =>
+                  ['codex', 'sqlite', 'logs'].includes(item.kind),
+                )"
                 :key="workspace.id"
                 :class="{ unavailable: workspace.status !== 'available' }"
                 ><input
@@ -3143,7 +3346,9 @@ onUnmounted(() => {
                 class="workspace-row"
               >
                 <div class="workspace-row-copy">
-                  <strong>{{ candidateKindLabels[candidate.kind] }}</strong>
+                  <strong>{{
+                    candidate.label || candidateKindLabels[candidate.kind]
+                  }}</strong>
                   <p class="utility-path">{{ candidate.path }}</p>
                   <small>{{ candidate.source }} · 未验证建议</small>
                 </div>
@@ -3270,7 +3475,9 @@ onUnmounted(() => {
               class="workspace-row"
             >
               <Icon
-                :name="workspace.kind === 'codex' ? 'folder' : 'storage'"
+                :name="
+                  isCleanupWorkspace(workspace.kind) ? 'folder' : 'storage'
+                "
                 :size="19"
               />
               <div class="workspace-row-copy">
@@ -3299,13 +3506,13 @@ onUnmounted(() => {
                   :disabled="
                     !!busy ||
                     workspace.status !== 'available' ||
-                    (workspace.kind === 'codex' &&
+                    (isCleanupWorkspace(workspace.kind) &&
                       workspace.path === context.root)
                   "
                   @click="activateWorkspace(workspace)"
                 >
                   {{
-                    workspace.kind !== "codex"
+                    !isCleanupWorkspace(workspace.kind)
                       ? "用于诊断"
                       : workspace.path === context.root
                         ? "当前目录"
@@ -3342,7 +3549,7 @@ onUnmounted(() => {
               <Icon name="folder" :size="18" />
               <div class="workspace-row-copy">
                 <strong
-                  >{{ candidateKindLabels[candidate.kind] }}
+                  >{{ candidate.label || candidateKindLabels[candidate.kind] }}
                   <span class="workspace-state suggested">未验证</span></strong
                 >
                 <p class="utility-path" tabindex="0">{{ candidate.path }}</p>
@@ -3355,7 +3562,9 @@ onUnmounted(() => {
                 @click="activateCandidate(candidate)"
               >
                 {{
-                  candidate.kind === "codex-home" ? "选择此目录" : "添加到诊断"
+                  isCleanupCandidate(candidate.kind)
+                    ? "选择此目录"
+                    : "添加到诊断"
                 }}
               </button>
             </div>
@@ -3599,17 +3808,17 @@ onUnmounted(() => {
         <div class="page-title">
           <div>
             <h1 tabindex="-1">隔离记录</h1>
-            <p>
-              {{ batches.length }} 个批次 · {{ quarantinedCount }} 个文件待恢复
-            </p>
+            <p>{{ batches.length }} 个批次 · {{ quarantinedCount }} 项待恢复</p>
           </div>
           <span>隔离文件仍占用磁盘空间</span>
         </div>
         <div class="history-explanation">
           <Icon name="info" :size="16" />
           <p>
-            恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经
-            AgentVac 校验恢复。
+            恢复会将文件放回原路径，不覆盖同名文件。目录组不保证原
+            ACL、扩展属性和创建时间。回收站中的批次需先还原整个文件夹，再经
+            AgentVac
+            校验恢复。其他提供方的记录可在「目录与恢复」中重新连接原目录查看。
           </p>
         </div>
         <div v-if="!batches.length" class="tool-empty">
@@ -3625,7 +3834,12 @@ onUnmounted(() => {
             <div class="batch-heading">
               <Icon name="archive" :size="18" />
               <div>
-                <h2>{{ date(batch.createdAt) }}</h2>
+                <h2>
+                  <span class="provider-badge">{{
+                    providerName(batch.provider)
+                  }}</span>
+                  · {{ date(batch.createdAt) }}
+                </h2>
                 <p>{{ batch.id }}</p>
               </div>
               <span class="batch-count"
@@ -3659,10 +3873,39 @@ onUnmounted(() => {
               </div>
             </div>
             <div class="batch-root">{{ batch.root }}</div>
+            <div
+              v-if="
+                batch.items.some(
+                  (item) => item.status === 'pending' || item.error,
+                )
+              "
+              class="batch-recovery-guidance"
+            >
+              <strong>请先保留原目录和隔离区中的全部副本</strong>
+              <p>留存位置：{{ retainedBatchPath(batch) }}</p>
+              <p>
+                在「目录与恢复」读取留存信息。若原路径出现新的同名数据，先另存新数据再重试；未认证或恢复仍受阻时不要强行覆盖，不要编辑
+                manifest.json。当前没有自动导出不确定副本的功能。
+              </p>
+              <button
+                v-if="canOpenBatch"
+                class="button secondary"
+                :disabled="!!busy"
+                @click="openBatch(batch)"
+              >
+                查看此批次留存文件夹
+              </button>
+            </div>
             <div v-for="item in batch.items" :key="item.id" class="batch-item">
-              <Icon name="file" :size="15" /><span class="batch-path"
+              <Icon
+                :name="item.cleanupUnit ? 'folder' : 'file'"
+                :size="15"
+              /><span class="batch-path"
                 >{{ item.path
-                }}<small v-if="item.error" class="failure-text">{{
+                }}<small v-if="item.cleanupUnit"
+                  >整组 · {{ item.cleanupUnit.fileCount }} 个文件 /
+                  {{ item.cleanupUnit.directoryCount }} 个目录</small
+                ><small v-if="item.error" class="failure-text">{{
                   item.error
                 }}</small></span
               ><span>{{ formatSize(item.size) }}</span
@@ -3701,10 +3944,10 @@ onUnmounted(() => {
           </thead>
           <tbody>
             <tr>
-              <td><Icon name="log" :size="18" />旧轮转日志</td>
+              <td><Icon name="log" :size="18" />旧日志</td>
               <td>低风险候选</td>
               <td>
-                仅识别受支持位置中的旧轮转日志。文件需满足修改时间阈值，执行前再次验证。
+                {{ providerScope }} 文件或完整组需满足保留天数，执行前再次验证。
               </td>
             </tr>
             <tr>
@@ -3716,10 +3959,17 @@ onUnmounted(() => {
               </td>
             </tr>
             <tr>
+              <td><Icon name="cache" :size="18" />可重建缓存</td>
+              <td>需审阅完整组</td>
+              <td>
+                仅开放当前提供方已验证的缓存布局；不拆分相关成员。可能需要重新编译、下载或重建派生索引，离线时部分功能暂不可用。主数据库不受影响。
+              </td>
+            </tr>
+            <tr>
               <td><Icon name="lock" :size="18" />关键数据与未知文件</td>
               <td>始终保护</td>
               <td>
-                认证、配置、缓存、history.jsonl、状态数据库、符号链接及未识别文件不可隔离。受保护目录不会展开。
+                认证、配置、history.jsonl、主状态数据库、符号链接及未识别文件不可隔离。未知缓存格式也保留。受保护目录不会展开。
               </td>
             </tr>
           </tbody>
@@ -3728,8 +3978,9 @@ onUnmounted(() => {
           <section>
             <h2>扫描与进程检查</h2>
             <p>
-              扫描只读取文件元数据，不上传内容。隔离或恢复前需退出全部 Codex CLI
-              / 桌面进程。检测到正在运行的 Codex 时，操作会被阻止。
+              扫描只读取文件元数据，不上传内容。隔离或恢复前需退出全部
+              {{ providerLabel }}
+              相关进程。检测到正在运行或无法确认进程状态时，操作会被阻止。
             </p>
           </section>
           <section>
@@ -3774,7 +4025,7 @@ onUnmounted(() => {
           清除隐藏选择
         </button>
       </div>
-      <footer class="action-bar">
+      <footer v-if="page !== 'conversations'" class="action-bar">
         <template v-if="page === 'scan'"
           ><div class="selection-summary" role="status" aria-live="polite">
             <strong>{{
@@ -3839,11 +4090,39 @@ onUnmounted(() => {
         <template v-if="preview"
           ><div class="modal-symbol"><Icon name="archive" :size="26" /></div>
 
-          <h2 id="modal-title">确认这一次整理</h2>
+          <h2 id="modal-title">
+            {{
+              conversationArchiveIds.length
+                ? "确认这一次对话隔离"
+                : "确认这一次整理"
+            }}
+          </h2>
+          <p v-if="conversationArchiveTitles.length" class="modal-subtitle">
+            已选择
+            {{ conversationArchiveTitles.length }}
+            条完整对话；以下显示后台核实的全部关联文件。
+          </p>
+          <details
+            v-if="conversationArchiveTitles.length"
+            class="conversation-preview-titles"
+          >
+            <summary>核对所选对话标题</summary>
+            <p v-for="(title, index) in conversationArchiveTitles" :key="index">
+              {{ index + 1 }}. {{ title }}
+            </p>
+          </details>
           <p class="modal-subtitle">
+            {{ providerName(preview.provider) }} ·
             {{ preview.items.length }} 个项目 ·
             {{ formatSize(preview.totalBytes)
             }}<span v-if="context.demo" class="demo-pill">演示目录</span>
+          </p>
+          <p class="preview-root">{{ preview.root || context.root }}</p>
+          <p v-if="preview.totalFiles !== undefined" class="unit-note">
+            合计 {{ preview.totalFiles }} 个文件、{{
+              preview.totalDirectories ?? 0
+            }}
+            个目录；整组项目不可拆分选择。
           </p>
           <div
             v-if="preview.scanStatus === 'partial'"
@@ -3869,7 +4148,13 @@ onUnmounted(() => {
             <div v-for="item in preview.items" :key="item.id">
               <Icon :name="categoryIcons[item.category]" :size="17" /><span
                 :title="item.path"
-                >{{ item.path }}</span
+                >{{ item.path
+                }}<small v-if="item.cleanupUnit" class="unit-note"
+                  >整组 · {{ item.cleanupUnit.fileCount }} 个文件 /
+                  {{ item.cleanupUnit.directoryCount }} 个目录<br />{{
+                    item.cleanupUnit.members.join(" + ")
+                  }}</small
+                ></span
               ><span :class="['risk-badge', item.risk]">{{
                 item.risk === "review" ? "需审阅" : "低风险"
               }}</span
@@ -3882,6 +4167,18 @@ onUnmounted(() => {
               <strong>这是可恢复的隔离，不是永久删除</strong>
               <p>
                 文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。
+              </p>
+            </div>
+          </div>
+          <div
+            v-if="preview.items.some((item) => item.category === 'cache')"
+            class="modal-notice amber-notice"
+          >
+            <Icon name="cache" :size="19" />
+            <div>
+              <strong>这些缓存可能需要重新生成</strong>
+              <p>
+                隔离后可能重新编译、下载模型目录或重建派生搜索索引；离线时部分信息可能暂不可用。恢复不会覆盖已经重新生成的同名数据。
               </p>
             </div>
           </div>
@@ -3908,7 +4205,7 @@ onUnmounted(() => {
               :size="17"
             /><span>{{
               preview.processStatus?.details ||
-              "无法确认进程状态，请自行确认所有 Codex 进程已退出。"
+              "无法确认进程状态，本次文件操作已阻止。"
             }}</span>
           </div>
           <label class="acknowledgement"
@@ -3924,7 +4221,9 @@ onUnmounted(() => {
               v-model="confirmedClosed"
               type="checkbox"
               :disabled="!!busy"
-            /><span>我已退出所有 Codex CLI / 桌面进程。</span></label
+            /><span
+              >我已退出所有 {{ providerLabel }} 相关程序与后台服务。</span
+            ></label
           >
           <div v-if="previewExpired" class="failure-text expiry-message">
             预览已过期。请关闭弹窗并重新预览。
@@ -4176,14 +4475,17 @@ onUnmounted(() => {
             </div>
           </div>
           <p class="restore-safety">
-            恢复前请退出 Codex，避免正在运行的会话读取到变化中的文件。
+            恢复前请退出
+            {{ providerLabel }}，避免正在运行的会话读取到变化中的文件。
           </p>
           <label v-if="!context.demo" class="acknowledgement"
             ><input
               v-model="confirmedClosed"
               type="checkbox"
               :disabled="!!busy"
-            /><span>我已退出所有 Codex CLI / 桌面进程。</span></label
+            /><span
+              >我已退出所有 {{ providerLabel }} 相关程序与后台服务。</span
+            ></label
           >
           <div v-if="error" class="modal-error" role="alert" tabindex="-1">
             {{ error }}

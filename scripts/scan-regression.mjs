@@ -7,14 +7,18 @@ import path from "node:path";
 import os from "node:os";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { AgentVacEngine } from "../electron/engine.ts";
+const { AgentVacEngine } = await import(
+  process.env.AGENTVAC_SCAN_ENGINE || "../electron/engine.ts"
+);
 import { createDemo } from "../electron/fixtures.ts";
 import { PreferenceStore } from "../electron/preferences.ts";
 const base = await fs.mkdtemp(
   path.join(await fs.realpath(os.tmpdir()), "agentvac-e2e-"),
 );
-const dist = path.resolve("dist");
-const screenshots = path.resolve("docs/scan-regression");
+const dist = path.resolve(process.env.AGENTVAC_SCAN_DIST || "dist");
+const screenshots = path.resolve(
+  process.env.AGENTVAC_SCAN_EVIDENCE || "docs/scan-regression",
+);
 await fs.mkdir(screenshots, { recursive: true });
 const server = createServer(async (req, res) => {
   try {
@@ -79,7 +83,7 @@ try {
     browser = await chromium.launch({
       executablePath: process.env.AGENTVAC_BROWSER,
       headless: true,
-      args: ["--no-sandbox"],
+      chromiumSandbox: true,
     });
   else if (process.platform === "linux") {
     const { default: serverless } = await import("@sparticuz/chromium");

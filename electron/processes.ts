@@ -1,42 +1,304 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import type { ProcessStatus } from "../shared/types.js";
+import type { ProcessStatus, ProviderId } from "../shared/types.js";
+import type { ProcessSnapshot, ProcessRecord } from "./providers/types.js";
+import { getAdapter } from "./providers/index.js";
 const run = promisify(execFile);
-export async function checkCodexProcesses(): Promise<ProcessStatus> {
-  try {
-    const { stdout } =
-      process.platform === "win32"
-        ? await run("tasklist.exe", ["/FO", "CSV", "/NH"], {
-            timeout: 5000,
-            maxBuffer: 4_000_000,
-            windowsHide: true,
-          })
-        : await run("/bin/ps", ["-eo", "comm="], {
-            timeout: 5000,
-            maxBuffer: 4_000_000,
-          });
-    const names = stdout
-      .split(/\r?\n/)
-      .map((line) =>
-        process.platform === "win32"
-          ? (line.match(/^"([^"]+)"/)?.[1] ?? "")
-          : (line.trim().split("/").at(-1) ?? ""),
+const limits = { timeout: 5000, maxBuffer: 4_000_000, windowsHide: true };
+export interface OwnedApplication {
+  pid: number;
+  executablePaths: readonly string[];
+}
+export function applicationExecutablePaths(
+  executable: string,
+  platform: NodeJS.Platform,
+): string[] {
+  const output = [executable];
+  if (platform === "darwin") {
+    const match = executable.match(/^(.*\.app\/Contents)\/MacOS\/([^/]+)$/);
+    if (match)
+      for (const suffix of ["", " (GPU)", " (Renderer)", " (Plugin)"]) {
+        const name = match[2] + " Helper" + suffix;
+        output.push(
+          `${match[1]}/Frameworks/${name}.app/Contents/MacOS/${name}`,
+        );
+      }
+  }
+  return output;
+}
+function normalizedExecutable(
+  value: string,
+  platform: NodeJS.Platform,
+): string {
+  if (platform === "win32") {
+    const local = /^\\\\\?\\[a-z]:\\/i.test(value) ? value.slice(4) : value;
+    return path.win32.normalize(local).toLowerCase();
+  }
+  return path.posix.normalize(value);
+}
+function helperRole(record: ProcessRecord): boolean {
+  const command = record.commandLine ?? "";
+  const executable = record.executablePath;
+  // POSIX ps prints argv[0] with literal spaces rather than shell quotes. The
+  // executable value is OS-derived; remove only its exact leading boundary.
+  const unquoted = !!executable && command.startsWith(executable + " ");
+  const argumentsText = unquoted
+    ? command.slice(executable!.length).trimStart()
+    : command;
+  const tokens = [
+    ...argumentsText.matchAll(/"([^"\r\n]*)"|'([^'\r\n]*)'|(\S+)/g),
+  ].map((match) => match[1] ?? match[2] ?? match[3]);
+  return /^(?:--type=)(?:zygote|gpu-process|renderer|utility|broker|crashpad-handler)$/.test(
+    tokens[unquoted ? 0 : 1] ?? "",
+  );
+}
+/** Name/arguments alone never grant ownership: require exact executable and a verified helper-only parent chain. */
+export function excludeOwnedApplicationProcesses(
+  snapshot: ProcessSnapshot,
+  ownedPids: readonly number[],
+  application?: OwnedApplication,
+): ProcessSnapshot {
+  const records = new Map(
+    snapshot.processes
+      .filter((record) => Number.isSafeInteger(record.pid))
+      .map((record) => [record.pid!, record]),
+  );
+  const paths = new Set(
+    (application?.executablePaths ?? []).map((value) =>
+      normalizedExecutable(value, snapshot.platform),
+    ),
+  );
+  const helper = (record: ProcessRecord) =>
+    !!record.executablePath &&
+    paths.has(normalizedExecutable(record.executablePath, snapshot.platform)) &&
+    helperRole(record);
+  const ownedHelper = (record: ProcessRecord) => {
+    if (!application || !helper(record)) return false;
+    let parent = record.parentPid;
+    const visited = new Set<number>();
+    for (
+      let depth = 0;
+      depth < 64 && Number.isSafeInteger(parent) && parent! > 0;
+      depth++
+    ) {
+      if (parent === application.pid) return true;
+      if (visited.has(parent!)) return false;
+      visited.add(parent!);
+      const ancestor = records.get(parent!);
+      if (!ancestor || !helper(ancestor)) return false;
+      parent = ancestor.parentPid;
+    }
+    return false;
+  };
+  return {
+    ...snapshot,
+    processes: snapshot.processes.filter(
+      (record) => !ownedPids.includes(record.pid ?? -1) && !ownedHelper(record),
+    ),
+  };
+}
+/** Pure bounded-output parser: only OS-proven exited zombies are ignored. */
+export function parsePosixProcessSnapshot(
+  namesText: string,
+  commandsText: string,
+  platform: NodeJS.Platform,
+  ownedPids: readonly number[] = [],
+  withParents = false,
+): ProcessSnapshot {
+  const parse = (stdout: string) => {
+    const result = new Map<
+      number,
+      { state: string; value: string; parentPid?: number }
+    >();
+    for (const line of stdout.split(/\r?\n/).filter((line) => line.trim())) {
+      const match = line.match(
+        withParents
+          ? /^\s*(\d+)\s+(\d+)\s+([A-Za-z][A-Za-z<+NlsLEW-]*)\s+(\S.*)$/
+          : /^\s*(\d+)\s+([A-Za-z][A-Za-z<+NlsLEW-]*)\s+(\S.*)$/,
       );
-    const running = names.filter((n) => /^codex(?:[ ._-]|$)/i.test(n));
-    return running.length
-      ? {
-          status: "running",
-          details: "检测到 Codex 相关进程：" + [...new Set(running)].join("、"),
+      if (
+        !match ||
+        !Number.isSafeInteger(Number(match[1])) ||
+        result.has(Number(match[1]))
+      )
+        throw new Error("Malformed process row");
+      result.set(Number(match[1]), {
+        state: match[withParents ? 3 : 2],
+        value: match[withParents ? 4 : 3].trim(),
+        ...(withParents ? { parentPid: Number(match[2]) } : {}),
+      });
+    }
+    if (!result.size) throw new Error("Empty process inventory");
+    return result;
+  };
+  const names = parse(namesText),
+    commands = parse(commandsText);
+  let complete = true;
+  const processes: ProcessRecord[] = [];
+  for (const [pid, first] of names) {
+    if (ownedPids.includes(pid) || /(?:^|\/)ps$/.test(first.value)) continue;
+    const second = commands.get(pid);
+    if (first.state.startsWith("Z")) {
+      if (second && !second.state.startsWith("Z")) complete = false;
+      continue;
+    }
+    if (!second) {
+      complete = false;
+      continue;
+    }
+    if (second.state.startsWith("Z")) continue;
+    if (withParents && first.parentPid !== second.parentPid) complete = false;
+    processes.push({
+      pid,
+      name: first.value,
+      commandLine: second.value,
+      ...(withParents ? { parentPid: second.parentPid } : {}),
+    });
+  }
+  if (
+    [...commands].some(
+      ([pid, row]) =>
+        !ownedPids.includes(pid) &&
+        !names.has(pid) &&
+        !row.state.startsWith("Z") &&
+        !/^\/bin\/ps\s/.test(row.value),
+    )
+  )
+    complete = false;
+  return { platform, complete, processes };
+}
+/** Failed, malformed or changing enumeration never becomes an empty clear result. */
+export async function collectProcessSnapshot(
+  ownedPids: readonly number[] = [process.pid],
+  application?: OwnedApplication,
+): Promise<ProcessSnapshot> {
+  const platform = process.platform;
+  try {
+    if (platform === "win32") {
+      const { stdout } = await run(
+        "powershell.exe",
+        [
+          "-NoLogo",
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          "Get-CimInstance Win32_Process -ErrorAction Stop | Select-Object ProcessId,ParentProcessId,ExecutablePath,Name,CommandLine | ConvertTo-Json -Compress",
+        ],
+        limits,
+      );
+      const parsed: unknown = JSON.parse(stdout);
+      const rows = Array.isArray(parsed) ? parsed : [parsed];
+      if (
+        !rows.length ||
+        rows.some(
+          (row) =>
+            !row ||
+            typeof row !== "object" ||
+            typeof row.Name !== "string" ||
+            !row.Name ||
+            !Number.isSafeInteger(row.ProcessId),
+        )
+      )
+        throw Error("Invalid process inventory");
+      const snapshot: ProcessSnapshot = {
+        platform,
+        complete: true,
+        processes: rows.map((row) => ({
+          pid: row.ProcessId,
+          parentPid: Number.isSafeInteger(row.ParentProcessId)
+            ? row.ParentProcessId
+            : undefined,
+          executablePath:
+            typeof row.ExecutablePath === "string"
+              ? row.ExecutablePath
+              : undefined,
+          name: row.Name,
+          ...(typeof row.CommandLine === "string" && row.CommandLine
+            ? { commandLine: row.CommandLine }
+            : {}),
+        })),
+      };
+      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
+    }
+    if (platform !== "linux" && platform !== "darwin")
+      throw Error("Unsupported process enumeration");
+    const withParents = !!application;
+    const prefix = withParents ? "pid=,ppid=,stat=," : "pid=,stat=,";
+    const snapshot = parsePosixProcessSnapshot(
+      (await run("/bin/ps", ["-eo", prefix + "comm="], limits)).stdout,
+      (await run("/bin/ps", ["-eo", prefix + "args="], limits)).stdout,
+      platform,
+      application ? [] : ownedPids,
+      withParents,
+    );
+    if (application) {
+      for (const record of snapshot.processes)
+        if (record.pid && helperRole(record)) {
+          if (platform === "linux") {
+            // Read kernel executable identity, never follow it into a target file.
+            try {
+              record.executablePath = await fs.readlink(
+                `/proc/${record.pid}/exe`,
+              );
+            } catch {
+              /* unproven ownership remains visible */
+            }
+          } else if (
+            platform === "darwin" &&
+            path.posix.isAbsolute(record.name)
+          )
+            record.executablePath = record.name;
         }
-      : {
-          status: "clear",
-          details:
-            "未检测到常见 Codex 进程名。检测并非完备，仍须确认已退出全部 CLI 和桌面窗口。",
-        };
+      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
+    }
+    return snapshot;
   } catch {
+    return { platform, complete: false, processes: [] };
+  }
+}
+export async function checkProviderProcesses(
+  provider: ProviderId,
+  ownedPids?: readonly number[],
+  application?: OwnedApplication,
+): Promise<ProcessStatus> {
+  const adapter = getAdapter(provider);
+  const snapshot = await collectProcessSnapshot(ownedPids, application);
+  if (!snapshot.complete)
     return {
       status: "unknown",
-      details: "无法可靠检测进程。请手动退出所有 Codex CLI / 桌面进程后继续。",
+      details:
+        "进程列表读取不完整或正在变化，已阻止操作；请等待程序启动/退出完成后重新检查。",
     };
+  const result = adapter.assessProcesses(snapshot);
+  if (result.status === "unknown") {
+    const blockers = snapshot.processes
+      .filter(
+        (record) =>
+          adapter.assessProcesses({
+            platform: snapshot.platform,
+            complete: true,
+            processes: [record],
+          }).status === "unknown",
+      )
+      .slice(0, 8)
+      .map(
+        (record) =>
+          `${record.name.replaceAll("\\", "/").split("/").at(-1)}${record.pid ? " (PID " + record.pid + ")" : ""}`,
+      );
+    if (blockers.length)
+      return {
+        status: "unknown",
+        details:
+          result.details +
+          " 无法归属：" +
+          blockers.join("、") +
+          "。请确认相关宿主及后台服务已退出后重试。",
+      };
   }
+  return result;
+}
+export async function checkCodexProcesses(): Promise<ProcessStatus> {
+  return checkProviderProcesses("codex");
 }

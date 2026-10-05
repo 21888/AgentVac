@@ -1,7 +1,11 @@
 name: Source-native Electron fixture verification
 
-# Deliberately manual only: no push, pull_request, tag or scheduled trigger.
+# Final/default state is manual only. A separately reviewed one-shot master marker
+# may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
+  push:
+    branches: [master]
+    paths: [.github/agentvac-native-once.json]
   workflow_dispatch:
 
 permissions:
@@ -13,9 +17,9 @@ concurrency:
 
 jobs:
   desktop:
+    if: ${{ github.event.repository.private == false }}
     name: Source-native ${{ matrix.platform }} ${{ matrix.arch }}
-    # Execution bound only; verified account spending controls remain separate.
-    timeout-minutes: 8
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -43,36 +47,69 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Set up Node
+      - name: Set up verified Node runtime
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          # No dependency cache: avoids Actions cache storage usage.
+          node-version: "24.19.0"
+          # No Actions dependency cache or artifact storage.
       - name: Install locked dependencies
-        timeout-minutes: 3
+        id: install
+        timeout-minutes: 4
         run: npm ci --no-audit --no-fund
-      - name: Check native harness syntax
-        run: node --check scripts/desktop-e2e.mjs
-      - name: Run fixture unit tests
+      - name: Verify actual Windows private-copy ACL boundaries
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 2
+        run: node --import tsx scripts/native-conversation-acl.mjs
+      - name: Run fixture unit and policy tests
+        id: units
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         timeout-minutes: 6
-        run: npm test
+        run: node --import tsx --test --test-concurrency=2 tests/*.test.ts
       - name: Build and typecheck source
+        id: build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 3
         run: npm run build
+      - name: Verify native filesystem committed-unit crash recovery
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 2
+        run: node --import tsx scripts/native-unit-durability.mjs
       - name: Install standard Linux desktop tools
-        if: runner.os == 'Linux'
+        id: linux-tools
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends xvfb xdotool openbox dbus-x11 libgtk-3-0 libnss3 libasound2 libgbm1 libglib2.0-bin xdg-utils
       - name: Native Linux window and OS integration
-        timeout-minutes: 2
-        if: runner.os == 'Linux'
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
         run: |
           xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-openbox.log 2>&1 & npm run test:desktop:built'
       - name: Native Windows or macOS window and OS integration
-        timeout-minutes: 2
-        if: runner.os != 'Linux'
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 3
         run: npm run test:desktop:built
-      - name: Check fresh source-native coverage and summarize limitations
+      - name: Native provider quarantine and restart recovery on Linux
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 4
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-provider-openbox.log 2>&1 & node --import tsx "$GITHUB_WORKSPACE/scripts/native-provider-regression.mjs"'
+      - name: Native provider quarantine and restart recovery on Windows or macOS
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 4
+        run: node --import tsx "${{ github.workspace }}/scripts/native-provider-regression.mjs"
+      - name: Native conversation readers and explicit-source consent on Linux
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-conversation-openbox.log 2>&1 & node --import tsx "$GITHUB_WORKSPACE/scripts/native-conversation-regression.mjs"'
+      - name: Native conversation readers and explicit-source consent on Windows or macOS
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 3
+        run: node --import tsx "${{ github.workspace }}/scripts/native-conversation-regression.mjs"
+      - name: Require fresh exact source-native evidence
         if: always()
+        timeout-minutes: 1
         run: node scripts/native-ci-summary.mjs
-      # No package publishing, upload-artifact, cache, deployment or release steps.
+      # No package/release publishing, upload-artifact, dependency cache or paid service.

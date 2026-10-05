@@ -61,8 +61,8 @@ let holdNextScan = false;
 let releaseScanGate = null;
 let gateCancelled = false;
 let processStatus = {
-  status: "unknown",
-  details: "测试夹具：无法自动检测进程。",
+  status: "clear",
+  details: "测试夹具：完整检查未检测到进程。",
 };
 const key = randomBytes(32);
 const report = [];
@@ -75,7 +75,7 @@ try {
     browser = await chromium.launch({
       executablePath: process.env.AGENTVAC_BROWSER,
       headless: true,
-      args: ["--no-sandbox"],
+      chromiumSandbox: true,
     });
   else if (process.platform === "linux") {
     const { default: serverless } = await import("@sparticuz/chromium");
@@ -473,7 +473,13 @@ try {
   await page.getByRole("button", { name: "完成", exact: true }).click();
   note("complete recoverable quarantine → history → restore workflow");
   await page.getByRole("button", { name: "文件", exact: true }).click();
-  await page.getByRole("checkbox", { name: /包括历史会话/ }).check();
+  assert.equal(
+    await page.getByRole("checkbox", { name: /包括历史会话/ }).isDisabled(),
+    true,
+  );
+  await page
+    .getByRole("combobox", { name: "候选文件最短年龄" })
+    .selectOption("90");
   assert.equal(
     await page.getByTestId("scan-state").getAttribute("data-state"),
     "idle",
@@ -481,15 +487,12 @@ try {
   assert.equal(await page.locator(".file-table tbody tr").count(), 0);
   note("policy changes invalidate old scan and selection");
   await page
+    .getByRole("combobox", { name: "候选文件最短年龄" })
+    .selectOption("30");
+  await page
     .getByRole("button", { name: "开始扫描", exact: true })
     .first()
     .click();
-  await page
-    .getByRole("checkbox", {
-      name: "选择 sessions/2025/06/rollout-demo-planning.jsonl",
-      exact: true,
-    })
-    .waitFor();
   await idle();
   assert.equal(
     await page
@@ -497,22 +500,12 @@ try {
         name: "选择 sessions/2025/06/rollout-demo-planning.jsonl",
         exact: true,
       })
-      .isEnabled(),
+      .isDisabled(),
     true,
   );
-  await page
-    .getByRole("checkbox", {
-      name: "选择 sessions/2025/06/rollout-demo-planning.jsonl",
-      exact: true,
-    })
-    .check();
-  await page.getByRole("button", { name: "预览隔离操作", exact: true }).click();
-  await page.getByText("你选择了历史会话", { exact: true }).waitFor();
-  await page.keyboard.press("Escape");
   note(
-    "session opt-in allows explicit per-file selection and warns about resume/index",
+    "Codex session-file cleanup is gated even with old review settings; signed recovery remains available",
   );
-  await page.getByRole("checkbox", { name: /包括历史会话/ }).uncheck();
   await page
     .getByRole("button", { name: "开始扫描", exact: true })
     .first()

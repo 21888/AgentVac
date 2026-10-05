@@ -1,11 +1,12 @@
 import { build } from "esbuild";
 await build({
-  entryPoints: [
-    "electron/main.ts",
-    "electron/preload.ts",
-    "electron/diagnostic-supervisor.ts",
-    "electron/diagnostic-worker.ts",
-  ],
+  entryPoints: {
+    main: "electron/main.ts",
+    preload: "electron/preload.ts",
+    "diagnostic-supervisor": "electron/diagnostic-supervisor.ts",
+    "diagnostic-worker": "electron/diagnostic-worker.ts",
+    "cursor-sql-worker": "electron/conversations/cursor-sql-worker.ts",
+  },
   bundle: true,
   platform: "node",
   target: "node22",

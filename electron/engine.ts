@@ -1,3 +1,23 @@
+import {
+  captureUnit,
+  sameUnit,
+  unitMetadata,
+  validateUnitDefinition,
+  assertUnitPolicy,
+  assertUnitRecord,
+  inspectUnitLocations,
+  inspectStoredUnit,
+  verifyEmptyUnitContainer,
+  ownedRestorePaths,
+  moveUnit,
+  restoreUnit,
+  unitStoragePath,
+  type UnitSnapshot,
+  type UnitRecord,
+} from "./cleanup-units.js";
+import { validRelative } from "./providers/paths.js";
+import { codexAdapter } from "./providers/codex.js";
+import type { ProviderAdapter } from "./providers/types.js";
 import { promises as fs, constants } from "node:fs";
 import path from "node:path";
 import {
@@ -58,97 +78,19 @@ interface RecordItem {
   before: Fingerprint;
   stored?: Fingerprint;
   restorePending?: boolean;
+  unit?: UnitRecord;
 }
 interface Journal {
-  version: 1;
+  version: 1 | 2 | 3;
+  provider?: import("../shared/types.js").ProviderId;
   id: string;
   root: string;
   createdAt: string;
   items: RecordItem[];
 }
-export function validRelative(p: string): boolean {
-  return (
-    !!p &&
-    !p.includes("\\") &&
-    !p.includes("\0") &&
-    !path.posix.isAbsolute(p) &&
-    !/^[a-z]:/i.test(p) &&
-    p.split("/").every((s) => s && s !== "." && s !== ".." && !s.includes(":"))
-  );
-}
-export function classify(
-  p: string,
-): Pick<Entry, "category" | "risk" | "reason"> {
-  if (!validRelative(p))
-    return {
-      category: "protected",
-      risk: "protected",
-      reason: "路径无效，拒绝访问。",
-    };
-  const parts = p.split("/");
-  const name = parts.at(-1)!;
-  if (p === "log/codex-tui.log")
-    return {
-      category: "log",
-      risk: "protected",
-      reason: "当前运行日志始终保护，即使修改时间较早。",
-    };
-  if (
-    parts.length === 1 &&
-    /^logs_\d+\.sqlite(?:-(wal|shm|journal))?$/.test(name)
-  )
-    return {
-      category: "log",
-      risk: "protected",
-      reason:
-        "Codex 实时日志数据库及旁路文件，仅统计大小。本版不执行 VACUUM、修改数据库或移走日志数据库。",
-    };
-  if (
-    parts.some(
-      (s) =>
-        s === Q ||
-        /^(auth|credentials?|config|state|history|session_index)([._-]|$)/i.test(
-          s,
-        ),
-    ) ||
-    /\.(sqlite|sqlite3|db)(-(wal|shm|journal))?$/i.test(name) ||
-    ["AGENTS.md", "version.json"].includes(name)
-  )
-    return {
-      category: "protected",
-      risk: "protected",
-      reason: "凭据、配置、状态数据库、历史索引和运行状态始终保留。",
-    };
-  if (/^(sessions|archived_sessions)\/(?:[^/]+\/)*[^/]+\.jsonl$/.test(p))
-    return {
-      category: "session",
-      risk: "review",
-      reason:
-        "会话原文可能用于恢复对话；移走会影响 resume/历史。不会同步修改状态数据库或修复索引，需自行确认不再使用。",
-    };
-  if (/^log\/codex-tui\.log(?:\.\d+|\.\d{4}-\d{2}-\d{2})(?:\.gz)?$/.test(p))
-    return {
-      category: "log",
-      risk: "safe",
-      reason:
-        "匹配旧轮转日志白名单；不涉及当前 codex-tui.log。请先退出 Codex 再隔离。",
-    };
-  if (/^(?:cache|\.cache)\/[^/]+\.cache$/.test(p))
-    return {
-      category: "cache",
-      risk: "review",
-      reason:
-        "缓存候选，扩展名不能证明可重建。本版仅展示，未验证其用途前保持保护。",
-    };
-  return {
-    category: "protected",
-    risk: "protected",
-    reason:
-      p === "log/codex-tui.log"
-        ? "当前运行日志始终保护，即使修改时间较早。"
-        : "不在明确白名单内，默认保护；不递归检查项目、技能、MCP 或未知目录。",
-  };
-}
+export { validRelative } from "./providers/paths.js";
+export { classifyCodex as classify } from "./providers/codex.js";
+
 async function exists(p: string) {
   try {
     return await fs.lstat(p);
@@ -196,9 +138,14 @@ async function plainParents(full: string, includeLeaf = true) {
 }
 export class AgentVacEngine {
   private rootFingerprint?: Fingerprint;
-  private entries = new Map<string, { entry: Entry; snapshot: Fingerprint }>();
+  private entries = new Map<
+    string,
+    { entry: Entry; snapshot: Fingerprint; unit?: UnitSnapshot }
+  >();
   private latest?: ScanResult;
   private previews = new Map<string, { value: Preview; ids: string[] }>();
+  private protection: string[] = [];
+  private invalidated = false;
   private busy = false;
   private cancelRequested = false;
   private activeScanId?: string;
@@ -212,6 +159,7 @@ export class AgentVacEngine {
       details: "无法自动确定 Codex 是否已退出。",
     }),
     private recoveryKeys: Buffer[] = [],
+    readonly adapter: ProviderAdapter = codexAdapter,
   ) {
     if (key !== null && (!Buffer.isBuffer(key) || key.length !== 32))
       throw new Error("恢复密钥无效。");
@@ -243,9 +191,73 @@ export class AgentVacEngine {
         : real !== this.root
     )
       throw new Error("所选目录不是规范真实路径。");
+    await this.adapter.validateRoot(this.root);
     this.rootFingerprint = fp(s);
   }
+  get provider() {
+    return this.adapter.id;
+  }
+  async verifyRootIdentity(): Promise<void> {
+    await this.rootOK();
+  }
+  invalidatePreview(token: string): void {
+    this.previews.delete(token);
+  }
+  get isBusy() {
+    return this.busy;
+  }
+  invalidate(): void {
+    this.invalidated = true;
+    this.cancelRequested = true;
+    this.entries.clear();
+    this.previews.clear();
+    this.latest = undefined;
+  }
+  private async refreshProtection() {
+    await this.rootOK();
+    const paths = (await this.adapter.protectedPaths?.(this.root)) ?? [];
+    if (
+      !Array.isArray(paths) ||
+      paths.length > 10000 ||
+      paths.some(
+        (p) =>
+          typeof p !== "string" ||
+          !validRelative(p.endsWith("/") ? p.slice(0, -1) : p),
+      )
+    )
+      throw new Error("动态保护范围无法验证，已阻止操作。");
+    this.protection = paths;
+  }
+  private dynamicallyProtected(relative: string) {
+    return this.protection.some((p) =>
+      p.endsWith("/")
+        ? relative.startsWith(p) || relative === p.slice(0, -1)
+        : relative === p,
+    );
+  }
+  private validJournalProvider(j: Journal): boolean {
+    return j.version === 1
+      ? this.provider === "codex" && j.provider === undefined
+      : (j.version === 2 || j.version === 3) && j.provider === this.provider;
+  }
+  private async requireStopped() {
+    if (this.demo) return;
+    let result: ProcessStatus;
+    try {
+      result = await this.processCheck();
+    } catch {
+      throw new Error("无法确认进程状态，已阻止文件操作。");
+    }
+    if (result?.status !== "clear")
+      throw new Error(
+        result?.status === "running"
+          ? `检测到 ${this.adapter.label} 正在运行，请退出后重试。`
+          : "无法确认进程状态，已阻止文件操作。",
+      );
+  }
   private async rootOK() {
+    if (this.invalidated)
+      throw new Error("提供方或目录已切换，旧扫描与预览已失效。");
     if (!this.rootFingerprint) await this.initialize();
     await plainParents(this.root);
     const s = await fs.lstat(this.root);
@@ -254,6 +266,7 @@ export class AgentVacEngine {
       s.ino !== this.rootFingerprint!.ino
     )
       throw new Error("根目录已被替换，请重新选择目录。");
+    await this.adapter.validateRoot(this.root);
   }
   private full(rel: string) {
     if (!validRelative(rel)) throw new Error("无效相对路径");
@@ -310,6 +323,7 @@ export class AgentVacEngine {
           onProgress?.({
             requestId,
             root: this.root,
+            provider: this.provider,
             phase,
             visitedEntries: visited,
             discoveredFiles,
@@ -352,7 +366,7 @@ export class AgentVacEngine {
           throw new Error(
             "扫描条件无效：天数需为 1–3650，上限仅支持 50,000 或 100,000 项。",
           );
-        await this.rootOK();
+        await this.refreshProtection();
         const now = Date.now();
         const walk = async (relative: string, depth: number): Promise<void> => {
           const directory = relative ? this.full(relative) : this.root;
@@ -384,7 +398,7 @@ export class AgentVacEngine {
             const full = this.full(rel);
             await plainParents(full, false);
             const s = await fs.lstat(full);
-            const c = classify(rel);
+            const c = this.adapter.classify(rel, this.root);
             const kind: Entry["kind"] = s.isSymbolicLink()
               ? "symlink"
               : s.isDirectory()
@@ -392,17 +406,71 @@ export class AgentVacEngine {
                 : s.isFile()
                   ? "file"
                   : "other";
+            let unit: UnitSnapshot | undefined;
+            let unitError: string | undefined;
+            try {
+              const definition = await this.adapter.cleanupUnit?.(
+                rel,
+                this.root,
+              );
+              if (definition) {
+                validateUnitDefinition(definition, rel);
+                let unitVisited = 0;
+                unit = await captureUnit(
+                  this.root,
+                  definition,
+                  this.adapter,
+                  (p) => {
+                    checkCancelled();
+                    if (unitVisited++ > 0) {
+                      if (visited >= maxEntries) {
+                        hitLimit("entry-count");
+                        throw new Error(
+                          "单元超过剩余扫描预算，未提供部分清理。",
+                        );
+                      }
+                      visited++;
+                      currentPath = p;
+                      publish("scanning");
+                    }
+                    if (this.dynamicallyProtected(p))
+                      throw new Error("当前或活动数据属于此单元，已整体保护。");
+                  },
+                );
+              }
+            } catch (error) {
+              if (this.cancelRequested) throw error;
+              unitError = errorText(error);
+              if (/界限|预算|depth|limit/i.test(unitError)) {
+                inaccessibleEntries++;
+                warn(
+                  rel +
+                    "：单元检查不完整，整组保持保护，占用未计入完整统计。" +
+                    unitError,
+                );
+              }
+            }
             const allowedDirectory =
+              !unit &&
+              !unitError &&
               kind === "directory" &&
-              /^(log|sessions|archived_sessions|cache|\.cache)(\/|$)/.test(rel);
+              this.adapter.canTraverse(rel, this.root) &&
+              !this.dynamicallyProtected(rel);
             if (allowedDirectory && depth < 12) {
               await walk(rel, depth + 1);
               return;
             }
-            const ageDays = Math.max(0, Math.floor((now - s.mtimeMs) / DAY));
+            const ageDays = Math.max(
+              0,
+              Math.floor((now - (unit?.mtimeMs ?? s.mtimeMs)) / DAY),
+            );
             let risk = c.risk;
             let reason = c.reason;
-            if (kind !== "file" || s.nlink !== 1) {
+            if (this.dynamicallyProtected(rel)) {
+              risk = "protected";
+              reason = "当前或最新日志会话始终保留。";
+            }
+            if (!unit && (kind !== "file" || s.nlink !== 1)) {
               risk = "protected";
               reason =
                 kind === "directory"
@@ -420,33 +488,50 @@ export class AgentVacEngine {
               }
             }
             if (
-              kind === "file" &&
+              (kind === "file" || !!unit) &&
               ageDays < options.minAgeDays &&
               risk !== "protected"
             ) {
               risk = "protected";
               reason = `最近 ${options.minAgeDays} 天内修改，保护近期与可能活跃的数据。`;
             }
+            if (
+              c.category === "session" &&
+              this.adapter.supportsSessionCleanup === false
+            ) {
+              risk = "protected";
+              reason =
+                "完整会话依赖策略尚未验证，当前仅查看；已有签名隔离记录仍可恢复。";
+            }
             if (c.category === "session" && !options.includeSessions) {
               risk = "protected";
               reason = "会话复核尚未开启；默认保留全部会话。";
             }
-            if (c.category === "cache") {
+            if (c.category === "cache" && !unit) {
               risk = "protected";
               reason = c.reason;
+            }
+            if (unitError) {
+              risk = "protected";
+              reason = "整组清理未通过验证（整组占用未计入统计）：" + unitError;
             }
             const entry: Entry = {
               id: randomUUID(),
               path: rel,
               category: c.category,
               risk,
-              size: kind === "file" ? s.size : 0,
-              mtimeMs: s.mtimeMs,
+              size: unitError
+                ? 0
+                : (unit?.size ?? (kind === "file" ? s.size : 0)),
+              mtimeMs: unit?.mtimeMs ?? s.mtimeMs,
               ageDays,
               reason,
               selectable:
-                kind === "file" && s.nlink === 1 && risk !== "protected",
+                (!!unit || (kind === "file" && s.nlink === 1)) &&
+                risk !== "protected" &&
+                !unitError,
               kind,
+              ...(unit ? { cleanupUnit: unitMetadata(unit) } : {}),
             };
             const entryBytes =
               Buffer.byteLength(JSON.stringify(entry), "utf8") + 1;
@@ -456,9 +541,9 @@ export class AgentVacEngine {
             }
             resultBytes += entryBytes;
             entries.push(entry);
-            this.entries.set(entry.id, { entry, snapshot: fp(s) });
-            if (kind === "file") {
-              discoveredFiles++;
+            this.entries.set(entry.id, { entry, snapshot: fp(s), unit });
+            if (kind === "file" || unit) {
+              discoveredFiles += unit?.fileCount ?? 1;
               discoveredBytes += entry.size;
             }
             publish("scanning");
@@ -474,6 +559,16 @@ export class AgentVacEngine {
           warnings.push(
             `另有 ${warningCount - warnings.length} 项读取警告未逐条展示。`,
           );
+        const members = new Set(
+          [...this.entries.values()].flatMap(
+            (r) => r.unit?.definition.members.slice(1).map((m) => m.path) ?? [],
+          ),
+        );
+        for (let index = entries.length - 1; index >= 0; index--)
+          if (members.has(entries[index].path)) {
+            this.entries.delete(entries[index].id);
+            entries.splice(index, 1);
+          }
         entries.sort((a, b) => b.size - a.size || a.path.localeCompare(b.path));
         const sum = (risk?: Entry["risk"]) =>
           entries.reduce(
@@ -487,6 +582,7 @@ export class AgentVacEngine {
         this.latest = {
           id: requestId,
           root: this.root,
+          provider: this.provider,
           demo: this.demo,
           scannedAt: new Date().toISOString(),
           minAgeDays: options.minAgeDays,
@@ -526,14 +622,48 @@ export class AgentVacEngine {
       }
     });
   }
-  private async validateEntry(id: string) {
+  private assertNewQuarantinePolicy(id: string) {
     const record = this.entries.get(id);
-    if (!record || !record.entry.selectable)
+    if (!record) throw Error("扫描条目已失效。");
+    const policy = this.adapter.classify(record.entry.path, this.root);
+    if (
+      policy.risk === "protected" ||
+      (policy.category === "cache" && !record.unit) ||
+      (policy.category === "session" &&
+        this.adapter.supportsSessionCleanup === false)
+    )
+      throw Error(
+        "当前安全策略禁止新的此类文件隔离；已有签名记录仍按版本化恢复策略处理。",
+      );
+  }
+  private async validateEntry(id: string) {
+    this.assertNewQuarantinePolicy(id);
+    const record = this.entries.get(id);
+    if (
+      !record ||
+      !record.entry.selectable ||
+      this.dynamicallyProtected(record.entry.path)
+    )
       throw new Error("条目不可隔离或扫描已失效。");
     const p = this.full(record.entry.path);
     await this.rootOK();
     await plainParents(p, false);
     const s = await fs.lstat(p);
+    if (record.unit) {
+      await assertUnitPolicy(this.root, record.unit, this.adapter);
+      const current = await captureUnit(
+        this.root,
+        record.unit.definition,
+        this.adapter,
+        (relative) => {
+          if (this.dynamicallyProtected(relative))
+            throw new Error("当前或活动数据属于此单元，已整体保护。");
+        },
+      );
+      if (!sameUnit(current, record.unit))
+        throw new Error("清理单元自扫描后发生变化；请重新扫描。");
+      return record;
+    }
     if (
       !s.isFile() ||
       s.isSymbolicLink() ||
@@ -552,6 +682,7 @@ export class AgentVacEngine {
         new Set(ids).size !== ids.length
       )
         throw new Error("请选择 1–5000 个不重复条目。");
+      await this.refreshProtection();
       const items: Entry[] = [];
       for (const id of ids) items.push((await this.validateEntry(id)).entry);
       const processStatus = this.demo
@@ -562,8 +693,18 @@ export class AgentVacEngine {
         : await this.processCheck();
       const value: Preview = {
         token: randomUUID(),
+        provider: this.provider,
+        root: this.root,
         items,
         totalBytes: items.reduce((n, e) => n + e.size, 0),
+        totalFiles: items.reduce(
+          (n, e) => n + (e.cleanupUnit?.fileCount ?? 1),
+          0,
+        ),
+        totalDirectories: items.reduce(
+          (n, e) => n + (e.cleanupUnit?.directoryCount ?? 0),
+          0,
+        ),
         expiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
         processStatus,
         scanStatus: this.latest?.status ?? "partial",
@@ -618,6 +759,8 @@ export class AgentVacEngine {
     return createHmac("sha256", key).update(JSON.stringify(j)).digest("hex");
   }
   private async writeJournal(j: Journal, signingKey: Buffer | null = this.key) {
+    if (Buffer.byteLength(JSON.stringify(j), "utf8") > 24_000_000)
+      throw new Error("恢复清单超过 24 MB 安全预算，请减少选择。");
     const dir = await this.batchDir(j.id, true);
     const tmp = path.join(dir, randomUUID() + ".tmp");
     const h = await fs.open(tmp, "wx", 0o600);
@@ -689,7 +832,7 @@ export class AgentVacEngine {
     const sig = Buffer.from(String(data.signature), "hex");
     if (
       !this.signatureMatches(j, sig) ||
-      j.version !== 1 ||
+      !this.validJournalProvider(j) ||
       j.id !== id ||
       j.root !== this.root ||
       !Array.isArray(j.items)
@@ -701,16 +844,26 @@ export class AgentVacEngine {
         !UUID.test(i.id) ||
         ids.has(i.id) ||
         !validRelative(i.path) ||
-        classify(i.path).risk === "protected" ||
-        classify(i.path).category === "cache"
+        (!i.unit &&
+          !(this.adapter.restoreFileAllowed
+            ? this.adapter.restoreFileAllowed(i.path, j.version)
+            : this.adapter.classify(i.path, this.root).risk !== "protected" &&
+              this.adapter.classify(i.path, this.root).category !== "cache")) ||
+        (!!i.unit && j.version !== 3)
       )
         throw new Error("隔离清单包含非法路径。");
+      if (i.unit) {
+        validateUnitDefinition(i.unit.snapshot.definition, i.path);
+        await assertUnitRecord(this.root, i.unit, this.adapter);
+        if (i.size !== i.unit.snapshot.size)
+          throw new Error("清理单元占用与签名不一致。");
+      }
       ids.add(i.id);
     }
     this.journalKeys.set(j.id, this.keyForSignature(j, sig)!);
     if (!reconcile) return j;
     // A pending move is recoverable even if the app stopped after rename and before journal update.
-    for (const i of j.items.filter((i) => i.status === "pending")) {
+    for (const i of j.items.filter((i) => i.status === "pending" && !i.unit)) {
       const stored = await exists(path.join(dir, i.id + ".data"));
       const original = await exists(this.full(i.path));
       if (
@@ -729,7 +882,9 @@ export class AgentVacEngine {
         i.error = "操作中断或文件状态不确定，请人工检查隔离目录。";
       }
     }
-    for (const i of j.items.filter((i) => i.status === "quarantined")) {
+    for (const i of j.items.filter(
+      (i) => i.status === "quarantined" && !i.unit,
+    )) {
       const stored = await exists(path.join(dir, i.id + ".data"));
       const original = await exists(this.full(i.path));
       if (
@@ -747,24 +902,72 @@ export class AgentVacEngine {
         delete i.error;
       }
     }
+    for (const i of j.items.filter(
+      (i) => i.unit && ["pending", "quarantined"].includes(i.status),
+    )) {
+      if (i.unit!.restore) {
+        if (
+          i.unit!.snapshot.definition.members.every(
+            (m) =>
+              i.unit!.snapshot.absent.includes(m.path) ||
+              i.unit!.restore!.completedMembers.includes(m.path),
+          )
+        ) {
+          i.status = "restored";
+          delete i.error;
+        } else {
+          i.status = "quarantined";
+          i.error ??= "恢复曾中断；已保留可核验数据，可重试恢复。";
+        }
+        continue;
+      }
+      try {
+        const locations = await inspectUnitLocations(
+          this.root,
+          dir,
+          i.id,
+          i.unit!,
+        );
+        if (locations.count) {
+          i.status = "quarantined";
+          const moved = new Map(locations.stored.map((n) => [n.path, n]));
+          i.unit!.stored = {
+            ...i.unit!.snapshot,
+            nodes: i.unit!.snapshot.nodes.map((n) => moved.get(n.path) ?? n),
+          };
+          if (!locations.complete)
+            i.error = "整组移动曾中断；可恢复已移动成员，原位成员保留。";
+        } else {
+          i.status = "failed";
+          i.error = "操作在移动前中断；原位文件保留。";
+        }
+      } catch (error) {
+        i.error = errorText(error);
+      }
+    }
     return j;
   }
   async quarantine(
     token: string,
     confirmedClosed: boolean,
+    assertAuthorized?: () => void,
   ): Promise<OperationResult> {
     return this.exclusive(async () => {
+      assertAuthorized?.();
       this.requireSigningKey();
       const saved = this.previews.get(token);
       this.previews.delete(token);
       if (!saved || Date.parse(saved.value.expiresAt) < Date.now())
         throw new Error("预览已失效，请重新预览。");
       if (!this.demo && confirmedClosed !== true)
-        throw new Error("请先确认已退出全部 Codex CLI 和桌面进程。");
-      if (!this.demo && (await this.processCheck()).status === "running")
-        throw new Error("检测到 Codex 正在运行。请退出后重新预览。");
+        throw new Error(`请先确认已退出全部 ${this.adapter.label} 相关进程。`);
+      await this.requireStopped();
+      await this.refreshProtection();
+      assertAuthorized?.();
+      for (const id of saved.ids) this.assertNewQuarantinePolicy(id);
       const j: Journal = {
-        version: 1,
+        version: saved.ids.some((id) => this.entries.get(id)?.unit) ? 3 : 2,
+        provider: this.provider,
         id: randomUUID(),
         root: this.root,
         createdAt: new Date().toISOString(),
@@ -785,6 +988,7 @@ export class AgentVacEngine {
           size: record.entry.size,
           status: "pending" as const,
           before: record.snapshot,
+          ...(record.unit ? { unit: { snapshot: record.unit } } : {}),
         };
       });
       await this.writeJournal(j); // One durable intent record for the whole batch; pending moves reconcile after interruption.
@@ -793,7 +997,28 @@ export class AgentVacEngine {
         const item = j.items[index];
         let moved = false;
         try {
+          assertAuthorized?.();
           const r = await this.validateEntry(id);
+          if (r.unit && item.unit) {
+            await this.requireStopped();
+            moved = true; // Durable unit intent handles zero, partial, or complete movement after interruption.
+            await moveUnit(
+              this.root,
+              dir,
+              item.id,
+              item.unit,
+              () => this.writeJournal(j),
+              async () => {
+                await this.rootOK();
+                await this.requireStopped();
+                assertAuthorized?.();
+              },
+            );
+            item.status = "quarantined";
+            result.completed++;
+            result.bytes += item.size;
+            continue;
+          }
           const source = this.full(r.entry.path);
           const target = path.join(dir, item.id + ".data");
           const handle = await fs.open(
@@ -810,6 +1035,7 @@ export class AgentVacEngine {
             if (await exists(target)) throw new Error("隔离目标已存在。");
             if (!same(fp(await fs.lstat(source)), r.snapshot))
               throw new Error("源文件已变化。");
+            assertAuthorized?.();
             await fs.rename(source, target);
             moved = true;
           } finally {
@@ -829,8 +1055,33 @@ export class AgentVacEngine {
         } catch (e) {
           item.status = moved ? "pending" : "failed";
           item.error =
-            (moved ? "移动已完成，记录待协调；请刷新隔离记录。" : "") +
-            errorText(e);
+            (moved
+              ? "移动已完成或部分完成，记录待协调；请刷新隔离记录。"
+              : "") + errorText(e);
+          if (moved && item.unit && !item.unit.container) {
+            item.status = "failed";
+            item.error = "整组隔离尚未移动任何成员：" + errorText(e);
+          } else if (moved && item.unit) {
+            try {
+              await this.requireStopped();
+              await this.rootOK();
+              await restoreUnit(
+                this.root,
+                dir,
+                item.id,
+                item.unit,
+                () => this.writeJournal(j),
+                async () => {
+                  await this.rootOK();
+                  await this.requireStopped();
+                },
+              );
+              item.status = "restored";
+              item.error = "整组隔离失败，已安全恢复原位：" + errorText(e);
+            } catch (rollback) {
+              item.error += " 回滚尚未完成；数据仍保留：" + errorText(rollback);
+            }
+          }
           result.failed.push({ path: item.path, error: item.error });
         }
       }
@@ -855,11 +1106,19 @@ export class AgentVacEngine {
     await plainParents(dir);
     return dir;
   }
+  async getBatchQuarantinePath(id: string): Promise<string> {
+    await this.rootOK();
+    if (!UUID.test(id)) throw new Error("无效批次 ID。");
+    const dir = path.join(this.full(Q), id);
+    await plainParents(dir);
+    return dir;
+  }
   async inspectRecovery(): Promise<RecoveryInspection> {
     return this.exclusive(async () => {
       await this.rootOK();
       const result: RecoveryInspection = {
         root: this.root,
+        provider: this.provider,
         readOnly: true,
         truncated: false,
         inspectedFiles: 0,
@@ -905,14 +1164,64 @@ export class AgentVacEngine {
               break;
             }
             result.inspectedFiles++;
+            const isUnit =
+              child.name.endsWith(".unit") &&
+              UUID.test(child.name.slice(0, -5));
             if (
-              !child.name.endsWith(".data") ||
-              !UUID.test(child.name.slice(0, -5))
+              (!child.name.endsWith(".data") ||
+                !UUID.test(child.name.slice(0, -5))) &&
+              !isUnit
             ) {
               item.irregularEntries++;
               continue;
             }
             const data = await fs.lstat(path.join(dir, child.name));
+            if (isUnit) {
+              if (!data.isDirectory() || data.isSymbolicLink()) {
+                item.irregularEntries++;
+                continue;
+              }
+              let unitVisited = 0;
+              const countUnit = async (
+                directory: string,
+                depth: number,
+              ): Promise<void> => {
+                await plainParents(directory);
+                for await (const node of await fs.opendir(directory)) {
+                  if (result.inspectedFiles >= 50_000 || unitVisited >= 5000) {
+                    result.truncated = true;
+                    return;
+                  }
+                  result.inspectedFiles++;
+                  unitVisited++;
+                  const p = path.join(directory, node.name);
+                  if (!validRelative(node.name)) {
+                    item.irregularEntries++;
+                    continue;
+                  }
+                  await plainParents(p, false);
+                  const stat = await fs.lstat(p);
+                  if (stat.isSymbolicLink() || stat.dev !== data.dev) {
+                    item.irregularEntries++;
+                    continue;
+                  }
+                  if (stat.isDirectory()) {
+                    if (depth >= 13) {
+                      result.truncated = true;
+                      item.irregularEntries++;
+                      continue;
+                    }
+                    await countUnit(p, depth + 1);
+                  } else if (stat.isFile() && stat.nlink === 1) {
+                    item.storedFiles++;
+                    item.storedBytes += stat.size;
+                    result.storedBytes += stat.size;
+                  } else item.irregularEntries++;
+                }
+              };
+              await countUnit(path.join(dir, child.name), 0);
+              continue;
+            }
             if (!data.isFile() || data.isSymbolicLink() || data.nlink !== 1) {
               item.irregularEntries++;
               continue;
@@ -945,19 +1254,22 @@ export class AgentVacEngine {
             rows.push({
               id: j.id,
               root: j.root,
+              provider: j.provider ?? "codex",
               createdAt: j.createdAt,
-              items: j.items.map(({ id, path, size, status, error }) => ({
+              items: j.items.map(({ id, path, size, status, error, unit }) => ({
                 id,
                 path,
                 size,
                 status,
                 error,
+                ...(unit ? { cleanupUnit: unitMetadata(unit.snapshot) } : {}),
               })),
             });
           } catch (e) {
             rows.push({
               id: name,
               root: this.root,
+              provider: this.provider,
               createdAt: new Date().toISOString(),
               items: [
                 {
@@ -1001,7 +1313,7 @@ export class AgentVacEngine {
               !this.signatureMatches(j, sig) ||
               j.id !== id ||
               j.root !== this.root ||
-              j.version !== 1 ||
+              !this.validJournalProvider(j) ||
               !Array.isArray(j.items) ||
               j.items.some((i) => !validRelative(i.path))
             )
@@ -1009,19 +1321,22 @@ export class AgentVacEngine {
             rows.push({
               id: j.id,
               root: j.root,
+              provider: j.provider ?? "codex",
               createdAt: j.createdAt,
-              items: j.items.map(({ id, path, size, status, error }) => ({
+              items: j.items.map(({ id, path, size, status, error, unit }) => ({
                 id,
                 path,
                 size,
                 status,
                 error,
+                ...(unit ? { cleanupUnit: unitMetadata(unit.snapshot) } : {}),
               })),
             });
           } catch {
             rows.push({
               id,
               root: this.root,
+              provider: this.provider,
               createdAt: new Date().toISOString(),
               items: [
                 {
@@ -1054,12 +1369,26 @@ export class AgentVacEngine {
         throw new Error("此批次没有可移入回收站的隔离文件。");
       const allowed = new Set([
         "manifest.json",
-        ...candidates.map((i) => i.id + ".data"),
+        ...candidates.map((i) => i.id + (i.unit ? ".unit" : ".data")),
       ]);
+      for (const item of j.items.filter(
+        (i) => i.unit?.container && ["restored", "failed"].includes(i.status),
+      )) {
+        if (await exists(unitStoragePath(dir, item.id))) {
+          await verifyEmptyUnitContainer(dir, item.id, item.unit!);
+          allowed.add(item.id + ".unit");
+        }
+      }
       for (const name of await fs.readdir(dir))
         if (!allowed.has(name))
           throw new Error("批次目录含未知文件，已拒绝移入回收站：" + name);
       for (const i of candidates) {
+        if (i.unit) {
+          if (i.unit.restore)
+            throw new Error("单元恢复尚未结束；已阻止移入回收站。");
+          await inspectStoredUnit(dir, i.id, i.unit);
+          continue;
+        }
         const f = path.join(dir, i.id + ".data");
         const s = await fs.lstat(f);
         if (!i.stored || !s.isFile() || s.nlink !== 1 || !same(fp(s), i.stored))
@@ -1114,9 +1443,9 @@ export class AgentVacEngine {
     return this.exclusive(async () => {
       await this.rootOK();
       if (!this.demo && confirmedClosed !== true)
-        throw new Error("请先确认已退出全部 Codex CLI 和桌面进程。");
-      if (!this.demo && (await this.processCheck()).status === "running")
-        throw new Error("检测到 Codex 正在运行，请退出后恢复。");
+        throw new Error(`请先确认已退出全部 ${this.adapter.label} 相关进程。`);
+      await this.requireStopped();
+      await this.refreshProtection();
       const j = await this.readJournal(batchId);
       const signingKey = this.journalKeys.get(batchId)!;
       const dir = await this.batchDir(batchId);
@@ -1130,10 +1459,52 @@ export class AgentVacEngine {
       const previouslyPending = new Set(
         restoring.filter((i) => i.restorePending).map((i) => i.id),
       );
+      for (const item of restoring) {
+        const paths = item.unit?.snapshot.nodes.map((n) => n.path) ?? [
+          item.path,
+        ];
+        const blocked = this.protection.filter((p) =>
+          paths.some((relative) =>
+            p.endsWith("/")
+              ? relative.startsWith(p) || relative === p.slice(0, -1)
+              : relative === p,
+          ),
+        );
+        if (!blocked.length) continue;
+        const owned = item.unit?.restore
+          ? await ownedRestorePaths(this.root, dir, item.id, item.unit)
+          : new Set<string>();
+        // Never exempt parent-wide or runtime uncertainty. Exact signed owned targets may
+        // have become recent/newest solely because our interrupted restore created them.
+        if (
+          blocked.some((p) => !owned.has(p.endsWith("/") ? p.slice(0, -1) : p))
+        )
+          throw new Error("当前或活动数据保护范围发生变化，已阻止恢复。");
+      }
       for (const i of restoring) i.restorePending = true;
       await this.writeJournal(j, signingKey);
       for (const i of restoring) {
         try {
+          if (i.unit) {
+            await this.requireStopped();
+            await restoreUnit(
+              this.root,
+              dir,
+              i.id,
+              i.unit,
+              () => this.writeJournal(j, signingKey),
+              async () => {
+                await this.rootOK();
+                await this.requireStopped();
+              },
+            );
+            i.status = "restored";
+            delete i.error;
+            delete i.restorePending;
+            result.completed++;
+            result.bytes += i.size;
+            continue;
+          }
           const source = path.join(dir, i.id + ".data"),
             target = this.full(i.path);
           await plainParents(source, false);

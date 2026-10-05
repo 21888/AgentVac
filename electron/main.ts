@@ -1,3 +1,11 @@
+import { prepareReadOnlyConversationSource } from "./conversations/sources.js";
+import {
+  initializeCursorSnapshotStorage,
+  getCursorSnapshotStorageAvailability,
+} from "./conversations/cursor-temp.js";
+import { ConversationServices } from "./conversations/service.js";
+import { conversationReaders } from "./conversations/index.js";
+import { getAdapter } from "./providers/index.js";
 import {
   app,
   BrowserWindow,
@@ -15,7 +23,11 @@ import { isTrustedRendererEvent, rendererFileUrl } from "./renderer-origin.js";
 import { AppDataServices } from "./app-services.js";
 import { shutdownDiagnosticWorkers } from "./diagnostics.js";
 import { PreferenceStore } from "./preferences.js";
-import { checkCodexProcesses } from "./processes.js";
+import {
+  checkCodexProcesses,
+  checkProviderProcesses,
+  applicationExecutablePaths,
+} from "./processes.js";
 import type { ScanOptions, DiagnoseRequest } from "../shared/types.js";
 app.setName("AgentVac");
 if (!app.isPackaged && process.env.AGENTVAC_TEST_USER_DATA)
@@ -23,6 +35,7 @@ if (!app.isPackaged && process.env.AGENTVAC_TEST_USER_DATA)
 if (!app.requestSingleInstanceLock()) app.exit(0);
 let window: BrowserWindow;
 let services: AppDataServices;
+let conversations: ConversationServices;
 let preferences: PreferenceStore;
 let operation = false;
 let operationName = "";
@@ -65,6 +78,7 @@ function register(
     operation = true;
     operationName = name;
     try {
+      await conversations?.cancelAndDrain();
       return await handler(...args);
     } finally {
       operation = false;
@@ -86,6 +100,7 @@ app.on("before-quit", (event) => {
     preferences?.flush(),
     services?.flush(),
     shutdownDiagnosticWorkers(),
+    conversations?.cancelAndDrain(),
   ]).finally(() => {
     flushedForQuit = true;
     app.quit();
@@ -111,12 +126,53 @@ app
         : {
             CODEX_HOME: process.env.CODEX_HOME,
             CODEX_SQLITE_HOME: process.env.CODEX_SQLITE_HOME,
+            CLAUDE_CONFIG_DIR: process.env.CLAUDE_CONFIG_DIR,
+            APPDATA: process.env.APPDATA,
+            LOCALAPPDATA: process.env.LOCALAPPDATA,
+            XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME,
+            CLINE_DIR: process.env.CLINE_DIR,
+            CLINE_DATA_DIR: process.env.CLINE_DATA_DIR,
+            VSCODE_APPDATA: process.env.VSCODE_APPDATA,
+            VSCODE_PORTABLE: process.env.VSCODE_PORTABLE,
           },
       cwd: isolatedTest ? profile : process.cwd(),
       processCheck: checkCodexProcesses,
+      providerProcessCheck: (provider) =>
+        checkProviderProcesses(
+          provider,
+          app.getAppMetrics().map((metric) => metric.pid),
+          {
+            pid: process.pid,
+            executablePaths: applicationExecutablePaths(
+              process.execPath,
+              process.platform,
+            ),
+          },
+        ),
       trashItem: (directory) => shell.trashItem(directory),
     });
     await services.initialize();
+    try {
+      await initializeCursorSnapshotStorage(
+        path.join(profile, "conversation-snapshots"),
+      );
+    } catch {
+      /* Reader remains disabled; never fall back to an unverified temp root. */
+    }
+    conversations = new ConversationServices({
+      engine: () => services.engine(),
+      context: () => services.getContext(),
+      readers: conversationReaders,
+      blocked: () => operation || quitting,
+      readerAvailability: (provider) =>
+        provider === "cursor" &&
+        !getCursorSnapshotStorageAvailability().available
+          ? getCursorSnapshotStorageAvailability().reason ===
+            "windows-acl-unverified"
+            ? "当前 Windows 私有副本目录未通过实际权限验证，暂不能读取 Cursor 数据库会话。"
+            : "无法建立已验证的私有本地数据库副本目录，暂不能读取 Cursor 数据库会话。"
+          : undefined,
+    });
     preferences = new PreferenceStore(app.getPath("userData"));
     nativeTheme.themeSource = (await preferences.load()).theme;
     Menu.setApplicationMenu(
@@ -210,7 +266,82 @@ app
     window.webContents.session.setPermissionRequestHandler(
       (_wc, _permission, callback) => callback(false),
     );
+    let choosingConversationSource = false;
+    register(
+      "choose-conversation-source",
+      async (kind) => {
+        if (choosingConversationSource || operation)
+          throw Error("请等待当前操作完成。");
+        const provider = services.getContext().provider;
+        if (!(
+          (kind === "cline-sdk" && provider === "cline") ||
+          (kind === "cursor-transcripts" && provider === "cursor")
+        ))
+          throw Error("当前工具不支持此读取来源。");
+        const selected = services.getContext();
+        choosingConversationSource = true;
+        try {
+          const result = await dialog.showOpenDialog(window, {
+            title:
+              kind === "cline-sdk"
+                ? "选择 Cline SDK 会话数据目录（只读）"
+                : "选择 Cursor agent-transcripts 目录（只读）",
+            properties: ["openDirectory", "showHiddenFiles"],
+          });
+          if (result.canceled || !result.filePaths[0]) return null;
+          if (
+            services.getContext().provider !== selected.provider ||
+            services.getContext().root !== selected.root
+          )
+            throw Error("工具目录已改变，请重新选择。");
+          return conversations.useReadOnlySource(
+            await prepareReadOnlyConversationSource(kind, result.filePaths[0]),
+          );
+        } finally {
+          choosingConversationSource = false;
+        }
+      },
+      true,
+    );
+    register(
+      "reset-conversation-source",
+      async () => conversations.resetSource(),
+      true,
+    );
+    register(
+      "conversation-access",
+      async () => conversations.getAccess(),
+      true,
+    );
+    register(
+      "conversation-consent",
+      async (allowed) => conversations.setAccess(allowed),
+      true,
+    );
+    register(
+      "conversation-list",
+      async (request) => conversations.list(request),
+      true,
+    );
+    register(
+      "conversation-read",
+      async (request) => conversations.read(request),
+      true,
+    );
+    register(
+      "conversation-cancel",
+      async (id) => conversations.cancel(id),
+      true,
+    );
+    register(
+      "conversation-preview",
+      async (ids) => conversations.previewArchive(ids),
+      true,
+    );
     register("context", async () => services.getContext());
+    register("set-provider", async (provider) =>
+      services.setProvider(provider),
+    );
     register(
       "preferences",
       async () => {
@@ -241,11 +372,11 @@ app
     });
     register("choose-root", async () => {
       const result = await dialog.showOpenDialog(window, {
-        title: "选择 Codex 数据目录（通常为 .codex）",
+        title: `选择 ${getAdapter(services.getContext().provider).label} 数据目录`,
         properties: ["openDirectory", "showHiddenFiles"],
       });
       if (result.canceled) return null;
-      return services.selectCodexRoot(result.filePaths[0], false);
+      return services.selectProviderRoot(result.filePaths[0]);
     });
     register("demo", async () => services.loadDemo());
     register("reset-demo", async (confirmed: boolean) =>
@@ -337,7 +468,9 @@ app
     register("quarantine", async (token: string, closed: boolean) => {
       if (typeof token !== "string" || typeof closed !== "boolean")
         throw new Error("无效请求。");
-      return selected().quarantine(token, closed);
+      return conversations.ownsPreview(token)
+        ? conversations.quarantine(token, closed)
+        : selected().quarantine(token, closed);
     });
     register("history", async () => selected().history());
     register("restore", async (id: string, closed: boolean) => {
@@ -348,6 +481,11 @@ app
     register("trash", async (id: string, confirmed: boolean) =>
       selected().trash(id, confirmed, (dir) => shell.trashItem(dir)),
     );
+    register("open-batch-quarantine", async (id) => {
+      const folder = await selected().getBatchQuarantinePath(id);
+      const problem = await shell.openPath(folder);
+      if (problem) throw new Error(problem);
+    });
     register("open-quarantine", async () => {
       const dir = await selected().getQuarantinePath();
       const problem = await shell.openPath(dir);

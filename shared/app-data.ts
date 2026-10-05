@@ -1,3 +1,4 @@
+import type { ProviderId } from "./types.js";
 // JSON-only renderer contracts. This file must not import Node or Electron implementations.
 export type DiagnosticRootKind = "codex-home" | "sqlite-home" | "log-dir";
 export interface DiagnosticRoot {
@@ -101,7 +102,7 @@ export interface StorageDiagnostics {
   observational: true;
 }
 
-export type WorkspaceKind = "codex" | "sqlite" | "logs";
+export type WorkspaceKind = ProviderId | "sqlite" | "logs";
 export type WorkspaceStatus =
   "available" | "missing" | "moved" | "unsafe" | "error";
 export interface WorkspaceSelection {
@@ -150,9 +151,14 @@ export interface RecoveryExportResult {
   keyIds: string[];
 }
 
-export interface CandidateView extends DiagnosticCandidate {
+export interface CandidateView {
   id: string;
   verified: false;
+  path: string;
+  kind: DiagnosticRootKind | "provider-home";
+  source: string;
+  provider?: ProviderId;
+  label?: string;
 }
 export interface DemoView {
   path: string;
@@ -161,6 +167,12 @@ export interface DemoView {
   message: string;
 }
 export interface AppDataView {
+  providers?: {
+    id: ProviderId;
+    label: string;
+    scope: string;
+    supportsSessionCleanup?: boolean;
+  }[];
   workspaces: WorkspaceListing;
   recovery: RecoveryKeyringDescription;
   candidates: CandidateView[];
