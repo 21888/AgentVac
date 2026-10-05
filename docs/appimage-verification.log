@@ -1,0 +1,38 @@
+
+7-Zip (z) 24.09 (x64) : Copyright (c) 1999-2024 Igor Pavlov : 2024-11-28
+ 64-bit locale=C.UTF-8 Threads:9 OPEN_MAX:16384, ASM
+
+Scanning the drive for archives:
+1 file, 125117305 bytes (120 MiB)
+
+Extracting archive: release-next/linux/AgentVac-0.1.0.AppImage
+
+WARNINGS:
+There are data after the end of archive
+
+--
+Path = release-next/linux/AgentVac-0.1.0.AppImage
+Type = SquashFS
+WARNINGS:
+There are data after the end of archive
+Offset = 188392
+Physical Size = 124796928
+Tail Size = 131985
+Headers Size = 9740
+File System = SquashFS 4.0
+Method = ZLIB
+Cluster Size = 131072
+Big-endian = -
+Created = 2026-10-04 14:26:14
+Characteristics = NO_FRAGMENTS DUPLICATES_REMOVED EXPORTABLE NO_XATTRS
+Code Page = UTF-8
+
+Everything is Ok
+
+Archives with Warnings: 1
+
+Warnings: 1
+Folders: 11
+Files: 90
+Size:       317274262
+Compressed: 125117305

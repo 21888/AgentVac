@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-04T21:21:50.171Z",
+  "passed": [
+    "onboarding + cancelled directory dialog leaves state untouched",
+    "1024px theme controls stay on one line in both themes; chart and table each have one tab stop",
+    "chart roving focus supports arrows, Home/End and Enter inspection",
+    "partial selection has a mixed bulk checkbox; Escape restores the original enabled trigger",
+    "rapid double click invokes quarantine once; result focus stays inside; Escape falls back to page heading when trigger is disabled",
+    "restore result also re-focuses; Escape returns to the current page heading for its disabled trigger",
+    "blocked action moves focus to its error and offers recheck; refreshed preview re-focuses, resets acknowledgements and leaves files untouched",
+    "exceptions after real fixture moves invalidate stale scan/selection, never resubmit the old token, disclose uncertainty and route to reconciled records for quarantine and restore"
+  ]
+}

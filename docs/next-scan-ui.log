@@ -1,0 +1,4 @@
+Generating 50,020 rotated-log fixtures
+PASS real progress matches active request, stale/wrong-root events ignored, cancellation is scoped and clears all selectable rows
+PASS real 50k truncation disables bulk but allows manual preview with warning; explicit 100k rescan returns complete result and clears old selection
+PASS real root I/O failure produces explicit failed state without old selectable entries

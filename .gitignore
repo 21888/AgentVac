@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.e2e-data/
+release-mac/
+release-win/
+
+build-check*/
+
+release-final/
+
+release-next/
+.qa/
+
+.build-cache/

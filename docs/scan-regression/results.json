@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-04T21:22:01.063Z",
+  "passed": [
+    "real progress matches active request, stale/wrong-root events ignored, cancellation is scoped and clears all selectable rows",
+    "real 50k truncation disables bulk but allows manual preview with warning; explicit 100k rescan returns complete result and clears old selection",
+    "real root I/O failure produces explicit failed state without old selectable entries"
+  ],
+  "coverage": {
+    "visitedEntries": 50050,
+    "returnedEntries": 50041,
+    "protectedDirectories": 3,
+    "inaccessibleEntries": 0,
+    "depthLimitedDirectories": 0,
+    "maxEntries": 100000,
+    "limitReason": null,
+    "resultBytes": 14903045
+  },
+  "scanCalls": [
+    {
+      "minAgeDays": 30,
+      "includeSessions": false,
+      "maxEntries": 50000,
+      "requestId": "9272f574-6b22-499c-84f9-6c3bb7184de9"
+    },
+    {
+      "minAgeDays": 30,
+      "includeSessions": false,
+      "maxEntries": 50000,
+      "requestId": "37226a7d-68a7-4b69-a698-a48344cba157"
+    },
+    {
+      "minAgeDays": 30,
+      "includeSessions": false,
+      "maxEntries": 50000,
+      "requestId": "80f0ebb7-f488-4ab0-b43b-58d42456ff9f"
+    },
+    {
+      "minAgeDays": 30,
+      "includeSessions": false,
+      "maxEntries": 100000,
+      "requestId": "03c447be-77ea-4b9f-8d88-8cdf6e44da43"
+    },
+    {
+      "minAgeDays": 30,
+      "includeSessions": false,
+      "maxEntries": 100000,
+      "requestId": "c11d1589-b3d6-4678-82ba-6d6280174cbf"
+    }
+  ]
+}

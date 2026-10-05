@@ -1,0 +1,6 @@
+PASS explicit candidate activation adds a diagnostic root without changing active Codex root or scanning; missing/moved entries stay disabled and forget removes only records
+PASS explicit scope/config opt-in, actual SQLite metadata and read-only metrics, sidecar/unknown-process blocks; chooser cancellation preserves selection
+PASS diagnosis cancellation uses current request ID, reports normal cancellation without stale metrics, and ignores a late old ID
+PASS real retained-data counts distinguish irregular files; unsigned batches have no direct restore; missing signing capability disables mutations but authenticated old restore and opening Trash work
+PASS key export/import require explicit risk acknowledgement; native cancellation preserves choices; successful import clears prior scan and selections
+PASS single reusable demo reset requires confirmation; real adapter move succeeds once; post-move failure refreshes actual context and never reports rebuilt success

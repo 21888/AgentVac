@@ -1,0 +1,24 @@
+2026-10-04T20:12:35.445Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac/release-final/linux/linux-unpacked/agentvac --inspect=0 --remote-debugging-port=0
+2026-10-04T20:12:35.449Z pw:browser <launched> pid=34828
+2026-10-04T20:12:35.505Z pw:browser [pid=34828][err] [34828:1004/131235.504793:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T20:12:35.513Z pw:browser [pid=34828][err] Debugger listening on ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7
+2026-10-04T20:12:35.514Z pw:browser [pid=34828][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T20:12:35.514Z pw:browser <ws connecting> ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7
+2026-10-04T20:12:35.521Z pw:browser <ws connected> ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7
+2026-10-04T20:12:35.521Z pw:browser [pid=34828][err] Debugger attached.
+2026-10-04T20:12:35.564Z pw:browser [pid=34828][err] [34828:1004/131235.564458:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T20:12:35.564Z pw:browser [pid=34828][err] [34828:1004/131235.564483:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T20:12:35.565Z pw:browser [pid=34828][err] 
+2026-10-04T20:12:35.565Z pw:browser [pid=34828][err] DevTools listening on ws://127.0.0.1:46367/devtools/browser/2bfb19ae-1975-49c5-9c5e-c47ea7018ae6
+2026-10-04T20:12:35.565Z pw:browser <ws connecting> ws://127.0.0.1:46367/devtools/browser/2bfb19ae-1975-49c5-9c5e-c47ea7018ae6
+2026-10-04T20:12:35.575Z pw:browser <ws connected> ws://127.0.0.1:46367/devtools/browser/2bfb19ae-1975-49c5-9c5e-c47ea7018ae6
+WAITING FOR NATIVE FILE MANAGER RESTORE OF BATCH cebcf7c1-d379-4b16-9957-42a2832e18d0 TO /workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-57fOo5/.agentvac-quarantine/cebcf7c1-d379-4b16-9957-42a2832e18d0
+PASS packaged native system Trash round-trip and byte-exact app restoration
+2026-10-04T20:16:53.849Z pw:browser <ws disconnecting> ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7
+2026-10-04T20:16:53.851Z pw:browser [pid=34828][err] Debugger ending on ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7
+2026-10-04T20:16:53.851Z pw:browser [pid=34828][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T20:16:53.852Z pw:browser <ws disconnected> ws://127.0.0.1:34687/2e8ea8a3-ad17-44f2-b37d-3e5e60eed5f7 code=1005 reason=
+2026-10-04T20:16:53.874Z pw:browser <ws disconnected> ws://127.0.0.1:46367/devtools/browser/2bfb19ae-1975-49c5-9c5e-c47ea7018ae6 code=1006 reason=
+2026-10-04T20:16:53.877Z pw:browser [pid=34828] <process did exit: exitCode=0, signal=null>
+2026-10-04T20:16:53.877Z pw:browser [pid=34828] starting temporary directories cleanup
+2026-10-04T20:16:53.879Z pw:browser [pid=34828] finished temporary directories cleanup

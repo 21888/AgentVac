@@ -1,0 +1,9 @@
+{
+  "stage": "03-export-cancel",
+  "expected": null,
+  "windowId": 46141398,
+  "title": "保存恢复钥匙备份（含敏感恢复材料）",
+  "action": "Clicked native GTK Cancel",
+  "verified": "App reports 已取消导出，未保存恢复备份",
+  "observedVia": "CUA screenshot"
+}

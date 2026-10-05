@@ -1,0 +1,30 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+  • electron-builder  version=26.15.3 os=6.18.44
+  • loaded configuration  file=package.json ("build" field)
+  • executing @electron/rebuild  electronVersion=44.5.1 arch=x64 buildFromSource=false workspaceRoot=/workspace/scratch/4f36639a43c1/AgentVac-next projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=x64 electron=44.5.1 appOutDir=release-next/macos/mac
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=/workspace/scratch/4f36639a43c1/AgentVac-next/release-next/macos/mac
+  • searching for node modules  pm=npm searchDir=/workspace/scratch/4f36639a43c1/AgentVac-next
+  • searching for node modules  pm=traversal searchDir=/workspace/scratch/4f36639a43c1/AgentVac-next
+  • using manual traversal of node_modules to build dependency tree
+  • no node modules returned while searching directories  searchDirectories=[""]
+  • skipped macOS application code signing  reason=supported only on macOS
+  • executing @electron/rebuild  electronVersion=44.5.1 arch=arm64 buildFromSource=false workspaceRoot=/workspace/scratch/4f36639a43c1/AgentVac-next projectDir=./ appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=44.5.1 appOutDir=release-next/macos/mac-arm64
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=/workspace/scratch/4f36639a43c1/AgentVac-next/release-next/macos/mac-arm64
+  • searching for node modules  pm=npm searchDir=/workspace/scratch/4f36639a43c1/AgentVac-next
+  • searching for node modules  pm=traversal searchDir=/workspace/scratch/4f36639a43c1/AgentVac-next
+  • using manual traversal of node_modules to build dependency tree
+  • no node modules returned while searching directories  searchDirectories=[""]
+  • skipped macOS application code signing  reason=supported only on macOS
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

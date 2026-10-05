@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-04T21:20:26.854Z",
+  "passed": [
+    "explicit candidate activation adds a diagnostic root without changing active Codex root or scanning; missing/moved entries stay disabled and forget removes only records",
+    "explicit scope/config opt-in, actual SQLite metadata and read-only metrics, sidecar/unknown-process blocks; chooser cancellation preserves selection",
+    "diagnosis cancellation uses current request ID, reports normal cancellation without stale metrics, and ignores a late old ID",
+    "real retained-data counts distinguish irregular files; unsigned batches have no direct restore; missing signing capability disables mutations but authenticated old restore and opening Trash work",
+    "key export/import require explicit risk acknowledgement; native cancellation preserves choices; successful import clears prior scan and selections",
+    "single reusable demo reset requires confirmation; real adapter move succeeds once; post-move failure refreshes actual context and never reports rebuilt success"
+  ],
+  "states": 32,
+  "errors": [],
+  "sourceSha256": {
+    "src/App.vue": "cb6696657e70fb178434c56aebcd2a49f0594c3a5695b52a87ac56f40a659b53",
+    "src/style.css": "c083a5e0bbe416e135713a7510bbe489155ab79cfc84ca718d041d8ad7069817",
+    "electron/app-services.ts": "49c7428be3a4df953c95909be5cfab36420e44f61837f15361e467a4ec20a580",
+    "electron/diagnostics.ts": "fc3e52c4136a9db2e792dcf8a56f9d8c273afb5d0a06ed875c55684f27d9774d"
+  },
+  "scope": "Browser UI with real AppDataServices and generated fixtures. Folder dialogs and OS Trash adapters simulated. Not a native Electron or WCAG certification."
+}

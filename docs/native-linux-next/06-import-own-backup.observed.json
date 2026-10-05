@@ -1,0 +1,9 @@
+{
+  "stage": "06-import-own-backup",
+  "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json",
+  "windowId": 46144423,
+  "title": "导入 AgentVac 恢复钥匙备份",
+  "action": "Typed exact same generated backup path and clicked native Open",
+  "verified": "UI says import complete, 0 new keys and 1 existing key; old scan and selections cleared",
+  "observedVia": "CUA screenshot"
+}

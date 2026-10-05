@@ -1,0 +1,9 @@
+{
+  "stage": "01-folder-cancel",
+  "expected": null,
+  "windowId": 46137351,
+  "title": "选择 Codex 数据目录（通常为 .codex）",
+  "action": "Clicked GTK Cancel button",
+  "verified": "Native dialog disappeared and AgentVac remains with no selected directory",
+  "observedVia": "CUA screenshot and window inventory"
+}

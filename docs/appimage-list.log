@@ -1,0 +1,133 @@
+
+7-Zip (z) 24.09 (x64) : Copyright (c) 1999-2024 Igor Pavlov : 2024-11-28
+ 64-bit locale=C.UTF-8 Threads:9 OPEN_MAX:16384, ASM
+
+Scanning the drive for archives:
+1 file, 125117305 bytes (120 MiB)
+
+Listing archive: release-next/linux/AgentVac-0.1.0.AppImage
+
+--
+Path = release-next/linux/AgentVac-0.1.0.AppImage
+Type = SquashFS
+WARNINGS:
+There are data after the end of archive
+Offset = 188392
+Physical Size = 124796928
+Tail Size = 131985
+Headers Size = 9740
+File System = SquashFS 4.0
+Method = ZLIB
+Cluster Size = 131072
+Big-endian = -
+Created = 2026-10-04 14:26:14
+Characteristics = NO_FRAGMENTS DUPLICATES_REMOVED EXPORTABLE NO_XATTRS
+Code Page = UTF-8
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+2026-10-04 14:25:58 .....           51           51  .DirIcon
+2026-10-04 14:25:58 .....         3483         1498  AppRun
+2026-10-04 14:26:11 .....         1096          646  LICENSE.electron.txt
+2026-10-04 14:26:11 .....     20111209      2559348  LICENSES.chromium.html
+2026-10-04 14:26:11 .....    228629832     95308513  agentvac
+2026-10-04 14:25:58 .....           51           51  agentvac.png
+2026-10-04 14:25:58 .....          243          199  app.agentvac.desktop
+2026-10-04 14:26:11 .....        15232         6361  chrome-sandbox
+2026-10-04 14:26:11 .....       719546       694142  chrome_100_percent.pak
+2026-10-04 14:26:11 .....      1268994      1220043  chrome_200_percent.pak
+2026-10-04 14:26:11 .....      1918544       856276  chrome_crashpad_handler
+2026-10-04 14:26:11 .....     10876560      4661497  icudtl.dat
+2026-10-04 14:26:11 .....      2801736      1173444  libffmpeg.so
+2026-10-04 14:26:11 .....      4657848      1781727  libvk_swiftshader.so
+2026-10-04 14:26:11 .....      2483184       619337  libvulkan.so.1
+2026-10-04 14:26:11 D....                            locales
+2026-10-04 14:26:11 D....                            resources
+2026-10-04 14:26:11 .....     12634346     12532209  resources.pak
+2026-10-04 14:26:11 .....       368768        82437  snapshot_blob.bin
+2026-10-04 14:26:11 D....                            usr
+2026-10-04 14:26:11 .....       742200       212357  v8_context_snapshot.bin
+2026-10-04 14:26:11 .....            6            6  version
+2026-10-04 14:26:11 .....          107           95  vk_swiftshader_icd.json
+2026-10-04 14:26:11 .....       115408        44208  locales/af.pak
+2026-10-04 14:26:11 .....       186176        53478  locales/am.pak
+2026-10-04 14:26:11 .....       185624        52645  locales/ar.pak
+2026-10-04 14:26:11 .....       211672        54790  locales/bg.pak
+2026-10-04 14:26:11 .....       269422        56361  locales/bn.pak
+2026-10-04 14:26:11 .....       129791        46381  locales/ca.pak
+2026-10-04 14:26:11 .....       130919        48807  locales/cs.pak
+2026-10-04 14:26:11 .....       119482        44708  locales/da.pak
+2026-10-04 14:26:11 .....       127411        47074  locales/de.pak
+2026-10-04 14:26:11 .....       229543        58573  locales/el.pak
+2026-10-04 14:26:11 .....       106865        41823  locales/en-GB.pak
+2026-10-04 14:26:11 .....       106969        41729  locales/en-US.pak
+2026-10-04 14:26:11 .....       128677        46055  locales/es-419.pak
+2026-10-04 14:26:11 .....       129380        45939  locales/es.pak
+2026-10-04 14:26:11 .....       116201        44936  locales/et.pak
+2026-10-04 14:26:11 .....       180542        50782  locales/fa.pak
+2026-10-04 14:26:11 .....       119440        45328  locales/fi.pak
+2026-10-04 14:26:11 .....       131706        45867  locales/fil.pak
+2026-10-04 14:26:11 .....       136129        47673  locales/fr.pak
+2026-10-04 14:26:11 .....       262702        55056  locales/gu.pak
+2026-10-04 14:26:11 .....       158974        48446  locales/he.pak
+2026-10-04 14:26:11 .....       278957        58005  locales/hi.pak
+2026-10-04 14:26:11 .....       125949        47065  locales/hr.pak
+2026-10-04 14:26:11 .....       137413        49382  locales/hu.pak
+2026-10-04 14:26:11 .....       114654        42527  locales/id.pak
+2026-10-04 14:26:11 .....       127474        45485  locales/it.pak
+2026-10-04 14:26:11 .....       147791        47174  locales/ja.pak
+2026-10-04 14:26:11 .....       295238        57088  locales/kn.pak
+2026-10-04 14:26:11 .....       126096        44418  locales/ko.pak
+2026-10-04 14:26:11 .....       134875        48180  locales/lt.pak
+2026-10-04 14:26:11 .....       135866        48005  locales/lv.pak
+2026-10-04 14:26:11 .....       312341        59543  locales/ml.pak
+2026-10-04 14:26:11 .....       261151        55060  locales/mr.pak
+2026-10-04 14:26:11 .....       117618        42837  locales/ms.pak
+2026-10-04 14:26:11 .....       115867        43873  locales/nb.pak
+2026-10-04 14:26:11 .....       121445        45536  locales/nl.pak
+2026-10-04 14:26:11 .....       131479        48743  locales/pl.pak
+2026-10-04 14:26:11 .....       126281        45634  locales/pt-BR.pak
+2026-10-04 14:26:11 .....       127702        45666  locales/pt-PT.pak
+2026-10-04 14:26:11 .....       132409        46989  locales/ro.pak
+2026-10-04 14:26:11 .....       207665        55861  locales/ru.pak
+2026-10-04 14:26:11 .....       133943        49737  locales/sk.pak
+2026-10-04 14:26:11 .....       126084        46664  locales/sl.pak
+2026-10-04 14:26:11 .....       196325        53355  locales/sr.pak
+2026-10-04 14:26:11 .....       116299        44070  locales/sv.pak
+2026-10-04 14:26:11 .....       124791        45270  locales/sw.pak
+2026-10-04 14:26:11 .....       314512        56595  locales/ta.pak
+2026-10-04 14:26:11 .....       289043        57546  locales/te.pak
+2026-10-04 14:26:11 .....       249576        51559  locales/th.pak
+2026-10-04 14:26:11 .....       125317        45692  locales/tr.pak
+2026-10-04 14:26:11 .....       209472        55911  locales/uk.pak
+2026-10-04 14:26:11 .....       185651        52430  locales/ur.pak
+2026-10-04 14:26:11 .....       149276        47224  locales/vi.pak
+2026-10-04 14:26:11 .....       103981        43388  locales/zh-CN.pak
+2026-10-04 14:26:11 .....       103156        43078  locales/zh-TW.pak
+2026-10-04 14:26:11 .....         1078          641  resources/LICENSE.agentvac.txt
+2026-10-04 14:26:11 .....         1096          646  resources/LICENSE.electron.txt
+2026-10-04 14:26:11 .....     20111209      2559348  resources/LICENSES.chromium.html
+2026-10-04 14:26:11 .....         1364          805  resources/THIRD-PARTY-NOTICES.txt
+2026-10-04 14:26:11 .....       406677       129789  resources/app.asar
+2026-10-04 14:26:11 D....                            resources/app.asar.unpacked
+2026-10-04 14:26:11 .....       110862        85779  resources/default_app.asar
+2026-10-04 14:26:11 D....                            resources/app.asar.unpacked/dist-electron
+2026-10-04 14:26:11 .....         6920         2259  resources/app.asar.unpacked/dist-electron/diagnostic-supervisor.cjs
+2026-10-04 14:26:11 .....        14192         4649  resources/app.asar.unpacked/dist-electron/diagnostic-worker.cjs
+2026-10-04 14:26:11 D....                            usr/lib
+2026-10-04 14:25:58 D....                            usr/share
+2026-10-04 14:26:11 .....        14488         4220  usr/lib/libXss.so.1
+2026-10-04 14:26:11 .....        22880         9261  usr/lib/libXtst.so.6
+2026-10-04 14:26:11 .....        52128        18377  usr/lib/libappindicator.so.1
+2026-10-04 14:26:11 .....       192296        77666  usr/lib/libgconf-2.so.4
+2026-10-04 14:26:11 .....        60648        22217  usr/lib/libindicator.so.7
+2026-10-04 14:26:11 .....        31304        11304  usr/lib/libnotify.so.4
+2026-10-04 14:25:58 D....                            usr/share/icons
+2026-10-04 14:25:58 D....                            usr/share/icons/hicolor
+2026-10-04 14:25:58 D....                            usr/share/icons/hicolor/1024x1024
+2026-10-04 14:25:58 D....                            usr/share/icons/hicolor/1024x1024/apps
+2026-10-04 14:25:58 .....        25354        19741  usr/share/icons/hicolor/1024x1024/apps/agentvac.png
+------------------- ----- ------------ ------------  ------------------------
+2026-10-04 14:26:11          317274262    127347188  90 files, 11 folders
+
+Warnings: 1

@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-04T21:55:08.341Z",
+  "status": "passed",
+  "fixtureOnly": true,
+  "profile": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile",
+  "checks": [
+    {
+      "stage": "native-trash-standard-tool-restore-app-restore",
+      "status": "passed",
+      "restoredFiles": 3,
+      "hashesMatch": true
+    }
+  ],
+  "runtime": {
+    "packaged": true,
+    "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile",
+    "appPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar",
+    "argv": [
+      "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac",
+      "--inspect=0",
+      "--remote-debugging-port=0",
+      "--user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile"
+    ],
+    "sandbox": true,
+    "disabledSandboxSwitch": false
+  },
+  "demoRoot": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile/demo-workspace",
+  "batchId": "d41f35c6-88d6-4c1c-aa74-c191da082be6",
+  "batchDirectory": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile/demo-workspace/.agentvac-quarantine/d41f35c6-88d6-4c1c-aa74-c191da082be6",
+  "files": [
+    {
+      "path": "log/codex-tui.log.1",
+      "size": 12400000,
+      "sha256": "69c34fa40954fce3d3e2dc19e6b0863295f0691c9f8dc08778d85c3670b666ff"
+    },
+    {
+      "path": "log/codex-tui.log.2",
+      "size": 7200000,
+      "sha256": "dc05b7c3ea32bdd0cb513d61497055b2aa9d84ad90d2ae195191f08404eb2d6e"
+    },
+    {
+      "path": "log/codex-tui.log.2026-05-01.gz",
+      "size": 3600000,
+      "sha256": "92019df970eb9f882c440c24f4df266d0de072f3bcd77d8ef5dc1e6412465ec1"
+    }
+  ],
+  "stage": "awaiting_standard_system_trash_restore",
+  "finishedAt": "2026-10-04T21:56:50.895Z"
+}

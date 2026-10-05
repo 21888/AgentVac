@@ -1,0 +1,61 @@
+{
+  "startedAt": "2026-10-04T20:12:35.434Z",
+  "platform": "linux",
+  "checks": [
+    "packaged Electron window; sandbox and context isolation enabled; renderer Node integration disabled",
+    "generated fixture quarantine through real packaged preload/IPC",
+    "real Electron shell.trashItem accepted generated batch; original directory absent; signed history reports trashed",
+    "whole generated batch returned from system Trash to its original quarantine directory",
+    "app restored every file after OS Trash round-trip; SHA-256 matches quarantined fixture bytes"
+  ],
+  "status": "passed",
+  "runtime": {
+    "packaged": true,
+    "electron": "44.5.1",
+    "appPath": "/workspace/scratch/4f36639a43c1/AgentVac/release-final/linux/linux-unpacked/resources/app.asar",
+    "launchArgs": [
+      "/workspace/scratch/4f36639a43c1/AgentVac/release-final/linux/linux-unpacked/agentvac",
+      "--inspect=0",
+      "--remote-debugging-port=0"
+    ],
+    "preferences": {
+      "allowRunningInsecureContent": false,
+      "contextIsolation": true,
+      "disableDialogs": false,
+      "disablePopups": false,
+      "enableBlinkFeatures": "",
+      "experimentalFeatures": false,
+      "javascript": true,
+      "nodeIntegration": false,
+      "nodeIntegrationInSubFrames": false,
+      "nodeIntegrationInWorker": false,
+      "safeDialogs": false,
+      "safeDialogsMessage": "",
+      "sandbox": true,
+      "webSecurity": true,
+      "webviewTag": false
+    },
+    "chromiumSandboxRequested": true
+  },
+  "demoRoot": "/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-57fOo5",
+  "batchId": "cebcf7c1-d379-4b16-9957-42a2832e18d0",
+  "batchDirectory": "/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-57fOo5/.agentvac-quarantine/cebcf7c1-d379-4b16-9957-42a2832e18d0",
+  "files": [
+    {
+      "path": "log/codex-tui.log.1",
+      "size": 12400000,
+      "sha256": "69c34fa40954fce3d3e2dc19e6b0863295f0691c9f8dc08778d85c3670b666ff"
+    },
+    {
+      "path": "log/codex-tui.log.2",
+      "size": 7200000,
+      "sha256": "dc05b7c3ea32bdd0cb513d61497055b2aa9d84ad90d2ae195191f08404eb2d6e"
+    },
+    {
+      "path": "log/codex-tui.log.2026-05-01.gz",
+      "size": 3600000,
+      "sha256": "92019df970eb9f882c440c24f4df266d0de072f3bcd77d8ef5dc1e6412465ec1"
+    }
+  ],
+  "finishedAt": "2026-10-04T20:16:53.846Z"
+}

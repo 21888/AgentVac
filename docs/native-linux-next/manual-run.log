@@ -1,0 +1,36 @@
+2026-10-04T21:41:55.021Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile
+2026-10-04T21:41:55.025Z pw:browser <launched> pid=56634
+2026-10-04T21:41:55.095Z pw:browser [pid=56634][err] [56634:1004/144155.094253:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:41:55.110Z pw:browser [pid=56634][err] Debugger listening on ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970
+2026-10-04T21:41:55.110Z pw:browser [pid=56634][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:41:55.110Z pw:browser <ws connecting> ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970
+2026-10-04T21:41:55.116Z pw:browser <ws connected> ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970
+2026-10-04T21:41:55.117Z pw:browser [pid=56634][err] Debugger attached.
+2026-10-04T21:41:55.159Z pw:browser [pid=56634][err] [56634:1004/144155.158820:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:41:55.159Z pw:browser [pid=56634][err] [56634:1004/144155.158852:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:41:55.160Z pw:browser [pid=56634][err] 
+2026-10-04T21:41:55.160Z pw:browser [pid=56634][err] DevTools listening on ws://127.0.0.1:44177/devtools/browser/7b76d3c3-c6d7-41b5-9f35-84354468565b
+2026-10-04T21:41:55.160Z pw:browser <ws connecting> ws://127.0.0.1:44177/devtools/browser/7b76d3c3-c6d7-41b5-9f35-84354468565b
+2026-10-04T21:41:55.170Z pw:browser <ws connected> ws://127.0.0.1:44177/devtools/browser/7b76d3c3-c6d7-41b5-9f35-84354468565b
+NATIVE_STAGE 01-folder-cancel
+NATIVE_STAGE 02-folder-select
+NATIVE_STAGE 03-export-cancel
+NATIVE_STAGE 04-export-save
+NATIVE_STAGE 05-import-cancel
+NATIVE_STAGE 06-import-own-backup
+2026-10-04T21:51:41.344Z pw:browser [pid=56634][err] Error occurred in handler for 'agentvac:context': Error: 请等待当前操作完成。
+2026-10-04T21:51:41.344Z pw:browser [pid=56634][err]     at /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar/dist-electron/main.cjs:3161:26
+2026-10-04T21:51:41.344Z pw:browser [pid=56634][err]     at Session.<anonymous> (node:electron/js2c/browser_init:1:118964)
+2026-10-04T21:51:41.344Z pw:browser [pid=56634][err]     at Session.emit (node:events:514:28)
+page.evaluate: Error: Error invoking remote method 'agentvac:context': Error: 请等待当前操作完成。
+    at /workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:77:31
+2026-10-04T21:51:41.448Z pw:browser <ws disconnecting> ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970
+2026-10-04T21:51:41.449Z pw:browser [pid=56634][err] Debugger ending on ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970
+2026-10-04T21:51:41.449Z pw:browser [pid=56634][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:51:41.450Z pw:browser <ws disconnected> ws://127.0.0.1:44141/ba3f073f-229e-4c5f-baeb-4da18164b970 code=1005 reason=
+2026-10-04T21:51:41.491Z pw:browser <ws disconnected> ws://127.0.0.1:44177/devtools/browser/7b76d3c3-c6d7-41b5-9f35-84354468565b code=1006 reason=
+2026-10-04T21:51:41.496Z pw:browser [pid=56634] <process did exit: exitCode=0, signal=null>
+2026-10-04T21:51:41.497Z pw:browser [pid=56634] starting temporary directories cleanup
+2026-10-04T21:51:41.498Z pw:browser [pid=56634] finished temporary directories cleanup
+
+Native manual suite exit: 1

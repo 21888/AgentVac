@@ -1,0 +1,29 @@
+PASS onboarding + cancelled directory dialog leaves state untouched
+PASS theme reload uses the real persisted preference even without localStorage cache, and hydration never writes it back
+PASS explicit light and dark modes do not change with system colour-scheme
+PASS system appearance responds dynamically while preserving the persisted system mode
+PASS cancel scan remains responsive and leaves no stale selectable results
+PASS single-row inspector explains protected live log database without selecting it
+PASS real generated demo scan and space overview
+PASS copy directory invokes only the selected-root clipboard bridge
+PASS file table, space attribution and inspector fit 1200×800 and 1024×768
+PASS clickable real-byte distribution filters actual matching files
+PASS credentials and sessions protected by default
+PASS search empty state and reset
+PASS preview requires acknowledgement; Escape cancels without mutation
+PASS system appearance changes preserve selected files and an acknowledged open confirmation
+PASS explicit quarantine moves exactly selected 3 logs
+PASS quarantine result transition retains focus inside its modal
+PASS history and open-folder request; cancelled restore is non-mutating
+PASS complete recoverable quarantine → history → restore workflow
+PASS policy changes invalidate old scan and selection
+PASS session opt-in allows explicit per-file selection and warns about resume/index
+PASS typed double confirmation → mock system trash, signed receipt, no permanent deletion
+PASS 1024×768 desktop layout has no document horizontal overflow
+PASS real-mode fixture requires closed-process acknowledgement; modal focus stays trapped
+PASS newly running process blocks operation after preview with no mutation
+PASS GUI partial quarantine clearly reports changed file while preserving unaffected success
+PASS GUI restore closure confirmation and destination-conflict partial result; no overwrite
+PASS large fixture table paginates at 100 rows without mounting all records
+PASS filter resets pagination; row keyboard Enter inspects and Space toggles explicit selection
+PASS no unhandled renderer errors

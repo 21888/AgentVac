@@ -1,0 +1,47 @@
+2026-10-04T21:39:28.356Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile
+2026-10-04T21:39:28.361Z pw:browser <launched> pid=56260
+2026-10-04T21:39:28.419Z pw:browser [pid=56260][err] [56260:1004/143928.418230:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:39:28.430Z pw:browser [pid=56260][err] Debugger listening on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+2026-10-04T21:39:28.431Z pw:browser [pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:39:28.431Z pw:browser <ws connecting> ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+2026-10-04T21:39:28.437Z pw:browser <ws connected> ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+2026-10-04T21:39:28.438Z pw:browser [pid=56260][err] Debugger attached.
+2026-10-04T21:39:28.480Z pw:browser [pid=56260][err] [56260:1004/143928.479293:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:39:28.480Z pw:browser [pid=56260][err] [56260:1004/143928.479353:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:39:28.480Z pw:browser [pid=56260][err] 
+2026-10-04T21:39:28.480Z pw:browser [pid=56260][err] DevTools listening on ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca
+2026-10-04T21:39:28.480Z pw:browser <ws connecting> ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca
+2026-10-04T21:39:28.489Z pw:browser <ws connected> ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca
+NATIVE_STAGE 01-folder-cancel
+2026-10-04T21:41:08.730Z pw:browser [pid=56260] <gracefully close start>
+2026-10-04T21:41:08.732Z pw:browser <ws disconnecting> ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+2026-10-04T21:41:08.733Z pw:browser [pid=56260][err] Debugger ending on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+2026-10-04T21:41:08.733Z pw:browser [pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:41:08.734Z pw:browser <ws disconnected> ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c code=1005 reason=
+electronApplication.evaluate: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile
+<launched> pid=56260
+[pid=56260][err] [56260:1004/143928.418230:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[pid=56260][err] Debugger listening on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+[pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+[pid=56260][err] Debugger attached.
+[pid=56260][err] [56260:1004/143928.479293:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[pid=56260][err] [56260:1004/143928.479353:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[pid=56260][err] 
+[pid=56260][err] DevTools listening on ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca
+[pid=56260] <gracefully close start>
+[pid=56260][err] Debugger ending on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c
+[pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+    at /workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:32:33
+    at until (/workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:23:46)
+    at async nativeDialog (/workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:32:13)
+    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:64:3
+2026-10-04T21:41:08.757Z pw:browser <ws disconnected> ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca code=1006 reason=
+2026-10-04T21:41:08.761Z pw:browser [pid=56260] <process did exit: exitCode=0, signal=null>
+2026-10-04T21:41:08.762Z pw:browser [pid=56260] starting temporary directories cleanup
+2026-10-04T21:41:08.763Z pw:browser [pid=56260] finished temporary directories cleanup
+2026-10-04T21:41:08.763Z pw:browser [pid=56260] <gracefully close end>
+
+Native manual suite exit: 130

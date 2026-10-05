@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-04T21:38:31.702Z",
+  "files": 79,
+  "scope": "Read-only NSIS payload extraction and nested 7z integrity check; every payload file matches unpacked build. Windows runtime NOT executed."
+}

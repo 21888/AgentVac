@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-04T21:39:28.345Z",
+  "status": "failed",
+  "platform": "linux",
+  "fixtureOnly": true,
+  "ownedRoot": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1",
+  "profile": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile",
+  "selectedRoot": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/fixture",
+  "backupPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/fixture-recovery.json",
+  "checks": [],
+  "runtime": {
+    "packaged": true,
+    "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile",
+    "appPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar",
+    "argv": [
+      "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac",
+      "--inspect=0",
+      "--remote-debugging-port=0",
+      "--user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile"
+    ],
+    "sandbox": true,
+    "disabledSandboxSwitch": false
+  },
+  "stage": "01-folder-cancel",
+  "error": "electronApplication.evaluate: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-0hxac1/profile\n<launched> pid=56260\n[pid=56260][err] [56260:1004/143928.418230:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory\n[pid=56260][err] Debugger listening on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c\n[pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging\n[pid=56260][err] Debugger attached.\n[pid=56260][err] [56260:1004/143928.479293:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory\n[pid=56260][err] [56260:1004/143928.479353:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory\n[pid=56260][err] \n[pid=56260][err] DevTools listening on ws://127.0.0.1:40201/devtools/browser/4e22935a-db45-469a-a1d3-fdb99a9013ca\n[pid=56260] <gracefully close start>\n[pid=56260][err] Debugger ending on ws://127.0.0.1:40749/e5d8b271-de26-430c-8aad-86b7bdce172c\n[pid=56260][err] For help, see: https://nodejs.org/learn/getting-started/debugging\n    at /workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:32:33\n    at until (/workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:23:46)\n    at async nativeDialog (/workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:32:13)\n    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:64:3"
+}

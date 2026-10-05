@@ -1,0 +1,9 @@
+{
+  "stage": "05-import-cancel",
+  "expected": null,
+  "windowId": 46143795,
+  "title": "导入 AgentVac 恢复钥匙备份",
+  "action": "Clicked native Cancel",
+  "verified": "App reports 已取消导入，未选择恢复备份 and retains one trusted fixture key",
+  "observedVia": "CUA screenshot"
+}

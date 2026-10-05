@@ -1,0 +1,158 @@
+{
+  "at": "2026-10-04T21:39:56.532Z",
+  "scope": "Read-only unpacked package structure, exact tested renderer/main/preload bytes and target CPU architecture; NOT native runtime acceptance",
+  "targets": [
+    {
+      "platform": "linux",
+      "arch": "x64",
+      "app": "linux/linux-unpacked",
+      "asarBytes": 406677,
+      "asarSha256": "ec9f7bc6c69bef717f869bd78df81629690206be02c0813f9f12e1d9048f7b29",
+      "verifiedFiles": 8,
+      "architectureVerified": true,
+      "notices": {
+        "LICENSE.agentvac.txt": {
+          "bytes": 1078,
+          "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+        },
+        "THIRD-PARTY-NOTICES.txt": {
+          "bytes": 1364,
+          "sha256": "563e402783d8ff3741e34ddc67eeb3b6c6a3b479033a48412ecff004be8a5541"
+        },
+        "LICENSE.electron.txt": {
+          "bytes": 1096,
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d"
+        },
+        "LICENSES.chromium.html": {
+          "bytes": 20111209,
+          "sha256": "a62dabd1c6ef1327365b2a3fdffb806222684a746dcb8f4afd1c1f690eba5535"
+        }
+      },
+      "unpackedHelpers": {
+        "diagnostic-supervisor.cjs": {
+          "bytes": 6920,
+          "sha256": "32694a4adbadd02c7d23ffc946d6c040610026456c08fc24dc402e4513ffba7b"
+        },
+        "diagnostic-worker.cjs": {
+          "bytes": 14192,
+          "sha256": "e6247c4bdc24fa929d75326ad74464bcc0a15eac61f18712be5bd925465d6b7d"
+        }
+      },
+      "nativeExecuted": false
+    },
+    {
+      "platform": "windows",
+      "arch": "x64",
+      "app": "windows/win-unpacked",
+      "asarBytes": 406677,
+      "asarSha256": "ec9f7bc6c69bef717f869bd78df81629690206be02c0813f9f12e1d9048f7b29",
+      "verifiedFiles": 8,
+      "architectureVerified": true,
+      "notices": {
+        "LICENSE.agentvac.txt": {
+          "bytes": 1078,
+          "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+        },
+        "THIRD-PARTY-NOTICES.txt": {
+          "bytes": 1364,
+          "sha256": "563e402783d8ff3741e34ddc67eeb3b6c6a3b479033a48412ecff004be8a5541"
+        },
+        "LICENSE.electron.txt": {
+          "bytes": 1096,
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d"
+        },
+        "LICENSES.chromium.html": {
+          "bytes": 20472830,
+          "sha256": "7b328b8c7463ac9bfc7dc648c751533517c8441a0b5b21047d6c0b2620e60d70"
+        }
+      },
+      "unpackedHelpers": {
+        "diagnostic-supervisor.cjs": {
+          "bytes": 6920,
+          "sha256": "32694a4adbadd02c7d23ffc946d6c040610026456c08fc24dc402e4513ffba7b"
+        },
+        "diagnostic-worker.cjs": {
+          "bytes": 14192,
+          "sha256": "e6247c4bdc24fa929d75326ad74464bcc0a15eac61f18712be5bd925465d6b7d"
+        }
+      },
+      "nativeExecuted": false
+    },
+    {
+      "platform": "macos",
+      "arch": "x64",
+      "app": "macos/mac/AgentVac.app/Contents",
+      "asarBytes": 406677,
+      "asarSha256": "ec9f7bc6c69bef717f869bd78df81629690206be02c0813f9f12e1d9048f7b29",
+      "verifiedFiles": 8,
+      "architectureVerified": true,
+      "notices": {
+        "LICENSE.agentvac.txt": {
+          "bytes": 1078,
+          "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+        },
+        "THIRD-PARTY-NOTICES.txt": {
+          "bytes": 1364,
+          "sha256": "563e402783d8ff3741e34ddc67eeb3b6c6a3b479033a48412ecff004be8a5541"
+        },
+        "LICENSE.electron.txt": {
+          "bytes": 1096,
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d"
+        },
+        "LICENSES.chromium.html": {
+          "bytes": 20111209,
+          "sha256": "a62dabd1c6ef1327365b2a3fdffb806222684a746dcb8f4afd1c1f690eba5535"
+        }
+      },
+      "unpackedHelpers": {
+        "diagnostic-supervisor.cjs": {
+          "bytes": 6920,
+          "sha256": "32694a4adbadd02c7d23ffc946d6c040610026456c08fc24dc402e4513ffba7b"
+        },
+        "diagnostic-worker.cjs": {
+          "bytes": 14192,
+          "sha256": "e6247c4bdc24fa929d75326ad74464bcc0a15eac61f18712be5bd925465d6b7d"
+        }
+      },
+      "nativeExecuted": false
+    },
+    {
+      "platform": "macos",
+      "arch": "arm64",
+      "app": "macos/mac-arm64/AgentVac.app/Contents",
+      "asarBytes": 406677,
+      "asarSha256": "ec9f7bc6c69bef717f869bd78df81629690206be02c0813f9f12e1d9048f7b29",
+      "verifiedFiles": 8,
+      "architectureVerified": true,
+      "notices": {
+        "LICENSE.agentvac.txt": {
+          "bytes": 1078,
+          "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+        },
+        "THIRD-PARTY-NOTICES.txt": {
+          "bytes": 1364,
+          "sha256": "563e402783d8ff3741e34ddc67eeb3b6c6a3b479033a48412ecff004be8a5541"
+        },
+        "LICENSE.electron.txt": {
+          "bytes": 1096,
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d"
+        },
+        "LICENSES.chromium.html": {
+          "bytes": 20111209,
+          "sha256": "a62dabd1c6ef1327365b2a3fdffb806222684a746dcb8f4afd1c1f690eba5535"
+        }
+      },
+      "unpackedHelpers": {
+        "diagnostic-supervisor.cjs": {
+          "bytes": 6920,
+          "sha256": "32694a4adbadd02c7d23ffc946d6c040610026456c08fc24dc402e4513ffba7b"
+        },
+        "diagnostic-worker.cjs": {
+          "bytes": 14192,
+          "sha256": "e6247c4bdc24fa929d75326ad74464bcc0a15eac61f18712be5bd925465d6b7d"
+        }
+      },
+      "nativeExecuted": false
+    }
+  ]
+}

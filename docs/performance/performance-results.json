@@ -1,0 +1,98 @@
+{
+  "at": "2026-10-04T21:23:44.625Z",
+  "scope": "Generated 5000-file fixtures. Sparse logical sizes are NOT real storage read/write throughput. Observational timing on this filesystem, not a performance guarantee.",
+  "timings": {
+    "create5000SparseLogs": 332.77,
+    "scan5000": 527.08,
+    "preview5000": 907.81,
+    "quarantine5000": 2916.21,
+    "historyAfterRestart5000": 359.87,
+    "readOnlyLostKeyRescue5000": 187.82,
+    "restore5000": 1989.04
+  },
+  "memory": [
+    {
+      "stage": "create5000SparseLogs",
+      "rss": 64794624,
+      "heapTotal": 28307456,
+      "heapUsed": 16784736,
+      "external": 5757233,
+      "arrayBuffers": 1739375
+    },
+    {
+      "stage": "scan5000",
+      "rss": 68820992,
+      "heapTotal": 31424512,
+      "heapUsed": 14814192,
+      "external": 5374897,
+      "arrayBuffers": 1354991
+    },
+    {
+      "stage": "preview5000",
+      "rss": 85327872,
+      "heapTotal": 48959488,
+      "heapUsed": 22266168,
+      "external": 5903841,
+      "arrayBuffers": 1883935
+    },
+    {
+      "stage": "quarantine5000",
+      "rss": 104534016,
+      "heapTotal": 56045568,
+      "heapUsed": 26419432,
+      "external": 8492078,
+      "arrayBuffers": 4472172
+    },
+    {
+      "stage": "historyAfterRestart5000",
+      "rss": 111407104,
+      "heapTotal": 57778176,
+      "heapUsed": 33006720,
+      "external": 5764481,
+      "arrayBuffers": 1744575
+    },
+    {
+      "stage": "readOnlyLostKeyRescue5000",
+      "rss": 111992832,
+      "heapTotal": 58302464,
+      "heapUsed": 24118544,
+      "external": 5951473,
+      "arrayBuffers": 1674687
+    },
+    {
+      "stage": "restore5000",
+      "rss": 143601664,
+      "heapTotal": 99729408,
+      "heapUsed": 45717752,
+      "external": 9069062,
+      "arrayBuffers": 5049156
+    }
+  ],
+  "checks": [
+    "Unknown key refuses authenticated restore; bounded read-only rescue reports all 5000 retained data files without modifying them.",
+    "All 5000 sparse files (156.25 GiB logical) quarantined and restored after engine restart; first inode/body prefix and protected marker unchanged."
+  ],
+  "logicalFixtureBytes": 167772160000,
+  "allocatedFixtureBytes": 20480000,
+  "manifestBytes": 3142349,
+  "peakSampledRssBytes": 143863808,
+  "resourceUsage": {
+    "userCPUTime": 3283213,
+    "systemCPUTime": 4173313,
+    "maxRSS": 140492,
+    "sharedMemorySize": 0,
+    "unsharedDataSize": 0,
+    "unsharedStackSize": 0,
+    "minorPageFault": 53115,
+    "majorPageFault": 0,
+    "swappedOut": 0,
+    "fsRead": 0,
+    "fsWrite": 96,
+    "ipcSent": 0,
+    "ipcReceived": 0,
+    "signalsCount": 0,
+    "voluntaryContextSwitches": 533017,
+    "involuntaryContextSwitches": 19379
+  },
+  "finishedAt": "2026-10-04T21:23:52.144Z"
+}

@@ -1,0 +1,4 @@
+PASS packaged build, architecture and notices: linux x64
+PASS packaged build, architecture and notices: windows x64
+PASS packaged build, architecture and notices: macos x64
+PASS packaged build, architecture and notices: macos arm64

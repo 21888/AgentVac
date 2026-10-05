@@ -1,0 +1,4 @@
+a94c5e7f2e4ba6ce3745a0fcd36f2f41539e414ce279d624e28c0ee52a65773c  AgentVac/scripts/desktop-e2e.mjs
+584a7698be35bef7cc74b4c1ac74861bb7f761251f601f00fa8095b8d2866fa5  AgentVac/dist-electron/main.cjs
+53462888f62b314bcb9f506b7ae00bfa0618d02d314735630ff2ea532f8b0b70  AgentVac/dist-electron/preload.cjs
+3fdce20f653196792fd11228f19766d5d7a35d9c858a5dd9941cc0aebd3998ef  AgentVac/dist/index.html

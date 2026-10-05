@@ -1,0 +1,25 @@
+2026-10-04T21:55:08.352Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile
+2026-10-04T21:55:08.356Z pw:browser <launched> pid=57211
+2026-10-04T21:55:08.413Z pw:browser [pid=57211][err] [57211:1004/145508.412265:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:55:08.422Z pw:browser [pid=57211][err] Debugger listening on ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc
+2026-10-04T21:55:08.422Z pw:browser [pid=57211][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:55:08.423Z pw:browser <ws connecting> ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc
+2026-10-04T21:55:08.429Z pw:browser <ws connected> ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc
+2026-10-04T21:55:08.429Z pw:browser [pid=57211][err] Debugger attached.
+2026-10-04T21:55:08.469Z pw:browser [pid=57211][err] [57211:1004/145508.469655:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:55:08.470Z pw:browser [pid=57211][err] [57211:1004/145508.469684:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:55:08.471Z pw:browser [pid=57211][err] 
+2026-10-04T21:55:08.471Z pw:browser [pid=57211][err] DevTools listening on ws://127.0.0.1:45907/devtools/browser/f50e3174-45a5-4125-b942-8923c0af1727
+2026-10-04T21:55:08.471Z pw:browser <ws connecting> ws://127.0.0.1:45907/devtools/browser/f50e3174-45a5-4125-b942-8923c0af1727
+2026-10-04T21:55:08.479Z pw:browser <ws connected> ws://127.0.0.1:45907/devtools/browser/f50e3174-45a5-4125-b942-8923c0af1727
+NATIVE_STAGE awaiting_standard_system_trash_restore
+2026-10-04T21:56:50.898Z pw:browser <ws disconnecting> ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc
+2026-10-04T21:56:50.899Z pw:browser [pid=57211][err] Debugger ending on ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc
+2026-10-04T21:56:50.899Z pw:browser [pid=57211][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:56:50.900Z pw:browser <ws disconnected> ws://127.0.0.1:39635/d480ebf3-3238-428b-a740-53abf44488cc code=1005 reason=
+2026-10-04T21:56:50.929Z pw:browser <ws disconnected> ws://127.0.0.1:45907/devtools/browser/f50e3174-45a5-4125-b942-8923c0af1727 code=1006 reason=
+2026-10-04T21:56:50.932Z pw:browser [pid=57211] <process did exit: exitCode=0, signal=null>
+2026-10-04T21:56:50.932Z pw:browser [pid=57211] starting temporary directories cleanup
+2026-10-04T21:56:50.933Z pw:browser [pid=57211] finished temporary directories cleanup
+
+Native Trash roundtrip exit: 0

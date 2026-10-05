@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-04T19:56:27Z",
+  "platform": "linux",
+  "execution": "Normal graphical desktop launch of linux-unpacked/agentvac with no switches; manual native-window controls",
+  "binarySha256": "9155dd17c16f0edeaadb74db4fd91e2730511cca83e8b130d59bab57aa4d4e4b",
+  "asarSha256": "36caa3446eef1a7c8baeee13535dcf2309c3ac294aa4b47a8bb00f54fd085d78",
+  "passed": [
+    "Packaged native Electron application window opened normally without disabling sandbox flags.",
+    "Demo scan displayed 21 generated items and 95.8 MB logical size.",
+    "Select-safe header checkbox selected only 3 eligible log files, totaling 22.1 MB displayed.",
+    "Esc cancelled quarantine preview, preserved selection, and visibly returned focus to preview trigger.",
+    "Reopened confirmation reset acknowledgement; confirming quarantined 3 generated files.",
+    "History showed 3 quarantined entries; native Open Quarantine Directory opened matching directory in Thunar.",
+    "Confirmed restore returned all 3 entries to restored status and 0 pending.",
+    "Dark theme changed the native window; folder chooser opened and Esc cancellation retained the demo state.",
+    "Quit through Ctrl+Q and relaunch started at the safe no-directory page with dark preference retained."
+  ],
+  "limitations": [
+    "Manual observations and screenshots were viewed in the desktop test session; no manual screenshot file was materialized.",
+    "The AppImage launcher could not start because libfuse.so.2 was missing. Native runtime results apply to the unpacked Linux binary.",
+    "System Trash and process-detection stress cases were not part of this manual sequence; separate artifacts record later tests.",
+    "Some injected native shortcuts did not activate after relaunch; the idle second process was stopped via its terminal before automated tests."
+  ]
+}

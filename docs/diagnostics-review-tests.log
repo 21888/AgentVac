@@ -1,0 +1,22 @@
+✔ candidate discovery uses only injected home/env/cwd and never probes them (1.615633ms)
+✔ file identity prefers reliable dev/inode; Windows fallback folds case and normalizes paths (0.342203ms)
+✔ overlapping Codex, SQLite, and ordinary-log roots count each physical file once (23.605152ms)
+✔ metadata separates SQLite/WAL/SHM/journal/plain logs, never traverses sessions (9.57907ms)
+✔ strict opt-ins, top-level config hints only, external hint is not scanned (6.926261ms)
+✔ complex TOML, profiles and multiline embedded fake keys fail closed (12.148996ms)
+✔ unsupported relative config, oversized config and malformed values never echo data (5.633401ms)
+✔ only explicit selected directories are accessed; state and outside DB deep checks refused (4.417046ms)
+✔ known closed schemas report PRAGMA metrics without reading log bodies or altering bytes (145.505856ms)
+✔ closed WAL-header database uses immutable URI and creates no WAL or SHM (47.611707ms)
+✔ live WAL writer and stale or empty sidecars are blocked with every source byte preserved (22.844231ms)
+✔ unknown schema and corrupt DB are blocked without leaking SQL, comments or log bodies (94.363623ms)
+✔ source changed during stability window returns blocked and diagnosis adds no changes (47.015591ms)
+✔ symlink/hardlink roots, DBs, logs and config are never followed (9.216547ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 626.074382

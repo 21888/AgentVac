@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-04T21:22:12.753Z",
+  "environment": "Linux headless Chromium; production renderer + real metadata engine; generated fixtures only",
+  "passed": [
+    "300 actual log files: cross-page exact set and bytes, pagination, hidden counts, filter round-trip, clear-hidden focus and replacement semantics",
+    "display-age filter preserves explicit selection with disclosure; scan-policy change invalidates selection and rescans eligibility",
+    "300 actual sessions: opt-in and explicit category, risk acknowledgement, cancellation preserves prior selection, final exact session preview, safe bulk replaces hidden sessions and disabling review clears stale selection",
+    "5001 actual files: bounded table/chart, disabled cross-page action, no truncation or selection mutation, backend rejects over-limit set",
+    "exact 5000 boundary succeeds with authoritative engine preview; fresh protected file excluded and byte total matches exact candidate set"
+  ]
+}

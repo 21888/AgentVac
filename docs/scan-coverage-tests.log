@@ -1,0 +1,14 @@
+✔ complete scoped scan reports unexpanded protected directories and true terminal progress (15.752476ms)
+✔ 50,011 real files cannot masquerade as complete; 100k retry includes the large file (18512.852569ms)
+✔ cancel and restart have separate request identities and no stale preview or late cancellation (5.558132ms)
+✔ fatal scan failure emits error and never retains old selectable state (4.201694ms)
+✔ read errors and depth limits are explicit partial outcomes, not protected-directory completion (10.823488ms)
+✔ long-path result serialization stops at a bounded budget with an explicit partial reason (7699.965489ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26485.354613

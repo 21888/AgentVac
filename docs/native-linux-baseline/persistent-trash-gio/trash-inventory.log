@@ -1,0 +1,11 @@
+Sun Oct  4 20:14:18 UTC 2026
+gio: trash:: Operation not supported
+gio_list_exit=1
+
+Exact generated-batch system metadata
+[Trash Info]
+Path=/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-57fOo5/.agentvac-quarantine/cebcf7c1-d379-4b16-9957-42a2832e18d0
+DeletionDate=2026-10-04T13:12:36
+
+Exact generated-batch presence
+drwx------ 2 agent agent 4096 Oct  4 13:12 /home/agent/.local/share/Trash/files/cebcf7c1-d379-4b16-9957-42a2832e18d0

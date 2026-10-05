@@ -1,0 +1,206 @@
+AGENTVAC_CHECK {"id":"fixture-disk-and-diagnostic-data","status":"PASS","detail":{"sqlite":"3.53.3","pages":182,"freelist":129,"fixtureDisk":{"path":"/workspace/scratch/4f36639a43c1/AgentVac-next/.qa","device":"27","filesystemType":"0x794c7630","availableBytes":"21652029440","inMemoryFilesystem":false},"sourceSha256":"1ee2ad71637b9914225dd80b7bc2ad190449a65b51e11db711821690f27a5ac3","helperFixtureSyntaxChecked":true,"trashConfigurationChanged":false}}
+2026-10-04T21:35:48.050Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile
+2026-10-04T21:35:48.056Z pw:browser <launched> pid=55617
+2026-10-04T21:35:48.177Z pw:browser [pid=55617][err] [55617:1004/143548.176231:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:48.196Z pw:browser [pid=55617][err] Debugger listening on ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104
+2026-10-04T21:35:48.196Z pw:browser [pid=55617][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:35:48.197Z pw:browser <ws connecting> ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104
+2026-10-04T21:35:48.204Z pw:browser <ws connected> ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104
+2026-10-04T21:35:48.205Z pw:browser [pid=55617][err] Debugger attached.
+2026-10-04T21:35:48.259Z pw:browser [pid=55617][err] [55617:1004/143548.259630:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:48.260Z pw:browser [pid=55617][err] [55617:1004/143548.259674:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:48.262Z pw:browser [pid=55617][err] 
+2026-10-04T21:35:48.262Z pw:browser [pid=55617][err] DevTools listening on ws://127.0.0.1:36437/devtools/browser/8212ee12-e820-43bf-942f-76da6749e5f8
+2026-10-04T21:35:48.262Z pw:browser <ws connecting> ws://127.0.0.1:36437/devtools/browser/8212ee12-e820-43bf-942f-76da6749e5f8
+2026-10-04T21:35:48.275Z pw:browser <ws connected> ws://127.0.0.1:36437/devtools/browser/8212ee12-e820-43bf-942f-76da6749e5f8
+AGENTVAC_CHECK {"id":"native-window-preload-ipc-sandbox","status":"PASS","detail":{"windows":1,"visible":true,"userData":"/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile","packaged":true,"appPath":"/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar","electron":"44.5.1","arch":"x64","argv":["/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac","--inspect=0","--remote-debugging-port=0","--user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile"],"sandbox":true,"contextIsolation":true,"nodeIntegration":false,"disabledSandboxSwitch":false,"coldUiSigningReady":true,"parallelStartupIpcSucceeded":true,"canSign":true,"candidatePathsOnlyNoAutomaticContentScan":true}}
+AGENTVAC_CHECK {"id":"native-folder-picker-open-cancel","status":"SKIP","detail":"xdotool is absent; native picker was not opened. Install normal desktop test tools in the approved runner, without security changes."}
+AGENTVAC_CHECK {"id":"demo-ui-scan-quarantine-history-restore","status":"PASS","detail":{"batchId":"3123dc64-25e3-481c-a1e4-15f6a738043f","restoredItems":3,"realUi":true,"fixedDemoWorkspace":true}}
+2026-10-04T21:35:49.883Z pw:browser <ws disconnecting> ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104
+2026-10-04T21:35:49.884Z pw:browser [pid=55617][err] Debugger ending on ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104
+2026-10-04T21:35:49.884Z pw:browser [pid=55617][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:35:49.885Z pw:browser <ws disconnected> ws://127.0.0.1:39283/6b377dfe-a3ff-4af7-a456-29ad0dad5104 code=1005 reason=
+2026-10-04T21:35:49.925Z pw:browser <ws disconnected> ws://127.0.0.1:36437/devtools/browser/8212ee12-e820-43bf-942f-76da6749e5f8 code=1006 reason=
+2026-10-04T21:35:49.931Z pw:browser [pid=55617] <process did exit: exitCode=0, signal=null>
+2026-10-04T21:35:49.931Z pw:browser [pid=55617] starting temporary directories cleanup
+2026-10-04T21:35:49.932Z pw:browser [pid=55617] finished temporary directories cleanup
+2026-10-04T21:35:49.933Z pw:browser <launching> /workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac --inspect=0 --remote-debugging-port=0 --user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile
+2026-10-04T21:35:49.935Z pw:browser <launched> pid=55726
+2026-10-04T21:35:49.993Z pw:browser [pid=55726][err] [55726:1004/143549.992889:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:50.004Z pw:browser [pid=55726][err] Debugger listening on ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf
+2026-10-04T21:35:50.004Z pw:browser [pid=55726][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:35:50.004Z pw:browser <ws connecting> ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf
+2026-10-04T21:35:50.006Z pw:browser <ws connected> ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf
+2026-10-04T21:35:50.006Z pw:browser [pid=55726][err] Debugger attached.
+2026-10-04T21:35:50.056Z pw:browser [pid=55726][err] [55726:1004/143550.054753:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:50.056Z pw:browser [pid=55726][err] [55726:1004/143550.054794:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+2026-10-04T21:35:50.056Z pw:browser [pid=55726][err] 
+2026-10-04T21:35:50.056Z pw:browser [pid=55726][err] DevTools listening on ws://127.0.0.1:40479/devtools/browser/ae43ea29-4353-4300-82ad-7c8505e68433
+2026-10-04T21:35:50.056Z pw:browser <ws connecting> ws://127.0.0.1:40479/devtools/browser/ae43ea29-4353-4300-82ad-7c8505e68433
+2026-10-04T21:35:50.067Z pw:browser <ws connected> ws://127.0.0.1:40479/devtools/browser/ae43ea29-4353-4300-82ad-7c8505e68433
+2026-10-04T21:35:50.187Z pw:browser [pid=55726][err] [55807:1004/143550.187495:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:285] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+AGENTVAC_CHECK {"id":"preference-and-demo-persistence-restart","status":"PASS","detail":{"theme":"dark","actualProcessRestart":true,"sameDemoPathReused":true,"oneDemoWorkspace":true,"signedHistorySurvivesRestart":true}}
+AGENTVAC_CHECK {"id":"single-instance-lock","status":"PASS","detail":{"actualSecondElectronExit":0,"onePrimaryWindow":true}}
+AGENTVAC_CHECK {"id":"generated-root-adapter","status":"PASS","detail":"One-shot folder-selection adapter targets only generated data; this separately covers application flow, not a native folder-dialog selection."}
+AGENTVAC_CHECK {"id":"duplicate-quarantine-and-restore","status":"SKIP","detail":"Actual process gate is running: 检测到 Codex 相关进程：codex-linux-san、codex. No detector was mocked; non-demo mutation is not attempted."}
+AGENTVAC_CHECK {"id":"native-trash-recovery-ui","status":"UNTESTED","detail":"No Recycle Bin/Trash enumeration, restore UI, or empty-trash operation is attempted. Only the exact generated batch was sent to the actual OS API."}
+AGENTVAC_CHECK {"id":"native-trash-generated-batch","status":"PASS","detail":{"realShellTrashItem":true,"usedDemoBecauseRealProcessGateBlocked":true,"batchId":"b06d9242-9fb0-48d4-81ca-71c54acf7bbb","sourceGone":true,"signedReceiptVerified":true,"trashConfigurationChanged":false,"rmFallback":false}}
+AGENTVAC_CHECK {"id":"diagnostic-actual-process-gate","status":"PASS","detail":{"reason":"CODEX_RUNNING","helperLaunches":0,"stoppedAtActualPreOrPostProcessGate":true,"sourceUnchanged":true,"detectorMocked":false}}
+AGENTVAC_CHECK {"id":"diagnostic-real-helper-ipc-readonly","status":"SKIP","detail":"Actual process gate CODEX_RUNNING; full native parser IPC needs an authorized isolated runner without Codex processes. No process gate bypassed."}
+AGENTVAC_CHECK {"id":"diagnostic-cancel-no-orphans","status":"SKIP","detail":"Cannot start native diagnostic child because actual process gate is CODEX_RUNNING; no process detector mocked."}
+AGENTVAC_CHECK {"id":"diagnostic-window-close-no-orphans","status":"SKIP","detail":"No active native diagnostic worker with actual gate CODEX_RUNNING; window-close-during-diagnosis is untested."}
+2026-10-04T21:35:50.723Z pw:browser <ws disconnecting> ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf
+2026-10-04T21:35:50.723Z pw:browser [pid=55726][err] Debugger ending on ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf
+2026-10-04T21:35:50.723Z pw:browser [pid=55726][err] For help, see: https://nodejs.org/learn/getting-started/debugging
+2026-10-04T21:35:50.723Z pw:browser <ws disconnected> ws://127.0.0.1:33107/ca073bea-2a81-4807-b4c3-2fb73b0b83cf code=1005 reason=
+2026-10-04T21:35:50.750Z pw:browser <ws disconnected> ws://127.0.0.1:40479/devtools/browser/ae43ea29-4353-4300-82ad-7c8505e68433 code=1006 reason=
+2026-10-04T21:35:50.753Z pw:browser [pid=55726] <process did exit: exitCode=0, signal=null>
+2026-10-04T21:35:50.754Z pw:browser [pid=55726] starting temporary directories cleanup
+2026-10-04T21:35:50.754Z pw:browser [pid=55726] finished temporary directories cleanup
+AGENTVAC_NATIVE_EVIDENCE_BEGIN
+{
+  "at": "2026-10-04T21:35:48.030Z",
+  "platform": "linux",
+  "arch": "x64",
+  "fixtureOnly": true,
+  "nativeExecution": true,
+  "fixtureStorage": {
+    "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+    "device": "27",
+    "filesystemType": "0x794c7630",
+    "availableBytes": "21652029440",
+    "inMemoryFilesystem": false
+  },
+  "inheritedTemp": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+  "inheritedXdgDataHome": null,
+  "trashConfigurationChanged": false,
+  "packagedArtifactTested": true,
+  "packageSource": "release-next/linux/agentvac-0.1.0.tar.gz",
+  "checks": {
+    "fixture-disk-and-diagnostic-data": {
+      "status": "PASS",
+      "detail": {
+        "sqlite": "3.53.3",
+        "pages": 182,
+        "freelist": 129,
+        "fixtureDisk": {
+          "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+          "device": "27",
+          "filesystemType": "0x794c7630",
+          "availableBytes": "21652029440",
+          "inMemoryFilesystem": false
+        },
+        "sourceSha256": "1ee2ad71637b9914225dd80b7bc2ad190449a65b51e11db711821690f27a5ac3",
+        "helperFixtureSyntaxChecked": true,
+        "trashConfigurationChanged": false
+      }
+    },
+    "native-window-preload-ipc-sandbox": {
+      "status": "PASS",
+      "detail": {
+        "windows": 1,
+        "visible": true,
+        "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile",
+        "packaged": true,
+        "appPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar",
+        "electron": "44.5.1",
+        "arch": "x64",
+        "argv": [
+          "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac",
+          "--inspect=0",
+          "--remote-debugging-port=0",
+          "--user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-D2dSbt/profile"
+        ],
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "disabledSandboxSwitch": false,
+        "coldUiSigningReady": true,
+        "parallelStartupIpcSucceeded": true,
+        "canSign": true,
+        "candidatePathsOnlyNoAutomaticContentScan": true
+      }
+    },
+    "native-folder-picker-open-cancel": {
+      "status": "SKIP",
+      "detail": "xdotool is absent; native picker was not opened. Install normal desktop test tools in the approved runner, without security changes."
+    },
+    "demo-ui-scan-quarantine-history-restore": {
+      "status": "PASS",
+      "detail": {
+        "batchId": "3123dc64-25e3-481c-a1e4-15f6a738043f",
+        "restoredItems": 3,
+        "realUi": true,
+        "fixedDemoWorkspace": true
+      }
+    },
+    "preference-and-demo-persistence-restart": {
+      "status": "PASS",
+      "detail": {
+        "theme": "dark",
+        "actualProcessRestart": true,
+        "sameDemoPathReused": true,
+        "oneDemoWorkspace": true,
+        "signedHistorySurvivesRestart": true
+      }
+    },
+    "single-instance-lock": {
+      "status": "PASS",
+      "detail": {
+        "actualSecondElectronExit": 0,
+        "onePrimaryWindow": true
+      }
+    },
+    "generated-root-adapter": {
+      "status": "PASS",
+      "detail": "One-shot folder-selection adapter targets only generated data; this separately covers application flow, not a native folder-dialog selection."
+    },
+    "duplicate-quarantine-and-restore": {
+      "status": "SKIP",
+      "detail": "Actual process gate is running: 检测到 Codex 相关进程：codex-linux-san、codex. No detector was mocked; non-demo mutation is not attempted."
+    },
+    "native-trash-generated-batch": {
+      "status": "PASS",
+      "detail": {
+        "realShellTrashItem": true,
+        "usedDemoBecauseRealProcessGateBlocked": true,
+        "batchId": "b06d9242-9fb0-48d4-81ca-71c54acf7bbb",
+        "sourceGone": true,
+        "signedReceiptVerified": true,
+        "trashConfigurationChanged": false,
+        "rmFallback": false
+      }
+    },
+    "diagnostic-real-helper-ipc-readonly": {
+      "status": "SKIP",
+      "detail": "Actual process gate CODEX_RUNNING; full native parser IPC needs an authorized isolated runner without Codex processes. No process gate bypassed."
+    },
+    "diagnostic-cancel-no-orphans": {
+      "status": "SKIP",
+      "detail": "Cannot start native diagnostic child because actual process gate is CODEX_RUNNING; no process detector mocked."
+    },
+    "diagnostic-window-close-no-orphans": {
+      "status": "SKIP",
+      "detail": "No active native diagnostic worker with actual gate CODEX_RUNNING; window-close-during-diagnosis is untested."
+    },
+    "native-trash-recovery-ui": {
+      "status": "UNTESTED",
+      "detail": "No Recycle Bin/Trash enumeration, restore UI, or empty-trash operation is attempted. Only the exact generated batch was sent to the actual OS API."
+    },
+    "diagnostic-actual-process-gate": {
+      "status": "PASS",
+      "detail": {
+        "reason": "CODEX_RUNNING",
+        "helperLaunches": 0,
+        "stoppedAtActualPreOrPostProcessGate": true,
+        "sourceUnchanged": true,
+        "detectorMocked": false
+      }
+    }
+  },
+  "status": "PASS_WITH_LIMITATIONS",
+  "finishedAt": "2026-10-04T21:35:50.759Z"
+}
+AGENTVAC_NATIVE_EVIDENCE_END
+
+Native package suite exit: 0

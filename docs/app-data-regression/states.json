@@ -1,0 +1,642 @@
+[
+  {
+    "name": "01-first-connection",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/01-first-connection-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n开始扫描\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n尚未选择目录\n\n选择 Codex 数据目录，或先用独立测试目录体验。\n\n连接真实 Codex 目录\n体验演示扫描\n建议位置，尚未读取：\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n只读扫描 · 不上传文件内容\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "01-first-connection",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/01-first-connection-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n开始扫描\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n尚未选择目录\n\n选择 Codex 数据目录，或先用独立测试目录体验。\n\n连接真实 Codex 目录\n体验演示扫描\n建议位置，尚未读取：\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n只读扫描 · 不上传文件内容\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "02-directory-management",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/02-directory-management-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\nSQLite 目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n来源：CODEX_SQLITE_HOME\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "02-directory-management",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/02-directory-management-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\nSQLite 目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n来源：CODEX_SQLITE_HOME\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "03-export-risk",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/03-export-risk-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\nSQLite 目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n来源：CODEX_SQLITE_HOME\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n导出敏感恢复材料？\n\n恢复密钥用于认证隔离清单，请谨慎保管\n\n备份文件包含敏感密钥内容\n\n任何获得该备份的人都可能拥有对应的恢复认证材料。请只保存到你控制的安全位置，不要公开或发送给他人。\n\n我了解备份包含敏感恢复材料，会在安全位置妥善保存。\n取消\n选择安全保存位置",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "03-export-risk",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/03-export-risk-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\nSQLite 目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n来源：CODEX_SQLITE_HOME\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n导出敏感恢复材料？\n\n恢复密钥用于认证隔离清单，请谨慎保管\n\n备份文件包含敏感密钥内容\n\n任何获得该备份的人都可能拥有对应的恢复认证材料。请只保存到你控制的安全位置，不要公开或发送给他人。\n\n我了解备份包含敏感恢复材料，会在安全位置妥善保存。\n取消\n选择安全保存位置",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "13-unavailable-workspaces",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/13-unavailable-workspaces-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\nmissing-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/missing-record\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n用于诊断\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n没有可用的路径建议，可手动选择目录。\n\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "13-unavailable-workspaces",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/13-unavailable-workspaces-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\nmissing-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/missing-record\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n用于诊断\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n没有可用的路径建议，可手动选择目录。\n\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "04-diagnostics-files",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/04-diagnostics-files-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "04-diagnostics-files",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/04-diagnostics-files-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "05-explicit-config",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/05-explicit-config-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "05-explicit-config",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/05-explicit-config-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "06-deep-observations",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/06-deep-observations-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\nauto_vacuum\nNONE\njournal_mode\nDELETE\n页大小\n4.0 KB\n数据库页数\n9\n空闲页数\n0\n空闲页逻辑大小\n0 B\n非空闲页逻辑大小\n36.0 KB\n\n这是数据库内部页状态观察，不能承诺等量可回收空间。观察期间文件属性稳定，不保证其他程序稍后不会写入。\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "06-deep-observations",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/06-deep-observations-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 10 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n10 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\nauto_vacuum\nNONE\njournal_mode\nDELETE\n页大小\n4.0 KB\n数据库页数\n9\n空闲页数\n0\n空闲页逻辑大小\n0 B\n非空闲页逻辑大小\n36.0 KB\n\n这是数据库内部页状态观察，不能承诺等量可回收空间。观察期间文件属性稳定，不保证其他程序稍后不会写入。\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "07-deep-blocked",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/07-deep-blocked-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 11 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n11 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nlogs_2.sqlite-wal\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite-wal\n\tWAL\t17 B\t4.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n已阻止深入检查\n\n检测到 WAL、SHM 或 Journal 旁路文件，不能安全进行此项深查。\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "07-deep-blocked",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/07-deep-blocked-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n此次采样\n\n10/04 14:20 · 11 个已发现文件\n\nSQLite 相关文件\n17.6 MB\n含数据库主体及 WAL / SHM / Journal，也包含受保护的状态库\n普通日志\n23.8 MB\n与数据库分别统计；此页不提供删除操作\n11 项 · 按文件名标注角色\n文件 / 路径\t类型\t逻辑大小\t已分配大小\n\ncodex-tui.log\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log\n\t普通日志\t1.1 MB\t4.0 KB\n\ncodex-tui.log.1\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.1\n\t普通日志\t11.8 MB\t4.0 KB\n\ncodex-tui.log.2\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2\n\t普通日志\t6.9 MB\t4.0 KB\n\ncodex-tui.log.2026-05-01.gz\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.2026-05-01.gz\n\t普通日志\t3.4 MB\t4.0 KB\n\ncodex-tui.log.3\n普通日志 · 仅统计\n/tmp/agentvac-services-ui-B38F0B/home/.codex/log/codex-tui.log.3\n\t普通日志\t586 KB\t4.0 KB\n\nlogs_1.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/home/.codex/logs_1.sqlite\n\t数据库主体\t14.5 MB\t4.0 KB\n\nstate_5.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite\n\t数据库主体\t2.9 MB\t4.0 KB\n\nstate_5.sqlite-wal\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/home/.codex/state_5.sqlite-wal\n\tWAL\t176 KB\t4.0 KB\n\nlogs_2.sqlite\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n\t数据库主体\t36.0 KB\t36.0 KB\n\nlogs_2.sqlite-wal\nCodex 日志库 · 保留\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite-wal\n\tWAL\t17 B\t4.0 KB\n\nstate_8.sqlite\n状态数据库 · 始终保护\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/state_8.sqlite\n\t数据库主体\t31 B\t4.0 KB\n逻辑大小与实际分配量可能不同；未知值不按零处理。\n1 / 1\n日志库只读深查\n\n仅支持此次已发现的 logs_2.sqlite。状态库及其他版本日志库保持保护。\n\n日志数据库\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置/logs_2.sqlite\n允许以只读方式检查这份日志库的结构与页信息\n我已退出全部 Codex CLI / 桌面进程\n开始只读深查\n已阻止深入检查\n\n检测到 WAL、SHM 或 Journal 旁路文件，不能安全进行此项深查。\n\n旁路文件、进程运行或无法确认、结构未知及源文件变化都会阻止深查。此功能不执行 VACUUM，不压缩或改写数据库。\n\nCodex 版本与日志维护说明\n配置中的建议位置\n\n这些新增路径尚未验证，也没有读取其中内容。\n\n日志目录\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\nconfig.log_dir · 未验证建议\n添加这个位置\n磁盘可用空间采样\n\n其他程序会同时写入或释放空间；此值不等同于本次隔离字节。同一磁盘可能按多个位置重复出现，请勿相加。\n\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n总量 4.9 GB\n10/04 14:20 采样\n2.8 GB 可用\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n总量 4.9 GB\n10/04 14:20 采样\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".utility-table-scroll"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "14-diagnosis-progress",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/14-diagnosis-progress-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n取消诊断\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n正在进行只读诊断\n\n只读取你选定的位置。检查完成后显示此次结果。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "14-diagnosis-progress",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/14-diagnosis-progress-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n取消诊断\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n正在进行只读诊断\n\n只读取你选定的位置。检查完成后显示此次结果。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "15-diagnosis-cancelled",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/15-diagnosis-cancelled-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n诊断已取消，未修改源文件。本次结果已清空，可重新读取。\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n选择范围后开始只读统计\n\n不会自动扫描建议位置，也不会修改数据库。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "15-diagnosis-cancelled",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/15-diagnosis-cancelled-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n诊断已取消，未修改源文件。本次结果已清空，可重新读取。\n空间诊断\n\n分开查看数据库、旁路文件与普通日志。所有诊断均为只读。\n\n诊断范围\n\n仅检查你勾选的位置，最多 8 个；添加位置不会自动读取内容。\n\n添加 SQLite 位置\n添加日志位置\n选择诊断目录\n独立数据库位置 SQLite 位置\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n可用\nmoved-record 日志位置\n/tmp/agentvac-services-ui-B38F0B/moved-record\n原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n目录已变化\n.codex Codex 数据\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n可用\n允许只读解析所选 Codex 目录的路径配置（sqlite_home / log_dir）\n只读统计\n\n配置发现的位置仅作为未验证建议；不会自动跟随、添加或扫描。\n\n选择范围后开始只读统计\n\n不会自动扫描建议位置，也不会修改数据库。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "08-readonly-recovery",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/08-readonly-recovery-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n4 个实际留存文件\n22.1 MB 逻辑大小\n已检查 5 个条目\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n未认证\n\n清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。\n\n1 个实际文件 · 39 B\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n清单已认证\n\n恢复清单已通过可信钥匙认证；恢复前仍会重新检查文件及目标路径。\n\n3 个实际文件 · 22.1 MB · 1 个非标准条目\n\n查看已认证隔离记录\n1 / 1\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "08-readonly-recovery",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/08-readonly-recovery-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n4 个实际留存文件\n22.1 MB 逻辑大小\n已检查 5 个条目\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n未认证\n\n清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。\n\n1 个实际文件 · 39 B\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n清单已认证\n\n恢复清单已通过可信钥匙认证；恢复前仍会重新检查文件及目标路径。\n\n3 个实际文件 · 22.1 MB · 1 个非标准条目\n\n查看已认证隔离记录\n1 / 1\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "09-signing-unavailable",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/09-signing-unavailable-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n打开隔离目录\n打开系统回收站\n恢复签名不可用：新隔离和移入回收站已暂停；已认证的旧批次仍可恢复。\n查看恢复状态\n隔离记录\n\n2 个批次 · 3 个文件待恢复\n\n恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经 AgentVac 校验恢复。\n\n10/04 14:20\n\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n\n0 项待恢复 / 1 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n9eb859a3-4629-4f8e-af3c-f21f79e0471e/manifest.json\n清单不可用，未执行任何恢复：隔离清单校验失败；拒绝使用被改动或来自其他设备的清单。\n0 B\n失败\n10/04 14:20\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n\n3 项待恢复 / 3 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-services-ui-B38F0B/home/.codex\nlog/codex-tui.log.1\n11.8 MB\n已隔离\nlog/codex-tui.log.2\n6.9 MB\n已隔离\nlog/codex-tui.log.2026-05-01.gz\n3.4 MB\n已隔离\n所有操作仅作用于当前目录\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "09-signing-unavailable",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/09-signing-unavailable-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": false,
+    "focusInModal": false,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n打开隔离目录\n打开系统回收站\n恢复签名不可用：新隔离和移入回收站已暂停；已认证的旧批次仍可恢复。\n查看恢复状态\n隔离记录\n\n2 个批次 · 3 个文件待恢复\n\n恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经 AgentVac 校验恢复。\n\n10/04 14:20\n\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n\n0 项待恢复 / 1 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n9eb859a3-4629-4f8e-af3c-f21f79e0471e/manifest.json\n清单不可用，未执行任何恢复：隔离清单校验失败；拒绝使用被改动或来自其他设备的清单。\n0 B\n失败\n10/04 14:20\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n\n3 项待恢复 / 3 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-services-ui-B38F0B/home/.codex\nlog/codex-tui.log.1\n11.8 MB\n已隔离\nlog/codex-tui.log.2\n6.9 MB\n已隔离\nlog/codex-tui.log.2026-05-01.gz\n3.4 MB\n已隔离\n所有操作仅作用于当前目录\nLinux",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "10-import-risk",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/10-import-risk-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n恢复签名不可用：新隔离和移入回收站已暂停；已认证的旧批次仍可恢复。\n查看恢复状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n新隔离已暂停\n\n本地主恢复密钥缺失、格式异常或不可安全访问。不会签署新批次；已导入的原密钥仍可用于验证恢复。\n\n当前主密钥公开 ID\n不可用或尚未验证\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n4 个实际留存文件\n22.1 MB 逻辑大小\n已检查 5 个条目\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n未认证\n\n清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。\n\n1 个实际文件 · 39 B\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n清单已认证\n\n恢复清单已通过可信钥匙认证；恢复前仍会重新检查文件及目标路径。\n\n3 个实际文件 · 22.1 MB · 1 个非标准条目\n\n查看已认证隔离记录\n1 / 1\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n导入你的恢复备份？\n\n恢复密钥用于认证隔离清单，请谨慎保管\n\n只导入你自己可信的备份\n\n来自他人的密钥可能影响清单信任。导入成功不等于某个批次已认证，仍需核实清单和原目录。导入后会清空旧扫描及勾选。\n\n这是我自己的可信恢复备份，我了解导入会改变信任范围。\n取消\n选择我的备份文件",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "10-import-risk",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/10-import-risk-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n.codex\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n恢复签名不可用：新隔离和移入回收站已暂停；已认证的旧批次仍可恢复。\n查看恢复状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n新隔离已暂停\n\n本地主恢复密钥缺失、格式异常或不可安全访问。不会签署新批次；已导入的原密钥仍可用于验证恢复。\n\n当前主密钥公开 ID\n不可用或尚未验证\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n已导出 1 个恢复密钥。请离线妥善保存，不要分享备份文件。\n\n保存位置：/tmp/agentvac-services-ui-B38F0B/my-generated-recovery-backup.json\n\n本次涉及的公开 ID\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n4 个实际留存文件\n22.1 MB 逻辑大小\n已检查 5 个条目\n9eb859a3-4629-4f8e-af3c-f21f79e0471e\n未认证\n\n清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。\n\n1 个实际文件 · 39 B\n\n5a3b7a1b-535b-4fc2-8c00-e8036f7541fa\n清单已认证\n\n恢复清单已通过可信钥匙认证；恢复前仍会重新检查文件及目标路径。\n\n3 个实际文件 · 22.1 MB · 1 个非标准条目\n\n查看已认证隔离记录\n1 / 1\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n导入你的恢复备份？\n\n恢复密钥用于认证隔离清单，请谨慎保管\n\n只导入你自己可信的备份\n\n来自他人的密钥可能影响清单信任。导入成功不等于某个批次已认证，仍需核实清单和原目录。导入后会清空旧扫描及勾选。\n\n这是我自己的可信恢复备份，我了解导入会改变信任范围。\n取消\n选择我的备份文件",
+    "axe": {
+      "violations": [],
+      "incomplete": []
+    }
+  },
+  {
+    "name": "11-reset-demo-risk",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/11-reset-demo-risk-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n22\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n11\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n可使用\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示工作区会跨重启保留；载入不会重新生成文件。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "11-reset-demo-risk",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/11-reset-demo-risk-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n22\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n11\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n刷新状态\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n可用 · 目录可用；尚未扫描。\n当前目录\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n可使用\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示工作区会跨重启保留；载入不会重新生成文件。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "12-reset-demo-interrupted",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/12-reset-demo-interrupted-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n刷新状态\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n连接\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：尚未选择\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n\n旧演示可能已移入系统回收站，而新建尚未完成。请核实当前状态，不要假定旧演示仍在原位置。\n\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "12-reset-demo-interrupted",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/12-reset-demo-interrupted-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n刷新状态\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n连接\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：尚未选择\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n\n旧演示可能已移入系统回收站，而新建尚未完成。请核实当前状态，不要假定旧演示仍在原位置。\n\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "16-minimum-window-reset-error",
+    "theme": "light",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/16-minimum-window-reset-error-light.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n刷新状态\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n连接\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：尚未选择\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n\n旧演示可能已移入系统回收站，而新建尚未完成。请核实当前状态，不要假定旧演示仍在原位置。\n\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "16-minimum-window-reset-error",
+    "theme": "dark",
+    "file": "/workspace/scratch/4f36639a43c1/AgentVac-next/docs/app-data-regression/16-minimum-window-reset-error-dark.png",
+    "horizontalOverflow": false,
+    "sidebarOverflow": false,
+    "modal": true,
+    "focusInModal": true,
+    "text": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n刷新状态\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n目录与恢复\n\n明确选择本地位置，保管恢复能力，核实留存文件。\n\n已选与最近目录\n\n移除记录不会删除文件。缺失或已变化的目录需手动重新选择，不自动寻找替代位置。\n\n选择真实目录\n演示工作区 Codex 数据 · 演示\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n目录缺失 · 目录不在原位置或磁盘离线；不会自动查找。\n连接\n移除记录\n独立数据库位置 SQLite 位置\n\n/tmp/agentvac-services-ui-B38F0B/独立数据库位置\n\n可用 · 目录可用；尚未扫描。\n用于诊断\n移除记录\nmoved-record 日志位置\n\n/tmp/agentvac-services-ui-B38F0B/moved-record\n\n目录已变化 · 原路径对应的目录已改变或磁盘已更换。请重新选择确认；不会自动定位或扫描。\n用于诊断\n移除记录\n.codex Codex 数据\n\n/tmp/agentvac-services-ui-B38F0B/home/.codex\n\n可用 · 目录可用；尚未扫描。\n连接\n移除记录\n建议位置\n\n来自默认路径、环境变量或你允许读取的配置；只是路径建议，尚未验证或扫描。\n\n日志目录 未验证\n\n/tmp/agentvac-services-ui-B38F0B/独立日志位置\n\n来源：config.log_dir\n添加到诊断\n恢复密钥\n\n用于认证隔离清单。这里只显示公开标识，不显示密钥内容。\n\n可以创建新隔离记录\n当前主密钥公开 ID\n2e28fbaf77b51f56565a17f0a59000b6a4dbc3d13679788c39e992968226e8df\n可用于验证的密钥\n1 个\n查看已信任的公开 ID\n导入我的恢复备份\n导出恢复备份\n\n新增 0 个恢复密钥，1 个已存在。导入不代表隔离批次已经认证。\n\n只读核实隔离区\n\n即使清单未通过认证，也能查看实际保留的 .data 文件数量和逻辑大小；不据此提供恢复或删除。\n\n读取留存情况\n\n当前根目录：尚未选择\n\n独立演示目录\n\n应用内固定位置复用，不反复创建散落的演示目录。\n\n尚未创建\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n演示尚未创建；首次载入后会保留操作和恢复记录。\n\n打开演示并扫描\n重置演示目录\n\n重置前会再次确认；存在的旧演示整目录移入系统回收站，不永久删除。\n\n仅访问你明确选择的本地位置\nLinux\n重置独立演示目录？\n\n仅作用于应用的固定演示目录\n\n旧演示目录将整体移入系统回收站\n\n存在的旧演示数据及其隔离记录将进入系统回收站，随后创建新演示。此操作不永久删除；如果重建失败，会明确报告，并保留可核实的实际状态。\n\n/tmp/agentvac-services-ui-B38F0B/profile/demo-workspace\n\n我了解旧演示目录将移入系统回收站，同意重新创建演示。\n回收站操作报告失败，但演示已不在原位置；未生成新文件，请检查系统回收站。\n\n旧演示可能已移入系统回收站，而新建尚未完成。请核实当前状态，不要假定旧演示仍在原位置。\n\n取消\n确认重置演示目录",
+    "axe": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "nodes": [
+            {
+              "target": [
+                ".detail-path"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a p with no valid role attribute."
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,23 @@
+Official package source: https://ftp.debian.org/debian/pool/main/g/glib2.0/libglib2.0-bin_2.84.4-3~deb13u5_amd64.deb
+Official checksum source: https://packages.debian.org/trixie/amd64/libglib2.0-bin/download
+733e0bbb4aaa7846a23a02cc3f6af71b41cdfcc833538aae0c35eb2c1160c15a  AgentVac/docs/native-linux/debian-tools/libglib2.0-bin_2.84.4-3~deb13u5_amd64.deb
+Package: libglib2.0-bin
+Version: 2.84.4-3~deb13u5
+Architecture: amd64
+Depends: libglib2.0-data, libc6 (>= 2.38), libelf1t64 (>= 0.142), libglib2.0-0t64 (= 2.84.4-3~deb13u5)
+	linux-vdso.so.1 (0x00007f79d1d7e000)
+	libgio-2.0.so.0 => /lib/x86_64-linux-gnu/libgio-2.0.so.0 (0x00007f79d1b43000)
+	libgmodule-2.0.so.0 => /lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f79d1b3c000)
+	libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f79d19e3000)
+	libgobject-2.0.so.0 => /lib/x86_64-linux-gnu/libgobject-2.0.so.0 (0x00007f79d1980000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f79d178a000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f79d176a000)
+	libmount.so.1 => /lib/x86_64-linux-gnu/libmount.so.1 (0x00007f79d16ee000)
+	libselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007f79d16ba000)
+	libatomic.so.1 => /lib/x86_64-linux-gnu/libatomic.so.1 (0x00007f79d16b0000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f79d15be000)
+	libpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007f79d150f000)
+	libffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007f79d1502000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f79d1d80000)
+	libblkid.so.1 => /lib/x86_64-linux-gnu/libblkid.so.1 (0x00007f79d14a1000)
+2.84.4

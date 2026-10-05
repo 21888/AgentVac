@@ -1,0 +1,138 @@
+{
+  "at": "2026-10-04T21:33:50.065Z",
+  "platform": "linux",
+  "arch": "x64",
+  "fixtureOnly": true,
+  "nativeExecution": true,
+  "fixtureStorage": {
+    "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+    "device": "27",
+    "filesystemType": "0x794c7630",
+    "availableBytes": "22386892800",
+    "inMemoryFilesystem": false
+  },
+  "inheritedTemp": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+  "inheritedXdgDataHome": null,
+  "trashConfigurationChanged": false,
+  "packagedArtifactTested": false,
+  "checks": {
+    "fixture-disk-and-diagnostic-data": {
+      "status": "PASS",
+      "detail": {
+        "sqlite": "3.53.3",
+        "pages": 182,
+        "freelist": 129,
+        "fixtureDisk": {
+          "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+          "device": "27",
+          "filesystemType": "0x794c7630",
+          "availableBytes": "22386892800",
+          "inMemoryFilesystem": false
+        },
+        "sourceSha256": "1ff7c2a420f2e987d94af936fa51948949200d555c4dcf6964c541f272d3a1f3",
+        "helperFixtureSyntaxChecked": true,
+        "trashConfigurationChanged": false
+      }
+    },
+    "native-window-preload-ipc-sandbox": {
+      "status": "PASS",
+      "detail": {
+        "windows": 1,
+        "visible": true,
+        "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-HkzUaY/profile",
+        "electron": "44.5.1",
+        "arch": "x64",
+        "argv": [
+          "/workspace/scratch/4f36639a43c1/AgentVac/node_modules/electron/dist/electron",
+          "/workspace/scratch/4f36639a43c1/AgentVac-next"
+        ],
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "disabledSandboxSwitch": false,
+        "coldUiSigningReady": true,
+        "parallelStartupIpcSucceeded": true,
+        "canSign": true,
+        "noRealHomeDiscovery": true
+      }
+    },
+    "native-folder-picker-open-cancel": {
+      "status": "SKIP",
+      "detail": "xdotool is absent; native picker was not opened. Install normal desktop test tools in the approved runner, without security changes."
+    },
+    "demo-ui-scan-quarantine-history-restore": {
+      "status": "PASS",
+      "detail": {
+        "batchId": "dd6c406d-1ea2-4314-bf95-28b8406db12c",
+        "restoredItems": 3,
+        "realUi": true,
+        "fixedDemoWorkspace": true
+      }
+    },
+    "preference-and-demo-persistence-restart": {
+      "status": "PASS",
+      "detail": {
+        "theme": "dark",
+        "actualProcessRestart": true,
+        "sameDemoPathReused": true,
+        "oneDemoWorkspace": true,
+        "signedHistorySurvivesRestart": true
+      }
+    },
+    "single-instance-lock": {
+      "status": "PASS",
+      "detail": {
+        "actualSecondElectronExit": 0,
+        "onePrimaryWindow": true
+      }
+    },
+    "generated-root-adapter": {
+      "status": "PASS",
+      "detail": "One-shot folder-selection adapter targets only generated data; this separately covers application flow, not a native folder-dialog selection."
+    },
+    "duplicate-quarantine-and-restore": {
+      "status": "SKIP",
+      "detail": "Actual process gate is running: 检测到 Codex 相关进程：codex-linux-san、codex. No detector was mocked; non-demo mutation is not attempted."
+    },
+    "native-trash-generated-batch": {
+      "status": "PASS",
+      "detail": {
+        "realShellTrashItem": true,
+        "usedDemoBecauseRealProcessGateBlocked": true,
+        "batchId": "80cce8d4-ba4c-42ed-9f27-dfc089579541",
+        "sourceGone": true,
+        "signedReceiptVerified": true,
+        "trashConfigurationChanged": false,
+        "rmFallback": false
+      }
+    },
+    "diagnostic-real-helper-ipc-readonly": {
+      "status": "SKIP",
+      "detail": "Actual process gate CODEX_RUNNING; full native parser IPC needs an authorized isolated runner without Codex processes. No process gate bypassed."
+    },
+    "diagnostic-cancel-no-orphans": {
+      "status": "SKIP",
+      "detail": "Cannot start native diagnostic child because actual process gate is CODEX_RUNNING; no process detector mocked."
+    },
+    "diagnostic-window-close-no-orphans": {
+      "status": "SKIP",
+      "detail": "No active native diagnostic worker with actual gate CODEX_RUNNING; window-close-during-diagnosis is untested."
+    },
+    "native-trash-recovery-ui": {
+      "status": "UNTESTED",
+      "detail": "No Recycle Bin/Trash enumeration, restore UI, or empty-trash operation is attempted. Only the exact generated batch was sent to the actual OS API."
+    },
+    "diagnostic-actual-process-gate": {
+      "status": "PASS",
+      "detail": {
+        "reason": "CODEX_RUNNING",
+        "helperLaunches": 0,
+        "stoppedAtActualPreOrPostProcessGate": true,
+        "sourceUnchanged": true,
+        "detectorMocked": false
+      }
+    }
+  },
+  "status": "PASS_WITH_LIMITATIONS",
+  "finishedAt": "2026-10-04T21:33:52.498Z"
+}

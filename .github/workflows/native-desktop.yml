@@ -1,0 +1,74 @@
+name: Native Electron fixture verification
+
+# Deliberately manual only: no push, pull_request, tag or scheduled trigger.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentvac-native-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: Native ${{ matrix.platform }} ${{ matrix.arch }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            platform: Linux
+            arch: x64
+          - os: windows-2022
+            platform: Windows
+            arch: x64
+          - os: macos-15-intel
+            platform: macOS
+            arch: x64
+          - os: macos-15
+            platform: macOS
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      CI: "true"
+      AGENTVAC_EXPECTED_ARCH: ${{ matrix.arch }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          # No dependency cache: avoids Actions cache storage usage.
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check native harness syntax
+        run: node --check scripts/desktop-e2e.mjs
+      - name: Run fixture unit tests
+        run: npm test
+      - name: Build and typecheck source
+        run: npm run build
+      - name: Install standard Linux desktop tools
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xdotool openbox dbus-x11 libgtk-3-0 libnss3 libasound2 libgbm1 libglib2.0-bin xdg-utils
+      - name: Native Linux window and OS integration
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-openbox.log 2>&1 & npm run test:desktop:built'
+      - name: Native Windows or macOS window and OS integration
+        if: runner.os != 'Linux'
+        run: npm run test:desktop:built
+      - name: Publish coverage summary to job log
+        if: always()
+        shell: bash
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; const p=`docs/native-ci/next-${process.platform}-${process.arch}.json`; if (fs.existsSync(p)) { const r=JSON.parse(fs.readFileSync(p,"utf8")); console.log("Native result:",r.status); for (const [id,v] of Object.entries(r.checks)) console.log(`${v.status}: ${id}`); } else { console.log("UNTESTED: native harness did not produce evidence; inspect the earlier failing setup/build step."); }'
+      # No package publishing, upload-artifact, cache, deployment or release steps.

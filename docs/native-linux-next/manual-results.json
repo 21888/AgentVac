@@ -1,0 +1,155 @@
+{
+  "at": "2026-10-04T21:41:55.011Z",
+  "status": "failed",
+  "platform": "linux",
+  "fixtureOnly": true,
+  "ownedRoot": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH",
+  "profile": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile",
+  "selectedRoot": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture",
+  "backupPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json",
+  "checks": [
+    {
+      "stage": "01-folder-cancel",
+      "realNativeDialog": true,
+      "type": "open",
+      "observation": {
+        "stage": "01-folder-cancel",
+        "expected": null,
+        "windowId": 46137351,
+        "title": "选择 Codex 数据目录（通常为 .codex）",
+        "action": "Clicked GTK Cancel button",
+        "verified": "Native dialog disappeared and AgentVac remains with no selected directory",
+        "observedVia": "CUA screenshot and window inventory"
+      },
+      "result": {
+        "canceled": true,
+        "filePaths": []
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "02-folder-select",
+      "realNativeDialog": true,
+      "type": "open",
+      "observation": {
+        "stage": "02-folder-select",
+        "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture",
+        "windowId": 46139880,
+        "title": "选择 Codex 数据目录（通常为 .codex）",
+        "action": "Typed exact generated directory and clicked native Open button",
+        "verified": "Main app displays exact fixture path and directory connected notice",
+        "observedVia": "CUA screenshots"
+      },
+      "result": {
+        "canceled": false,
+        "filePaths": [
+          "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture"
+        ]
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "03-export-cancel",
+      "realNativeDialog": true,
+      "type": "save",
+      "observation": {
+        "stage": "03-export-cancel",
+        "expected": null,
+        "windowId": 46141398,
+        "title": "保存恢复钥匙备份（含敏感恢复材料）",
+        "action": "Clicked native GTK Cancel",
+        "verified": "App reports 已取消导出，未保存恢复备份",
+        "observedVia": "CUA screenshot"
+      },
+      "result": {
+        "canceled": true,
+        "filePath": null
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "04-export-save",
+      "realNativeDialog": true,
+      "type": "save",
+      "observation": {
+        "stage": "04-export-save",
+        "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json",
+        "windowId": 46142090,
+        "title": "保存恢复钥匙备份（含敏感恢复材料）",
+        "action": "Typed exact generated path and clicked native Save",
+        "verified": "UI says backup saved and shows exact fixture path with 1 exported key; no key content displayed",
+        "observedVia": "CUA screenshot"
+      },
+      "result": {
+        "canceled": false,
+        "filePath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json"
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "05-import-cancel",
+      "realNativeDialog": true,
+      "type": "open",
+      "observation": {
+        "stage": "05-import-cancel",
+        "expected": null,
+        "windowId": 46143795,
+        "title": "导入 AgentVac 恢复钥匙备份",
+        "action": "Clicked native Cancel",
+        "verified": "App reports 已取消导入，未选择恢复备份 and retains one trusted fixture key",
+        "observedVia": "CUA screenshot"
+      },
+      "result": {
+        "canceled": true,
+        "filePaths": []
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "06-import-own-backup",
+      "realNativeDialog": true,
+      "type": "open",
+      "observation": {
+        "stage": "06-import-own-backup",
+        "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json",
+        "windowId": 46144423,
+        "title": "导入 AgentVac 恢复钥匙备份",
+        "action": "Typed exact same generated backup path and clicked native Open",
+        "verified": "UI says import complete, 0 new keys and 1 existing key; old scan and selections cleared",
+        "observedVia": "CUA screenshot"
+      },
+      "result": {
+        "canceled": false,
+        "filePaths": [
+          "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json"
+        ]
+      },
+      "nativeReturnObjectCaptured": false
+    },
+    {
+      "stage": "key-risk-ack-reset-and-own-duplicate-import",
+      "status": "passed",
+      "keyCount": 1
+    }
+  ],
+  "runtime": {
+    "packaged": true,
+    "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile",
+    "appPath": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/resources/app.asar",
+    "argv": [
+      "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/tar/agentvac-0.1.0/agentvac",
+      "--inspect=0",
+      "--remote-debugging-port=0",
+      "--user-data-dir=/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/profile"
+    ],
+    "sandbox": true,
+    "disabledSandboxSwitch": false
+  },
+  "stage": "06-import-own-backup",
+  "backup": {
+    "bytes": 231,
+    "sha256": "9a579a5724ac892c5baef51c6924f00c62ddff4e7421947fbd99fde867fdbfbf",
+    "contentNeverPrinted": true
+  },
+  "error": "page.evaluate: Error: Error invoking remote method 'agentvac:context': Error: 请等待当前操作完成。\n    at /workspace/scratch/4f36639a43c1/AgentVac-next/docs/native-linux-next/manual-suite.mjs:77:31"
+}

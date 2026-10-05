@@ -1,0 +1,12 @@
+✔ imported trusted key restores old batch without replacing or orphaning the new primary (48.344587ms)
+✔ unavailable primary blocks new quarantine/trash but permits authenticated recovery (31.67415ms)
+✔ lost key inspection reports actual preserved data, never authenticates or changes it (23.072902ms)
+✔ recovery inspection does not create quarantine directories or accept malformed key collections (1.722143ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 320.851825

@@ -1,0 +1,9 @@
+{
+  "stage": "04-export-save",
+  "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture-recovery.json",
+  "windowId": 46142090,
+  "title": "保存恢复钥匙备份（含敏感恢复材料）",
+  "action": "Typed exact generated path and clicked native Save",
+  "verified": "UI says backup saved and shows exact fixture path with 1 exported key; no key content displayed",
+  "observedVia": "CUA screenshot"
+}

@@ -1,0 +1,11 @@
+✔ diagnosis cancellation is bound to request identity and cancels before source traversal (32.745855ms)
+✔ late cancel does not cancel a later diagnostic, and flush waits for cancellation settlement (16.489089ms)
+✔ invalid or duplicate active request IDs are rejected without replacing the original controller (8.676342ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 239.330963

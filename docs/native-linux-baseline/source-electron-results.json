@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-04T19:59:58.513Z",
+  "platform": "linux",
+  "electron": "44.5.1",
+  "checks": [
+    "real desktop window launched",
+    "sandboxed preload and verified IPC",
+    "generated demo scan",
+    "confirmed quarantine",
+    "history",
+    "restore exact batch"
+  ]
+}

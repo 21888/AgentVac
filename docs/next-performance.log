@@ -1,0 +1,8 @@
+create5000SparseLogs 332.77ms
+scan5000 527.08ms
+preview5000 907.81ms
+quarantine5000 2916.21ms
+historyAfterRestart5000 359.87ms
+readOnlyLostKeyRescue5000 187.82ms
+restore5000 1989.04ms
+Report /workspace/scratch/4f36639a43c1/AgentVac-next/docs/performance/performance-results.json

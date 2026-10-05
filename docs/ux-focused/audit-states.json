@@ -1,0 +1,312 @@
+[
+  {
+    "label": "01-welcome",
+    "theme": "light",
+    "file": "01-01-welcome-light.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n开始扫描\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n尚未选择目录\n\n选择 Codex 数据目录，或先用独立测试目录体验。\n\n连接真实 Codex 目录\n体验演示扫描\n只读扫描 · 不上传文件内容\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "01-welcome",
+    "theme": "dark",
+    "file": "02-01-welcome-dark.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n未选择目录\n\n等待连接本地目录\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n选择 Codex 目录\n开始扫描\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n尚未选择目录\n\n选择 Codex 数据目录，或先用独立测试目录体验。\n\n连接真实 Codex 目录\n体验演示扫描\n只读扫描 · 不上传文件内容\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "compact-controls-roving-focus",
+    "theme": "light",
+    "file": "03-compact-controls-roving-focus-light.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "compact-controls-roving-focus",
+    "theme": "dark",
+    "file": "04-compact-controls-roving-focus-dark.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "compact-controls-roving-focus",
+    "theme": "light",
+    "file": "05-compact-controls-roving-focus-light.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "compact-controls-roving-focus",
+    "theme": "dark",
+    "file": "06-compact-controls-roving-focus-dark.png",
+    "focus": {
+      "tag": "BODY",
+      "label": null,
+      "inModal": false
+    },
+    "modalOpen": false,
+    "documentOverflow": false,
+    "modalOverflow": [],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作"
+  },
+  {
+    "label": "result-focus-after-double-click",
+    "theme": "light",
+    "file": "07-result-focus-after-double-click-light.png",
+    "focus": {
+      "tag": "SECTION",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 359,
+        "scrollHeight": 359
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 27 项 · 返回 18 项\n\n4 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n73.7MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n16.2 MB\n22%\n会话记录\n50.9 MB\n69%\n临时缓存\n2.7 MB\n4%\n其他受保护\n3.9 MB\n5%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n0B\n\n0 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n18\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作\n整理完成，随时可以恢复\n\n成功隔离 3 项 · 22.1 MB\n\n隔离不会释放磁盘空间\n\n文件仍保存在本地隔离区。可以前往「隔离记录」查看批次或恢复文件。\n\n完成\n查看隔离记录"
+  },
+  {
+    "label": "result-focus-after-double-click",
+    "theme": "dark",
+    "file": "08-result-focus-after-double-click-dark.png",
+    "focus": {
+      "tag": "SECTION",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 359,
+        "scrollHeight": 359
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n18\n运行日志\n3\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 27 项 · 返回 18 项\n\n4 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n73.7MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n16.2 MB\n22%\n会话记录\n50.9 MB\n69%\n临时缓存\n2.7 MB\n4%\n其他受保护\n3.9 MB\n5%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n0B\n\n0 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n\n当前为独立稀疏测试文件。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n18\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作\n整理完成，随时可以恢复\n\n成功隔离 3 项 · 22.1 MB\n\n隔离不会释放磁盘空间\n\n文件仍保存在本地隔离区。可以前往「隔离记录」查看批次或恢复文件。\n\n完成\n查看隔离记录"
+  },
+  {
+    "label": "blocked-action-with-clear-recheck",
+    "theme": "light",
+    "file": "09-blocked-action-with-clear-recheck-light.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 711,
+        "scrollHeight": 711
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\n检测到 Codex 正在运行。请退出后重新预览。\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n已选择 3 项\n22.1 MB\n取消选择\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：无法自动检测进程。\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n检测到 Codex 正在运行。请退出后重新预览。\n返回检查\n重新检查所选项目"
+  },
+  {
+    "label": "blocked-action-with-clear-recheck",
+    "theme": "dark",
+    "file": "10-blocked-action-with-clear-recheck-dark.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 711,
+        "scrollHeight": 711
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\n检测到 Codex 正在运行。请退出后重新预览。\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n已选择 3 项\n22.1 MB\n取消选择\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：无法自动检测进程。\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n检测到 Codex 正在运行。请退出后重新预览。\n返回检查\n重新检查所选项目"
+  },
+  {
+    "label": "rechecked-preview-with-reset-confirmations",
+    "theme": "light",
+    "file": "11-rechecked-preview-with-reset-confirmations-light.png",
+    "focus": {
+      "tag": "SECTION",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 651,
+        "scrollHeight": 651
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n已选择 3 项\n22.1 MB\n取消选择\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：Codex 已退出\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n返回检查\n确认移入隔离区"
+  },
+  {
+    "label": "rechecked-preview-with-reset-confirmations",
+    "theme": "dark",
+    "file": "12-rechecked-preview-with-reset-confirmations-dark.png",
+    "focus": {
+      "tag": "SECTION",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 651,
+        "scrollHeight": 651
+      }
+    ],
+    "chartStops": 1,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n21\n运行日志\n6\n会话记录\n4\n临时缓存\n1\n其他受保护\n10\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\nCODEX · 本地数据\n空间分析\n本次范围扫描完整\n10/04 14:21\n本次可扫描范围已检查已访问 30 项 · 返回 21 项\n\n3 个受保护目录未展开，内容未计入。逻辑大小不等于磁盘实际占用。\n\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n95.8MB\n\n已发现逻辑大小\n\n已发现文件分布\n运行日志\n38.3 MB\n40%\n会话记录\n50.9 MB\n53%\n临时缓存\n2.7 MB\n3%\n其他受保护\n3.9 MB\n4%\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n22.1MB\n\n3 个旧日志文件可审阅隔离\n\n默认保护会话与关键数据\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n21\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n使用上下方向键浏览当前页，空格选择可隔离项目，Enter 查看详情。\n\t名称 / 路径\t大小\t修改日期\t风险\n\t\nrollout-demo-planning.jsonl\nsessions/2025/06\n\t26.7 MB\t2026-06-21\t\n保护\n\t\nrollout-demo-debugging.jsonl\nsessions/2025/08\n\t17.6 MB\t2026-08-04\t\n保护\n\t\nlogs_1.sqlite\n/\n\t14.5 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.1\nlog\n\t11.8 MB\t2026-08-17\t\n低风险\n\t\ncodex-tui.log.2\nlog\n\t6.9 MB\t2026-07-04\t\n低风险\n\t\nrollout-archived.jsonl\narchived_sessions\n\t6.5 MB\t2026-03-28\t\n保护\n\t\ncodex-tui.log.2026-05-01.gz\nlog\n\t3.4 MB\t2026-05-17\t\n低风险\n\t\nstate_5.sqlite\n/\n\t2.9 MB\t2026-07-06\t\n保护\n\t\nexample.cache\ncache\n\t2.7 MB\t2026-07-06\t\n保护\n\t\ncodex-tui.log\nlog\n\t1.1 MB\t2026-07-16\t\n保护\n\t\nhistory.jsonl\n/\n\t859 KB\t2026-07-06\t\n保护\n\t\ncodex-tui.log.3\nlog\n\t586 KB\t2026-10-01\t\n保护\n\t\nstate_5.sqlite-wal\n/\n\t176 KB\t2026-07-06\t\n保护\n\t\nrollout-current.jsonl\nsessions/2026/10\n\t117 KB\t2026-10-04\t\n保护\n\t\nsession_index.jsonl\n/\n\t9.6 KB\t2026-07-06\t\n保护\n\t\nconfig.toml\n/\n\t4.1 KB\t2026-03-18\t\n保护\n\t\nauth.json\n/\n\t2.3 KB\t2026-03-18\t\n保护\n\t\nunknown-notes.txt\n/\n\t1.2 KB\t2026-07-06\t\n保护\n\t\nmcp\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nprojects\n/\n\t0 B\t2026-10-04\t\n保护\n\t\nskills\n/\n\t0 B\t2026-10-04\t\n保护\n3 项低风险·22.1 MB 逻辑大小\n当前筛选的全部分页 · 将替换当前选择\n跨页选择低风险\n1 / 1 页\n已选择 3 项\n22.1 MB\n取消选择\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：Codex 已退出\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n返回检查\n确认移入隔离区"
+  },
+  {
+    "label": "uncertain-quarantine-guides-to-records",
+    "theme": "light",
+    "file": "13-uncertain-quarantine-guides-to-records-light.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 718,
+        "scrollHeight": 740
+      }
+    ],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\n测试夹具：文件移动后结果写入中断\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n等待扫描\n\n选择扫描条件后，点击顶部「开始扫描」。\n\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：Codex 已退出\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n测试夹具：文件移动后结果写入中断\n\n部分文件可能已完成操作。请先检查隔离记录核实状态，再重新扫描；不要假定文件均未改变。\n\n返回检查\n检查隔离记录"
+  },
+  {
+    "label": "uncertain-quarantine-guides-to-records",
+    "theme": "dark",
+    "file": "14-uncertain-quarantine-guides-to-records-dark.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 618,
+        "scrollWidth": 618,
+        "height": 718,
+        "scrollHeight": 740
+      }
+    ],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n开始扫描\n测试夹具：文件移动后结果写入中断\nCODEX · 本地数据\n空间分析\n尚未扫描\n使用方向键浏览文件，Home 或 End 跳至首尾，Enter 查看详情；也可通过分类图例和文件列表操作。\n—\n\n尚未扫描\n\n已发现文件分布\n运行日志\n—\n—\n会话记录\n—\n—\n临时缓存\n—\n—\n其他受保护\n—\n—\n\n内环：数据分类·外环：单个文件\n\n低风险候选\n—\n\n扫描后识别可隔离的旧日志\n\n默认保护会话与关键数据\n\n只统计已发现项目的逻辑大小。受保护目录不会展开，不代表全部磁盘占用。\n\n扫描条件\n候选文件修改于\n7 天前\n30 天前\n90 天前\n180 天前\n包括历史会话\n体验演示\n全部文件\n—\n所有时间\n30 天以上\n90 天以上\n180 天以上\n大小：从大到小\n修改：从旧到新\n路径：字母顺序\n等待扫描\n\n选择扫描条件后，点击顶部「开始扫描」。\n\n表头勾选仅包含当前页低风险项目\n1 / 1 页\n未选择项目\n勾选文件以准备隔离\n隔离不会释放磁盘空间\n预览隔离操作\n确认这一次整理\n\n3 个项目 · 22.1 MB\n\nlog/codex-tui.log.1\n低风险\n11.8 MB\nlog/codex-tui.log.2\n低风险\n6.9 MB\nlog/codex-tui.log.2026-05-01.gz\n低风险\n3.4 MB\n这是可恢复的隔离，不是永久删除\n\n文件将移入同一根目录下的隔离区，仍占用磁盘空间。你可以在「隔离记录」中恢复。\n\n测试夹具：Codex 已退出\n我已审阅所选项目，理解隔离的影响及其仍占用磁盘空间。\n我已退出所有 Codex CLI / 桌面进程。\n测试夹具：文件移动后结果写入中断\n\n部分文件可能已完成操作。请先检查隔离记录核实状态，再重新扫描；不要假定文件均未改变。\n\n返回检查\n检查隔离记录"
+  },
+  {
+    "label": "uncertain-restore-guides-to-records",
+    "theme": "light",
+    "file": "15-uncertain-restore-guides-to-records-light.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 478,
+        "scrollWidth": 478,
+        "height": 567,
+        "scrollHeight": 567
+      }
+    ],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n打开隔离目录\n测试夹具：恢复后结果写入中断\n隔离记录\n\n1 个批次 · 3 个文件待恢复\n\n恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经 AgentVac 校验恢复。\n\n10/04 14:21\n\n4e8ca8df-1877-47bc-a671-ac182e99d356\n\n3 项待恢复 / 3 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-e2e-dm6WQE/real-mode-fixture\nlog/codex-tui.log.1\n11.8 MB\n已隔离\nlog/codex-tui.log.2\n6.9 MB\n已隔离\nlog/codex-tui.log.2026-05-01.gz\n3.4 MB\n已隔离\n所有操作仅作用于当前目录\nLinux\n恢复这个批次？\n\n10/04 14:21 · 3 个文件\n\n文件将回到原来的位置\n\n已有同名文件不会被覆盖。无法恢复的项目会保留在隔离区，并单独显示原因。\n\n恢复前请退出 Codex，避免正在运行的会话读取到变化中的文件。\n\n我已退出所有 Codex CLI / 桌面进程。\n测试夹具：恢复后结果写入中断\n\n部分文件可能已完成操作。请先检查隔离记录核实状态，再重新扫描；不要假定文件均未改变。\n\n取消\n检查隔离记录"
+  },
+  {
+    "label": "uncertain-restore-guides-to-records",
+    "theme": "dark",
+    "file": "16-uncertain-restore-guides-to-records-dark.png",
+    "focus": {
+      "tag": "DIV",
+      "label": null,
+      "inModal": true
+    },
+    "modalOpen": true,
+    "documentOverflow": false,
+    "modalOverflow": [
+      {
+        "width": 478,
+        "scrollWidth": 478,
+        "height": 567,
+        "scrollHeight": 567
+      }
+    ],
+    "chartStops": 0,
+    "visibleText": "AgentVac\n工作空间\n空间分析\n空间诊断\n隔离记录\n3\n目录与恢复\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\nreal-mode-fixture\n\nCodex 本地数据\n\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n打开隔离目录\n测试夹具：恢复后结果写入中断\n隔离记录\n\n1 个批次 · 3 个文件待恢复\n\n恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经 AgentVac 校验恢复。\n\n10/04 14:21\n\n4e8ca8df-1877-47bc-a671-ac182e99d356\n\n3 项待恢复 / 3 项\n恢复此批次\n移入系统回收站\n/tmp/agentvac-e2e-dm6WQE/real-mode-fixture\nlog/codex-tui.log.1\n11.8 MB\n已隔离\nlog/codex-tui.log.2\n6.9 MB\n已隔离\nlog/codex-tui.log.2026-05-01.gz\n3.4 MB\n已隔离\n所有操作仅作用于当前目录\nLinux\n恢复这个批次？\n\n10/04 14:21 · 3 个文件\n\n文件将回到原来的位置\n\n已有同名文件不会被覆盖。无法恢复的项目会保留在隔离区，并单独显示原因。\n\n恢复前请退出 Codex，避免正在运行的会话读取到变化中的文件。\n\n我已退出所有 Codex CLI / 桌面进程。\n测试夹具：恢复后结果写入中断\n\n部分文件可能已完成操作。请先检查隔离记录核实状态，再重新扫描；不要假定文件均未改变。\n\n取消\n检查隔离记录"
+  }
+]

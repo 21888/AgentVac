@@ -1,0 +1,124 @@
+{
+  "at": "2026-10-04T21:32:58.815Z",
+  "platform": "linux",
+  "arch": "x64",
+  "fixtureOnly": true,
+  "nativeExecution": false,
+  "fixtureStorage": {
+    "path": "/workspace/scratch/4f36639a43c1/AgentVac-next",
+    "device": "27",
+    "filesystemType": "0x794c7630",
+    "availableBytes": "22521880576",
+    "inMemoryFilesystem": false
+  },
+  "inheritedTemp": "/tmp",
+  "inheritedXdgDataHome": "/home/agent/.local/share",
+  "trashConfigurationChanged": false,
+  "packagedArtifactTested": false,
+  "checks": {
+    "fixture-disk-and-diagnostic-data": {
+      "status": "PASS",
+      "detail": {
+        "sqlite": "3.53.3",
+        "pages": 182,
+        "freelist": 129,
+        "fixtureDisk": {
+          "path": "/workspace/scratch/4f36639a43c1/AgentVac-next",
+          "device": "27",
+          "filesystemType": "0x794c7630",
+          "availableBytes": "22521880576",
+          "inMemoryFilesystem": false
+        },
+        "sourceSha256": "69ebe6c87378551f251caf79acf069f46ca3b2f35680b1eb9345e089fbd650e7",
+        "helperFixtureSyntaxChecked": true,
+        "trashConfigurationChanged": false
+      }
+    },
+    "native-window-preload-ipc-sandbox": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "native-folder-picker-open-cancel": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "demo-ui-scan-quarantine-history-restore": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "preference-and-demo-persistence-restart": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "single-instance-lock": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "generated-root-adapter": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "duplicate-quarantine-and-restore": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "native-trash-generated-batch": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-real-helper-ipc-readonly": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-cancel-no-orphans": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-window-close-no-orphans": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "non-gui-shipped-diagnostic-helper-smoke": {
+      "status": "PASS",
+      "detail": {
+        "result": {
+          "status": "ok",
+          "schema": "codex-logs-v2",
+          "consistency": "stable-file-observations",
+          "sourceUnchanged": true,
+          "metrics": {
+            "pageSize": 4096,
+            "pageCount": 182,
+            "freelistCount": 129,
+            "freePageBytes": 528384,
+            "occupiedPageBytes": 217088,
+            "autoVacuum": "incremental",
+            "journalMode": "delete"
+          }
+        },
+        "nodeOnly": true,
+        "electronOrPreloadTested": false,
+        "shippedHelperArgumentsUnmodified": true
+      }
+    },
+    "non-gui-diagnostic-cancel-fixture-smoke": {
+      "status": "PASS",
+      "detail": {
+        "result": {
+          "status": "blocked",
+          "reason": "CANCELLED"
+        },
+        "nodeOnly": true,
+        "electronOrPreloadTested": false,
+        "controlledParserStartStall": true,
+        "bothOwnedProcessesExited": true
+      }
+    },
+    "non-gui-self-test": {
+      "status": "PASS",
+      "detail": "Generated SQLite schema/freelist, source hash invariance, ordinary-disk guard and lifecycle fixture JavaScript syntax verified. Electron was not launched."
+    }
+  },
+  "status": "SELF_TEST_PASS_NATIVE_UNTESTED",
+  "finishedAt": "2026-10-04T21:32:59.036Z"
+}

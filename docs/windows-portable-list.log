@@ -1,0 +1,27 @@
+
+7-Zip (z) 24.09 (x64) : Copyright (c) 1999-2024 Igor Pavlov : 2024-11-28
+ 64-bit locale=C.UTF-8 Threads:9 OPEN_MAX:16384, ASM
+
+Scanning the drive for archives:
+1 file, 99385982 bytes (95 MiB)
+
+Listing archive: release-next/windows/AgentVac 0.1.0.exe
+
+--
+Path = release-next/windows/AgentVac 0.1.0.exe
+Type = Nsis
+Physical Size = 99385982
+Method = Deflate
+Solid = -
+Headers Size = 39666
+Embedded Stub Size = 59904
+SubType = NSIS-3 Unicode
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+                    .....                      6931  $PLUGINSDIR/System.dll
+2026-10-04 14:36:48 .....     99025994     99025994  $PLUGINSDIR/app-64.7z
+                    .....                    242382  $PLUGINSDIR/nsis7z.dll
+                    .....                     45608  $PLUGINSDIR/StdUtils.dll
+------------------- ----- ------------ ------------  ------------------------
+2026-10-04 14:36:48           99025994     99320915  4 files

@@ -1,0 +1,5 @@
+locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('heading', { name: '隔离批次已移入系统回收站', exact: true }) to be visible[22m
+
+    at /workspace/scratch/4f36639a43c1/AgentVac/docs/native-linux/package-trash-qa.mjs:63:74

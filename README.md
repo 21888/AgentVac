@@ -4,7 +4,7 @@
 
 **隔离不等于释放磁盘。** 文件先进入所选目录内的 `.agentvac-quarantine`。移入系统回收站后通常仍占用磁盘，需用户在操作系统中清空才可能释放；清空后不可恢复。AgentVac 不提供永久删除功能。
 
-本私有仓库保存源码、测试及精选验证证据；本次上传不启动 GitHub Actions。完整范围和待运行条件见 [仓库范围说明](docs/REPOSITORY-CONTENTS.md)。
+本私有仓库保存源码、测试、构建所需图标及文字验证证据，不包含测试截图；本次上传不启动 GitHub Actions。完整范围和待运行条件见 [仓库范围说明](docs/REPOSITORY-CONTENTS.md)。
 
 ## 这一版能做什么
 

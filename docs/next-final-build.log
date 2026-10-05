@@ -1,0 +1,27 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> agentvac@0.1.0 build
+> npm run typecheck && vite build && node scripts/build-electron.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> agentvac@0.1.0 typecheck
+> vue-tsc --noEmit && tsc -p tsconfig.node.json --noEmit
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 11 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.68 kB │ gzip:  0.43 kB
+dist/assets/index-CdjAZrdr.css   60.89 kB │ gzip: 12.55 kB
+dist/assets/index-D1DOhThc.js   171.71 kB │ gzip: 58.75 kB
+✓ built in 973ms
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    electron/diagnostic-process.ts:39:62:
+      39 │ ... built ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+         ╵                                                    ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+

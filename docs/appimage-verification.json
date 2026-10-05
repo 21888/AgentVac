@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-04T21:39:27.101Z",
+  "files": 79,
+  "scope": "Read-only SquashFS extraction, every original Linux payload file hash matched. AppImage launcher/FUSE not run.",
+  "parserWarning": "Data after SquashFS end: builder appended embedded block map, matching packaging log; tail preserved.",
+  "nativeExecuted": false
+}

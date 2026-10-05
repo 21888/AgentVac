@@ -1,0 +1,5 @@
+d73ec64d9af560cffffedab8547bed85ff40a62c4b33e90ce041bbccfb4db788  release-next/windows/AgentVac 0.1.0.exe
+66bdaf4365c21c93a07b24520b2f426d259beb00bc290a76fc73b7d9e61edb18  release-next/linux/AgentVac-0.1.0.AppImage
+a494100f1f9bcea6954e638a6dd2d1cffc5900f374bba6f63ae60a033d612121  release-next/linux/agentvac-0.1.0.tar.gz
+b3ffd1b48cea090436fd2651d0aa6552b40cbc652c63bd79e7d74d22e6d86670  release-next/macos/AgentVac-0.1.0-macos-arm64.zip
+e5ecfef4dd1640001b58440abe57c512dfcf62ac3decd44c2e22fff5f0afe10d  release-next/macos/AgentVac-0.1.0-macos-x64.zip

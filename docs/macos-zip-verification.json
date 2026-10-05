@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-04T21:37:22.597878+00:00",
+  "scope": "Read-only ZIP stream/CRC, layout/symlinks and exact helper payload. Not macOS runtime or signature verification.",
+  "archives": [
+    {
+      "arch": "x64",
+      "bytes": 134100846,
+      "entries": 588,
+      "symlinksPreserved": 14,
+      "crcPassed": true,
+      "unpackedHelpersMatch": true
+    },
+    {
+      "arch": "arm64",
+      "bytes": 130151137,
+      "entries": 588,
+      "symlinksPreserved": 14,
+      "crcPassed": true,
+      "unpackedHelpersMatch": true
+    }
+  ]
+}

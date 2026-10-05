@@ -1,0 +1,9 @@
+{
+  "stage": "02-folder-select",
+  "expected": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/manual-YowgNH/fixture",
+  "windowId": 46139880,
+  "title": "选择 Codex 数据目录（通常为 .codex）",
+  "action": "Typed exact generated directory and clicked native Open button",
+  "verified": "Main app displays exact fixture path and directory connected notice",
+  "observedVia": "CUA screenshots"
+}

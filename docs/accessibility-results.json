@@ -1,0 +1,1070 @@
+{
+  "at": "2026-10-04T21:24:03.693Z",
+  "engine": "axe-core",
+  "version": "4.13.0",
+  "viewport": {
+    "width": 1024,
+    "height": 768
+  },
+  "source": "Production dist, unmodified CSP, real engine with generated fixtures",
+  "coverage": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "wcag22aa",
+    "best-practice"
+  ],
+  "limitation": "Automated renderer checks do not prove full WCAG compliance, assistive-technology usability, or native operating-system integration.",
+  "states": [
+    {
+      "name": "welcome",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "html": "<p title=\"已发现逻辑大小\">尚未扫描</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 36,
+      "inapplicableRules": 54,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "welcome",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "html": "<p title=\"已发现逻辑大小\">尚未扫描</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 36,
+      "inapplicableRules": 54,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history-empty",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 34,
+      "inapplicableRules": 56,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history-empty",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 34,
+      "inapplicableRules": 56,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "rules",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 40,
+      "inapplicableRules": 50,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "rules",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 40,
+      "inapplicableRules": 50,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "files",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".disk-center > span"
+              ],
+              "html": "<span>95.8<small>MB</small></span>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "18.8pt (25px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "3:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                ".disk-center > span > small"
+              ],
+              "html": "<small>MB</small>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "html": "<p title=\"已发现逻辑大小\">已发现逻辑大小</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 43,
+      "inapplicableRules": 47,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": "static",
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "files",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".disk-center > span"
+              ],
+              "html": "<span>95.8<small>MB</small></span>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "18.8pt (25px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "3:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                ".disk-center > span > small"
+              ],
+              "html": "<small>MB</small>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                "p[title=\"已发现逻辑大小\"]"
+              ],
+              "html": "<p title=\"已发现逻辑大小\">已发现逻辑大小</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 43,
+      "inapplicableRules": 47,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": "static",
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "sessions-with-inspector",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".disk-center > span"
+              ],
+              "html": "<span>50.9<small>MB</small></span>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "18.8pt (25px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "3:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                ".disk-center > span > small"
+              ],
+              "html": "<small>MB</small>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                "p[title=\"会话记录\"]"
+              ],
+              "html": "<p title=\"会话记录\">会话记录</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 45,
+      "inapplicableRules": 45,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "sessions-with-inspector",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".disk-center > span"
+              ],
+              "html": "<span>50.9<small>MB</small></span>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "18.8pt (25px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "3:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                ".disk-center > span > small"
+              ],
+              "html": "<small>MB</small>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            },
+            {
+              "target": [
+                "p[title=\"会话记录\"]"
+              ],
+              "html": "<p title=\"会话记录\">会话记录</p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because element contains an image node",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": "imgNode",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 45,
+      "inapplicableRules": 45,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "session-bulk-review",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 隔离会话可能影响 resume 与会话索引。修改时间不能证明会话已停止使用；AgentVac 不修改状态数据库。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 34,
+      "inapplicableRules": 56,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "session-bulk-review",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 隔离会话可能影响 resume 与会话索引。修改时间不能证明会话已停止使用；AgentVac 不修改状态数据库。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 34,
+      "inapplicableRules": 56,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "session-preview",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 32,
+      "inapplicableRules": 58,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "session-preview",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 32,
+      "inapplicableRules": 58,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "log-preview",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 32,
+      "inapplicableRules": 58,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "log-preview",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 32,
+      "inapplicableRules": 58,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": false
+      }
+    },
+    {
+      "name": "operation-result",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 29,
+      "inapplicableRules": 61,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "operation-result",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 29,
+      "inapplicableRules": 61,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 35,
+      "inapplicableRules": 55,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 35,
+      "inapplicableRules": 55,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "restore-confirmation",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 已有同名文件不会被覆盖。无法恢复的项目会保留在隔离区，并单独显示原因。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 29,
+      "inapplicableRules": 61,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "restore-confirmation",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 已有同名文件不会被覆盖。无法恢复的项目会保留在隔离区，并单独显示原因。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 29,
+      "inapplicableRules": 61,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "trash-confirmation",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 批次在系统回收站期间，无法从 AgentVac 直接恢复。需先通过系统回收站将整个批次文件夹还原到原隔离目录，再由 AgentVac 校验并恢复原路径。清空回收站才释放空间，清空后不可恢复。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 33,
+      "inapplicableRules": 57,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "trash-confirmation",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".modal-notice > div > p"
+              ],
+              "html": "<p> 批次在系统回收站期间，无法从 AgentVac 直接恢复。需先通过系统回收站将整个批次文件夹还原到原隔离目录，再由 AgentVac 校验并恢复原路径。清空回收站才释放空间，清空后不可恢复。 </p>",
+              "impact": "serious",
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements",
+                  "data": {
+                    "contrastRatio": 0,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "passedRules": 33,
+      "inapplicableRules": 57,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history-restored",
+      "theme": "light",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 35,
+      "inapplicableRules": 55,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    },
+    {
+      "name": "history-restored",
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [],
+      "passedRules": 35,
+      "inapplicableRules": 55,
+      "scopeVisibility": {
+        "horizontalOverflow": false,
+        "noticePosition": null,
+        "scopeVisible": true
+      }
+    }
+  ],
+  "runtimeErrors": [],
+  "summary": {
+    "states": 26,
+    "violationRules": 0,
+    "violationNodes": 0,
+    "incompleteRules": 12
+  }
+}

@@ -1,0 +1,39 @@
+✔ strict process protocol drops unexpected keys, errors and impossible metrics (1.362413ms)
+✔ blocked synchronous worker times out while caller event loop stays responsive (2524.156459ms)
+✔ explicit cancel and app shutdown await child exit; subsequent restart works (639.171425ms)
+✔ malformed and oversized worker output is bounded, killed and never echoed (330.546438ms)
+✔ worker environment does not inherit parent credentials or NODE_OPTIONS (154.879316ms)
+✔ parent crash closes pipe and supervisor reaps blocked worker before restart (412.393895ms)
+✔ SQLite final-open FIFO substitution is isolated, times out and preserves original DB (2515.852663ms)
+✔ packaged ASAR API locates unpacked fixed helpers under Electron without source loaders (250.176582ms)
+✔ candidate discovery uses only injected home/env/cwd and never probes them (1.284546ms)
+✔ file identity prefers reliable dev/inode; Windows fallback folds case and normalizes paths (0.215253ms)
+✔ overlapping Codex, SQLite, and ordinary-log roots count each physical file once (26.382504ms)
+✔ metadata separates SQLite/WAL/SHM/journal/plain logs, never traverses sessions (8.248107ms)
+✔ strict opt-ins, top-level config hints only, external hint is not scanned (5.895119ms)
+✔ complex TOML, profiles and multiline embedded fake keys fail closed (10.521396ms)
+✔ unsupported relative config, oversized config and malformed values never echo data (8.639555ms)
+✔ only explicit selected directories are accessed; state and outside DB deep checks refused (3.83446ms)
+✔ known closed schemas report PRAGMA metrics without reading log bodies or altering bytes (620.177615ms)
+✔ closed WAL-header database uses immutable URI and creates no WAL or SHM (204.213785ms)
+✔ live WAL writer and stale or empty sidecars are blocked with every source byte preserved (890.814298ms)
+✔ unknown schema and corrupt DB are blocked without leaking SQL, comments or log bodies (429.442093ms)
+✔ source changed during stability window returns blocked and diagnosis adds no changes (156.60301ms)
+✔ symlink/hardlink roots, DBs, logs and config are never followed (10.949529ms)
+✔ audit: demo reset refuses later-added unknown content before invoking Trash (41.615751ms)
+✔ audit parser unit: actual SQLite queries are nonempty schema/PRAGMA only, never log rows (56.931697ms)
+✔ audit parser unit: observed sidecar injection during inspection invalidates metrics (49.380123ms)
+✔ audit: process becomes running after deep check, app view withholds metrics (219.329462ms)
+✔ audit: process unknown blocks every database open even with explicit confirmation (8.811974ms)
+✔ audit: external primary replacement blocks export and leaves destination nonexistent (4.18775ms)
+✔ audit: import failure after reading malformed bundle preserves keyring bytes (7.603211ms)
+✔ audit: manifest-only authentication never permits restoring modified payload (17.418128ms)
+✔ audit: authenticated ready-marker crash residue can be reset after restart (40.261324ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6964.874522

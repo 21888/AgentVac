@@ -1,0 +1,60 @@
+{
+  "startedAt": "2026-10-04T20:10:21.335Z",
+  "platform": "linux",
+  "checks": [
+    "packaged Electron window; sandbox and context isolation enabled; renderer Node integration disabled",
+    "generated fixture quarantine through real packaged preload/IPC"
+  ],
+  "status": "failed",
+  "runtime": {
+    "packaged": true,
+    "electron": "44.5.1",
+    "appPath": "/workspace/scratch/4f36639a43c1/AgentVac/release-final/linux/linux-unpacked/resources/app.asar",
+    "launchArgs": [
+      "/workspace/scratch/4f36639a43c1/AgentVac/release-final/linux/linux-unpacked/agentvac",
+      "--inspect=0",
+      "--remote-debugging-port=0"
+    ],
+    "preferences": {
+      "allowRunningInsecureContent": false,
+      "contextIsolation": true,
+      "disableDialogs": false,
+      "disablePopups": false,
+      "enableBlinkFeatures": "",
+      "experimentalFeatures": false,
+      "javascript": true,
+      "nodeIntegration": false,
+      "nodeIntegrationInSubFrames": false,
+      "nodeIntegrationInWorker": false,
+      "safeDialogs": false,
+      "safeDialogsMessage": "",
+      "sandbox": true,
+      "webSecurity": true,
+      "webviewTag": false
+    },
+    "chromiumSandboxRequested": true
+  },
+  "demoRoot": "/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-7B2EVt",
+  "batchId": "476d143f-06d8-4fe7-a7a8-81a20c45d944",
+  "batchDirectory": "/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-7B2EVt/.agentvac-quarantine/476d143f-06d8-4fe7-a7a8-81a20c45d944",
+  "files": [
+    {
+      "path": "log/codex-tui.log.1",
+      "size": 12400000,
+      "sha256": "69c34fa40954fce3d3e2dc19e6b0863295f0691c9f8dc08778d85c3670b666ff"
+    },
+    {
+      "path": "log/codex-tui.log.2",
+      "size": 7200000,
+      "sha256": "dc05b7c3ea32bdd0cb513d61497055b2aa9d84ad90d2ae195191f08404eb2d6e"
+    },
+    {
+      "path": "log/codex-tui.log.2026-05-01.gz",
+      "size": 3600000,
+      "sha256": "92019df970eb9f882c440c24f4df266d0de072f3bcd77d8ef5dc1e6412465ec1"
+    }
+  ],
+  "error": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: '隔离批次已移入系统回收站', exact: true }) to be visible\u001b[22m\n\n    at /workspace/scratch/4f36639a43c1/AgentVac/docs/native-linux/package-trash-qa.mjs:63:74",
+  "finishedAt": "2026-10-04T20:10:42.664Z",
+  "visibleText": "AgentVac\n工作空间\n空间分析\n隔离记录\n3\n保护规则\n文件分类\n全部文件\n—\n运行日志\n—\n会话记录\n—\n临时缓存\n—\n其他受保护\n—\n当前目录\n演示目录\n\n独立测试数据\n\n演示模式\n浅色\n深色\n系统\n仅本地运行\nv0.1.0\n切换目录\n打开隔离目录\nError invoking remote method 'agentvac:trash': Error: Failed to move item to trash\n隔离记录\n\n1 个批次 · 3 个文件待恢复\n\n隔离文件仍占用磁盘空间\n\n恢复会将文件放回原路径，不覆盖同名文件。回收站中的批次需先还原整个文件夹，再经 AgentVac 校验恢复。\n\n10/04 13:10\n\n476d143f-06d8-4fe7-a7a8-81a20c45d944\n\n3 项待恢复 / 3 项\n恢复此批次\n移入系统回收站\n/workspace/scratch/4f36639a43c1/AgentVac/.qa/agentvac-demo-7B2EVt\nlog/codex-tui.log.1\n11.8 MB\n已隔离\nlog/codex-tui.log.2\n6.9 MB\n已隔离\nlog/codex-tui.log.2026-05-01.gz\n3.4 MB\n已隔离\n所有操作仅作用于当前目录\nLinux\n移入系统回收站？\n\n3 个隔离项目 · 22.1 MB\n\n批次在回收站期间，不能直接恢复\n\n批次在系统回收站期间，无法从 AgentVac 直接恢复。需先通过系统回收站将整个批次文件夹还原到原隔离目录，再由 AgentVac 校验并恢复原路径。清空回收站才释放空间，清空后不可恢复。\n\n我了解上述影响，并会自行管理系统回收站。\n输入「回收站」以确认此操作\nError invoking remote method 'agentvac:trash': Error: Failed to move item to trash\n\n部分文件可能已完成操作。请先检查隔离记录核实状态，再重新扫描；不要假定文件均未改变。\n\n保留在隔离区\n检查隔离记录"
+}

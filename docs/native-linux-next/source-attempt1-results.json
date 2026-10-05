@@ -1,0 +1,108 @@
+{
+  "at": "2026-10-04T21:31:20.896Z",
+  "platform": "linux",
+  "arch": "x64",
+  "fixtureOnly": true,
+  "nativeExecution": true,
+  "fixtureStorage": {
+    "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+    "device": "27",
+    "filesystemType": "0x794c7630",
+    "availableBytes": "23764488192",
+    "inMemoryFilesystem": false
+  },
+  "inheritedTemp": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+  "inheritedXdgDataHome": null,
+  "trashConfigurationChanged": false,
+  "packagedArtifactTested": false,
+  "checks": {
+    "fixture-disk-and-diagnostic-data": {
+      "status": "PASS",
+      "detail": {
+        "sqlite": "3.53.3",
+        "pages": 182,
+        "freelist": 129,
+        "fixtureDisk": {
+          "path": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa",
+          "device": "27",
+          "filesystemType": "0x794c7630",
+          "availableBytes": "23764488192",
+          "inMemoryFilesystem": false
+        },
+        "sourceSha256": "717de5fb4244041fef795b6a734a4eb4368c0806f294274affa58d72d3d359da",
+        "helperFixtureSyntaxChecked": true,
+        "trashConfigurationChanged": false
+      }
+    },
+    "native-window-preload-ipc-sandbox": {
+      "status": "PASS",
+      "detail": {
+        "windows": 1,
+        "visible": true,
+        "userData": "/workspace/scratch/4f36639a43c1/AgentVac-next/.qa/agentvac-native-suite-FGtI0r/profile",
+        "electron": "44.5.1",
+        "arch": "x64",
+        "argv": [
+          "/workspace/scratch/4f36639a43c1/AgentVac/node_modules/electron/dist/electron",
+          "/workspace/scratch/4f36639a43c1/AgentVac-next"
+        ],
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "disabledSandboxSwitch": false,
+        "coldUiSigningReady": true,
+        "parallelStartupIpcSucceeded": true,
+        "canSign": true,
+        "noRealHomeDiscovery": true
+      }
+    },
+    "native-folder-picker-open-cancel": {
+      "status": "SKIP",
+      "detail": "xdotool is absent; native picker was not opened. Install normal desktop test tools in the approved runner, without security changes."
+    },
+    "demo-ui-scan-quarantine-history-restore": {
+      "status": "PASS",
+      "detail": {
+        "batchId": "3aaeed44-8aef-4c7c-8d7c-9f99bfa6f228",
+        "restoredItems": 3,
+        "realUi": true,
+        "fixedDemoWorkspace": true
+      }
+    },
+    "preference-and-demo-persistence-restart": {
+      "status": "FAIL",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '体验演示扫描', exact: true }) to be visible\u001b[22m\n\n    at launch (/workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:227:6)\n    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:807:7\n    at async check (/workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:129:24)\n    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:791:5"
+    },
+    "single-instance-lock": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "generated-root-adapter": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "duplicate-quarantine-and-restore": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "native-trash-generated-batch": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-real-helper-ipc-readonly": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-cancel-no-orphans": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    },
+    "diagnostic-window-close-no-orphans": {
+      "status": "UNTESTED",
+      "detail": "Not reached"
+    }
+  },
+  "status": "FAIL",
+  "error": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '体验演示扫描', exact: true }) to be visible\u001b[22m\n\n    at launch (/workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:227:6)\n    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:807:7\n    at async check (/workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:129:24)\n    at async file:///workspace/scratch/4f36639a43c1/AgentVac-next/scripts/desktop-e2e.mjs:791:5",
+  "finishedAt": "2026-10-04T21:31:42.500Z"
+}

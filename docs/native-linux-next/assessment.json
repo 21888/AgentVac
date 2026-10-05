@@ -1,0 +1,22 @@
+{
+  "assessment": "PASS_WITH_LIMITATIONS",
+  "sourceNative": "PASS_WITH_LIMITATIONS",
+  "tarPackageNative": "PASS_WITH_LIMITATIONS",
+  "nativeDialogs": {
+    "observedAndVerified": 6,
+    "nativeReturnObjectCaptured": false,
+    "evidence": "manual-results.json",
+    "wholeCombinedRunner": "failed_after_dialogs_due_to_demo_context_timing"
+  },
+  "trashRoundtrip": {
+    "status": "passed",
+    "restoredFiles": 3,
+    "sha256Identical": true,
+    "method": "real Electron shell.trashItem + official Debian trash-restore + app restoration"
+  },
+  "diagnosticFullNativeLifecycle": "SKIP_ACTUAL_CODEX_RUNNING",
+  "appImage": "BLOCKED_MISSING_LIBFUSE_SO_2",
+  "thunarGraphicalTrashRestore": "UNTESTED_NO_GVFS",
+  "productionAsarSha256": "ec9f7bc6c69bef717f869bd78df81629690206be02c0813f9f12e1d9048f7b29",
+  "report": "README.md"
+}

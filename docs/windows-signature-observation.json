@@ -1,0 +1,16 @@
+[
+  {
+    "file": "release-next/windows/AgentVac 0.1.0.exe",
+    "machine": "0x14c",
+    "securityDirectoryOffset": 0,
+    "securityDirectoryBytes": 0,
+    "hasEmbeddedCertificate": false
+  },
+  {
+    "file": "release-next/windows/win-unpacked/AgentVac.exe",
+    "machine": "0x8664",
+    "securityDirectoryOffset": 0,
+    "securityDirectoryBytes": 0,
+    "hasEmbeddedCertificate": false
+  }
+]
