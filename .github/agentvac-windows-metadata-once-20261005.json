@@ -1,9 +1,0 @@
-{
-  "schema": 1,
-  "purpose": "windows-metadata-readonly-research-v1",
-  "sourceTreeSha256": "d999a79bcf418480e8fd8efa144b5917a900d01cbb1cbd1f916ec738d97c1fa2",
-  "standardRunner": "windows-2022",
-  "productionActivation": false,
-  "artifactsUploaded": false,
-  "restoreManualAfterTerminal": true
-}
