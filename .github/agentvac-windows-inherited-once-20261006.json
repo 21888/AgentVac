@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "purpose": "same-caller-inherited-context-generated-fixture-validation",
+  "sourceTreeSha256": "9aa841b040191b4e705aabfed6913b2f6d3b3d79a45daeda87a4824665eb088b",
+  "standardRunner": "windows-2022",
+  "appActivation": false,
+  "privateCopyActivation": false,
+  "restoreManualAfterTerminal": true
+}

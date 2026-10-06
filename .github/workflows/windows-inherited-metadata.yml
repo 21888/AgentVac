@@ -1,0 +1,46 @@
+name: Standalone inherited-context metadata research
+# Default is manual only. A reviewed temporary marker may trigger one source-only generated-fixture run.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/agentvac-windows-inherited-once-20261006.json"]
+permissions:
+  contents: read
+concurrency:
+  group: agentvac-windows-inherited-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  inherited-profile:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - name: Checkout reviewed source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - name: Build exact revised helper and separate initial fixture constructor
+        shell: cmd
+        run: |
+          call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=x64 -host_arch=x64
+          if errorlevel 1 exit /b 1
+          set "AGENTVAC_SDK_VERSION=%WindowsSDKVersion:\=%"
+          "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -File qa\windows-metadata-inherited\scripts\build-inherited-windows.ps1 -CompilerPath "%VCToolsInstallDir%bin\Hostx64\x64\cl.exe" -Architecture x64 -ExpectedSdkVersion "10.0.26100.0" -ExpectedSourceTreeSha256 "9aa841b040191b4e705aabfed6913b2f6d3b3d79a45daeda87a4824665eb088b"
+          if errorlevel 1 exit /b 1
+      - name: Pure policy tests on Windows compiler
+        shell: pwsh
+        run: |
+          & .\qa\windows-metadata-inherited\build\windows-x64\core-tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .\qa\windows-metadata-inherited\build\windows-x64\inherited-policy-tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exact-helper initial-empty-fixture probe
+        shell: pwsh
+        run: |
+          & 'C:\Program Files\nodejs\node.exe' .\qa\windows-metadata-inherited\scripts\native-inherited.mjs '9aa841b040191b4e705aabfed6913b2f6d3b3d79a45daeda87a4824665eb088b' '10.0.26100.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# No upload, release, app integration, privilege enablement, alternate login,
+# account/UAC changes, existing ACL writes, provider data or recursive cleanup.

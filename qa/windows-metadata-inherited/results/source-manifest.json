@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "profile": "same-caller-inherited-context-v1",
+  "status": "source-staged-not-native-accepted",
+  "sourceTreeSha256": "9aa841b040191b4e705aabfed6913b2f6d3b3d79a45daeda87a4824665eb088b",
+  "sources": {
+    ".gitattributes": "7f7a91fa46dfb949f7b76e5fa129d30a2b753676e8bbd267b344e8daf11fe576",
+    "include/core.hpp": "004309fe27a192ffe318050de7451c0ad6b8432e360d11ce57ccc59824428b7c",
+    "include/inherited-context.hpp": "dd30fcbf4e7f132fd60eae304651d2d85ab1e051ebb921f9e7ceeee3089d33ce",
+    "include/inherited-policy.hpp": "8e483aaff2722bcc2709f20079023c09bd4bb9030069b06a5bc5abd2fe6a32fd",
+    "include/inherited-request.hpp": "83d515b370d9ae1759e546a5888899211e41d04a938aca5f6c334e75c9c2eafa",
+    "inherited-protocol.mjs": "7d8bd88325aab021c0ff4a6d0be9d113c02a734bf4e775e1fc22b738b34fb054",
+    "protocol.mjs": "54bf9bcfd4d003b9a76e957979b3129dca08a76673e1abcc5de307aa8bc236ff",
+    "research-transport.mjs": "203e0b19c3a238b6d0e81c023b8e673b813632e5237e96cc31313ffd72c91c95",
+    "scripts/build-inherited-windows.ps1": "75f3532428880b80c1d8b11f23c6e84a39418ac53c3aba0317a1596f22d69363",
+    "scripts/native-inherited.mjs": "21dc93371f8d10574a5f4c6f39567111c5c7003f5121da6601240931abbc9b2f",
+    "scripts/source-manifest.mjs": "193fdbb131568bdf0042f67f564e5452cfffff7ab0e29ac1ede375563a40090f",
+    "src/fixture-constructor.cpp": "6e64c6cda69cee201d1c4bc542ed534f8f8db4a7b365c78318f867fa04fca806",
+    "src/helper.manifest": "ed744b8557e77fdbc476e0b29f5c2ae700e087a0db89d63cd1da4d86bf6ce2e6",
+    "src/native-helper.cpp": "50d94932f093755e855fcb5c15637e37c780a449199d9f85e2bf883767c32e97",
+    "tests/core.test.cpp": "29ecdfe086b7108ca203c9d9db3556b4c1b61fa4a6edbe513559c2a625e397eb",
+    "tests/inherited-policy.test.cpp": "8ffc8dcab896dda678e56a6a75baee063cb93562aa284b8b83bc1774428c3a52"
+  },
+  "baselineSourceTreeSha256": "d999a79bcf418480e8fd8efa144b5917a900d01cbb1cbd1f916ec738d97c1fa2",
+  "diagnosticSourceTreeSha256": "f0f64721b5fdbb505891c8d8aeb3ca9f43968bd34b64f4086b2b240508564e59",
+  "policySourceSha256": "497f00ba1caedfccb02e0ac69a1812cfaf6b37b301334c177cffb71f4f6a8dfd",
+  "nativeWindows": "NOT_RUN"
+}
