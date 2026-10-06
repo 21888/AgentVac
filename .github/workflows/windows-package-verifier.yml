@@ -1,0 +1,97 @@
+name: AgentVac original-source Windows package verification
+
+# Maintainers restore this manual workflow and remove only its dedicated marker
+# after the reviewed one-shot validation finishes.
+on:
+  push:
+    branches: [master]
+    paths: [".github/windows-package-verifier-20261006T2209Z-59090ba1.marker"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentvac-release-draft-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  windows-package:
+    if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false }}
+    runs-on: windows-2022
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: release-source
+    env:
+      CI: "true"
+      AGENTVAC_EXPECTED_ARCH: x64
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout reviewed QA workflow and verifier
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout exact original release source
+        uses: actions/checkout@v4
+        with:
+          ref: 4a523b95c1098eeb3e220cc58d290819ef97a01f
+          path: release-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - name: Install original locked dependencies
+        timeout-minutes: 4
+        run: npm ci --no-audit --no-fund
+      - name: Verify unchanged source and stage exact QA overlay
+        timeout-minutes: 2
+        run: node ../qa/windows-package-verifier/run.mjs stage
+      - name: Run actual ASAR and provenance regressions
+        id: overlay-tests
+        timeout-minutes: 2
+        run: node --test --test-reporter=tap .qa/windows-asar-verifier/tests/*.test.mjs
+      - name: Build original source once
+        id: build
+        timeout-minutes: 3
+        run: npm run build
+      - name: Generate original-source Windows distribution files
+        id: packages
+        timeout-minutes: 10
+        run: node scripts/build-release-artifacts.mjs
+      - name: Verify exact packaged bytes with reviewed host-native ASAR paths
+        id: package-bytes
+        timeout-minutes: 2
+        run: node .qa/windows-asar-verifier/scripts/verify-packages.mjs release-final windows x64
+      - name: Launch actual portable with generated recovery and supported readers
+        id: portable
+        timeout-minutes: 5
+        run: node scripts/release-package-smoke.mjs --target windows-portable --release-root release-final --source-revision 4a523b95c1098eeb3e220cc58d290819ef97a01f
+      - name: Install launch and uninstall actual generated NSIS package
+        id: setup
+        timeout-minutes: 5
+        run: node scripts/release-package-smoke.mjs --target windows-setup --release-root release-final --source-revision 4a523b95c1098eeb3e220cc58d290819ef97a01f
+      - name: Prepare receipts with explicit prior and current evidence
+        timeout-minutes: 2
+        env:
+          AGENTVAC_WINDOWS_QA_STAGES: >-
+            {"overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","portable":"${{ steps.portable.outcome }}","setup":"${{ steps.setup.outcome }}"}
+        run: node ../qa/windows-package-verifier/run.mjs prepare
+      - name: Upload only missing Windows assets while preserving original draft
+        id: upload
+        timeout-minutes: 6
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../qa/windows-package-verifier/run.mjs upload
+      - name: Report package-only scope without hiding prior source limitations
+        if: always()
+        timeout-minutes: 1
+        env:
+          AGENTVAC_WINDOWS_QA_SUMMARY: >-
+            {"sourceRevision":"4a523b95c1098eeb3e220cc58d290819ef97a01f","workflowQaRevision":"${{ github.sha }}","priorRun":37536722747,"priorJob":112519594642,"priorUnits":{"passed":1026,"failed":0,"skipped":44,"rerun":false},"priorProviderLifecycle":"failure-preserved","overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","portable":"${{ steps.portable.outcome }}","setup":"${{ steps.setup.outcome }}","upload":"${{ steps.upload.outcome }}","applicationAcceptance":false,"publication":false}
+        working-directory: .
+        run: node -e "console.log(process.env.AGENTVAC_WINDOWS_QA_SUMMARY)"
+      # No application source changes, new draft, retarget, clobber, publication,
+      # Actions artifacts/cache, other-platform rebuild or full unit rerun.

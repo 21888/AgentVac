@@ -1,0 +1,41 @@
+{
+  "format": "agentvac-windows-asar-qa-inputs-v1",
+  "sourceDigest": "ad0e0272da330d2349e13eb48bef9ff66fd8b7d293cc72260372e6ac44db31e3",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3064,
+      "sha256": "44e958804ebddef1172c192f787953ebd4a81845dd27a5dcad3e8f6c453cd737"
+    },
+    {
+      "path": "run.mjs",
+      "bytes": 10043,
+      "sha256": "f5f79e10d8191b891903e8a7b0878c8593c912fcc493ba7b9c2e709028bf2b67"
+    },
+    {
+      "path": "scripts/package-asar-paths.mjs",
+      "bytes": 452,
+      "sha256": "79ff9f9109b634b62b784b3eaf1690862b128d80ff2f501ff3a2b853d1345204"
+    },
+    {
+      "path": "scripts/package-targets.mjs",
+      "bytes": 1294,
+      "sha256": "77c785c61d596ebcd3c39c3a66542e40426538ef38b4b6ec29f68e291ac0c1c3"
+    },
+    {
+      "path": "scripts/verify-packages.mjs",
+      "bytes": 4657,
+      "sha256": "3a64abeccf78ff697da75dafa25fb4daa6b8e86e982156150f231f1707ea458f"
+    },
+    {
+      "path": "tests/package-asar-paths.test.mjs",
+      "bytes": 4354,
+      "sha256": "c611d223f0c1d2013597129aaa806baa12e6cd80dd58c147c91303dccd1fa9d9"
+    },
+    {
+      "path": "tests/provenance.test.mjs",
+      "bytes": 3957,
+      "sha256": "07d9ae1a4690f338bcc3bdaf5c40fc9b1d079f46c98f6476e672385b7b1ec046"
+    }
+  ]
+}
