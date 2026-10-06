@@ -21,5 +21,16 @@ int main(){
  info.size=0;info.attributes=0x410;assert(!makeReply(Phase::Ready,nonce,avm::Code::Private,&info,reply));++tests;
  assert(makeReply(Phase::Refused,nonce,avm::Code::InvalidRequest,nullptr,reply));assert(reply[36]==2&&reply[37]==0);tests+=2;
  assert(!makeReply(Phase::Refused,nonce,avm::Code::Private,&info,reply));assert(!makeReply(Phase::Ready,Nonce{},avm::Code::Private,&info,reply));tests+=2;
+ // Test the exact access policy consumed by CreateFileW. Windows static_asserts
+ // bind these constants to the SDK. This is not a native sharing proof.
+ for(bool directory:{false,true})for(bool acl:{false,true}){
+  const auto policy=retainedOpenPolicy(directory,acl);
+  assert((policy.desiredAccess & (directory?0x20u:0x1u))!=0);++tests;
+  assert((policy.desiredAccess & 0x80u)!=0);++tests;
+  assert((policy.desiredAccess & 0x20000u)==(acl?0x20000u:0));++tests;
+  assert((policy.desiredAccess & (0x2u|0x4u|0x40u|0x10000u|0x40000u|0x80000u))==0);++tests;
+  assert(directory?!(policy.desiredAccess&0x1u):!(policy.desiredAccess&0x20u));++tests;
+  assert(policy.shareAccess==(directory?0x1u:0x3u));++tests;
+ }
  std::cout<<"lease core checks "<<tests<<" passed\n";
 }

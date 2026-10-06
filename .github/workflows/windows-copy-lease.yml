@@ -1,6 +1,10 @@
 name: Standalone generated Windows copy-lease research
 # Default is manual only. A reviewed temporary marker may trigger one source-only generated-fixture run.
 on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/agentvac-windows-copy-lease-sharefix-once-20261006.json'
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,7 +29,7 @@ jobs:
           call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=x64 -host_arch=x64
           if errorlevel 1 exit /b 1
           set "AGENTVAC_SDK_VERSION=%WindowsSDKVersion:\=%"
-          "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -File qa\windows-copy-lease\scripts\build-lease-windows.ps1 -CompilerPath "%VCToolsInstallDir%bin\Hostx64\x64\cl.exe" -Architecture x64 -ExpectedSdkVersion "10.0.26100.0" -ExpectedSourceTreeSha256 "b5a05646699aefd57f6ec3c00e46498600b82e8da9c083a398e7a9dd02a8d6d3"
+          "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -File qa\windows-copy-lease\scripts\build-lease-windows.ps1 -CompilerPath "%VCToolsInstallDir%bin\Hostx64\x64\cl.exe" -Architecture x64 -ExpectedSdkVersion "10.0.26100.0" -ExpectedSourceTreeSha256 "05e1a6a6ce74c67073436e14c1e57b1f94504d2d5c0e187f472164381ea93385"
           if errorlevel 1 exit /b 1
       - name: Record exact source and compiled binary provenance
         shell: pwsh
@@ -55,7 +59,7 @@ jobs:
       - name: Exact-helper generated sentinel-copy probe
         shell: pwsh
         run: |
-          & 'C:\Program Files\nodejs\node.exe' .\qa\windows-copy-lease\scripts\native-lease.mjs 'b5a05646699aefd57f6ec3c00e46498600b82e8da9c083a398e7a9dd02a8d6d3' '10.0.26100.0'
+          & 'C:\Program Files\nodejs\node.exe' .\qa\windows-copy-lease\scripts\native-lease.mjs '05e1a6a6ce74c67073436e14c1e57b1f94504d2d5c0e187f472164381ea93385' '10.0.26100.0'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 # No upload, release, app integration, privilege enablement, alternate login,
 # account/UAC changes, existing ACL writes, provider data or recursive cleanup.

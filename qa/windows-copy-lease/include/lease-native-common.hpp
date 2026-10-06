@@ -162,11 +162,17 @@ Observation inspectLease(const avm_inherited::Request& whole, PSID currentUserSi
       result.code = Code::LocalityRejected; return result;
     }
     if ((attrs & FILE_ATTRIBUTE_REPARSE_POINT) || ((!final || request.directory) && !(attrs & FILE_ATTRIBUTE_DIRECTORY))) { result.code = Code::LocalityRejected; return result; }
-    // Ancestors stay open without WRITE/DELETE sharing until ACL + identity finish.
-    // A final regular file allows an already-open Node writer, but not rename/delete.
-    const DWORD share = FILE_SHARE_READ | ((final && !(attrs & FILE_ATTRIBUTE_DIRECTORY)) ? FILE_SHARE_WRITE : 0);
+    // Metadata-only access does not participate in read/write/delete sharing.
+    // Retain directory traversal rights or regular-file read rights explicitly;
+    // never enumerate a directory or read target contents through these handles.
+    // No weaker-rights retry is permitted if this open is denied.
+    static_assert(FILE_READ_ATTRIBUTES==0x80u && READ_CONTROL==0x20000u &&
+      FILE_READ_DATA==0x1u && FILE_TRAVERSE==0x20u && FILE_EXECUTE==FILE_TRAVERSE &&
+      FILE_SHARE_READ==0x1u && FILE_SHARE_WRITE==0x2u && FILE_SHARE_DELETE==0x4u,
+      "reviewed Windows share-participating rights");
     const bool privateBoundary=index>=privateIndex;
-    const DWORD access = FILE_READ_ATTRIBUTES | ((privateBoundary || (final && request.acl)) ? READ_CONTROL : 0);
+    const auto policy=avm_lease::retainedOpenPolicy((attrs & FILE_ATTRIBUTE_DIRECTORY)!=0, privateBoundary || (final && request.acl));
+    const DWORD share=policy.shareAccess, access=policy.desiredAccess;
     Handle handle(CreateFileW(native.c_str(), access, share, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr));
     if (handle.get() == INVALID_HANDLE_VALUE) { result.code = Code::MetadataUnavailable; if(GetLastError()==ERROR_SHARING_VIOLATION) result.reason=avm_lease::Reason::SharingConflict; return result; }
     BY_HANDLE_FILE_INFORMATION info{};

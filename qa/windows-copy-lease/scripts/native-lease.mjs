@@ -27,6 +27,8 @@ import { acquireFixtureDeleteHolder } from "../fixture-delete-holder.mjs";
 import {
   requireNativeFixtureRefusal,
   requireInvalidControlRefusal,
+  requireHeldRenameRefusal,
+  requireNoReadyUnderDeleteHolder,
 } from "../lease-oracles.mjs";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   build = path.join(root, "build", "windows-x64"),
@@ -254,6 +256,19 @@ async function runCase(id, body) {
       status: blocked ? "BLOCKED" : "FAIL",
       code: safeCode(e),
       ...(e?.nativeOutcome ? { nativeOutcome: e.nativeOutcome } : {}),
+      ...([
+        "none",
+        "initial-file-nonempty",
+        "initial-file-hardlink",
+        "initial-file-not-regular",
+        "filesystem-unsupported",
+        "sharing-conflict",
+      ].includes(e?.nativeReason)
+        ? {
+            nativeReason: e.nativeReason,
+            verifiedTerminalRefusal: e.verifiedTerminalRefusal === true,
+          }
+        : {}),
     });
     if (ownedGeneratedLeaseCount()) halted = true;
   }
@@ -409,11 +424,40 @@ try {
                 : target === "parent"
                   ? f.directory
                   : f.scope;
-          await assert.rejects(rename(p, p + ".renamed"), (e) =>
-            ["EPERM", "EACCES", "EBUSY"].includes(e.code),
+          const original = await lstat(p, { bigint: true });
+          const destinationBefore = await f.destination.stat({ bigint: true });
+          assert.equal(destinationBefore.size, 0n);
+          assert.equal(destinationBefore.nlink, 1n);
+          assert.equal(
+            destinationBefore.dev,
+            BigInt("0x" + lease.ready.identity.volume32),
           );
-          assert.equal((await f.destination.stat()).size, 0);
+          assert.equal(
+            destinationBefore.ino,
+            BigInt("0x" + lease.ready.identity.fileIndex64),
+          );
+          // Isolate helper-held namespace guards: Node's own descendant handles
+          // must not be the cause of either directory refusal or post-close failure.
+          await f.source.close();
+          await f.destination.close();
+          await requireHeldRenameRefusal(lease, () =>
+            rename(p, p + ".renamed"),
+          );
+          const held = await lstat(p, { bigint: true });
+          assert.equal(held.dev, original.dev);
+          assert.equal(held.ino, original.ino);
+          assert.equal((await lstat(f.target)).size, 0);
           await abortLease(lease, run);
+          try {
+            await rename(p, p + ".renamed");
+          } catch {
+            throw Object.assign(new Error("LEASE_RENAME_AFTER_CLOSE_FAILED"), {
+              code: "LEASE_RENAME_AFTER_CLOSE_FAILED",
+            });
+          }
+          const released = await lstat(p + ".renamed", { bigint: true });
+          assert.equal(released.dev, original.dev);
+          assert.equal(released.ino, original.ino);
         } finally {
           if (run?.child && !run.child.fixtureClosed) {
             run.child.kill();
@@ -463,15 +507,18 @@ try {
           holder = await holderRun.ready;
           assert.equal(holder.isHolding(), true);
           run = await launched(f);
-          let rejected;
+          let rejected,
+            wasReady = false;
           try {
             const unexpected = await run.ready;
+            wasReady = true;
             await abortLease(unexpected, run);
           } catch (e) {
             rejected = e;
           }
           await requireClosed(run);
           assert.equal(holder.isHolding(), true);
+          requireNoReadyUnderDeleteHolder(wasReady);
           requireNativeFixtureRefusal(rejected, "deleteAccess");
           assert.equal((await f.destination.stat()).size, 0);
           const release = await holder.release();

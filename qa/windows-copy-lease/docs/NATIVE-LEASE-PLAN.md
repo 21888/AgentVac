@@ -6,7 +6,7 @@ Use one standard public windows-2022 runner, contents:read, no dependency instal
 
 ## Build and local tests
 
-Run scripts/build-lease-windows.ps1 with explicit absolute Microsoft compiler, x64 architecture, exact SDK and reviewed source-tree pin. Before compilation it executes tests/source-inputs.test.ps1 under the same Windows PowerShell5.1 process. The suite checks the historical nested-array pipeline shape, direct top-level parsing, strict types/counts, duplicate/case aliases and path rejection. This parsing-only variant preserves the14-case native plan unchanged. Run the generated core, inherited-policy and lease-core executables plus the36 Node lease unit cases. Windows unit fixtures close their own descriptors but are left for runner disposal. No old baseline build script is the lease build.
+Run scripts/build-lease-windows.ps1 with explicit absolute Microsoft compiler, x64 architecture, exact SDK and reviewed source-tree pin. Before compilation it executes tests/source-inputs.test.ps1 under the same Windows PowerShell5.1 process. The suite checks the historical nested-array pipeline shape, direct top-level parsing, strict types/counts, duplicate/case aliases and path rejection. This parsing-only variant preserves the14-case native plan unchanged. Run the generated core, inherited-policy and lease-core executables plus the40 Node lease unit cases. Windows unit fixtures close their own descriptors but are left for runner disposal. No old baseline build script is the lease build.
 
 ## Native runner
 
@@ -15,7 +15,7 @@ Run scripts/native-lease.mjs with the exact source-tree pin and SDK. It rechecks
 The14 named native cases are:
 1. Exact held NTFS destination copy: final size/hash/readback and source preservation.
 2. Unrelated generated sibling creation/write remains usable while leased.
-3–5. Leaf, generated private parent and generated scope renames are refused while handles are retained.
+3–5. Leaf, generated private parent and generated scope renames are refused while the lease is observed live, original exact identity remains, then the same object successfully renames after verified helper close. A succeeded rename, unexpected errno or lost lease is a distinct failure. Node source/destination handles are explicitly closed before both attempts so their open descendants cannot create a false denial; copy/writer-coexistence remains covered by separate cases.
 6–8. Broad initial ACL, nonempty file and hardlinked file refuse before sentinel copy.
 9. Observed helper exit after READY blocks the first copy write.
 10. Cancellation after the first completed native write preserves the partial generated fixture. This is not a kernel-stalled pending-write test.
@@ -29,7 +29,7 @@ No raw paths, SIDs, arguments or source contents enter the report. It emits fixe
 
 Existing enabled backup/restore privileges, different-user/impersonated peers, reparse creation, parent exit with duplicated endpoint, ACL-change races, real kernel-pending-write stalls, SQLite WAL/SHM behavior, arbitrary app-path containment and full Electron runtime integration are not established by this stage. Existing ACL mutation and privilege/security changes remain unauthorized. Do not use a passing generated-copy probe to enable the application.
 
-The helper retains ancestors without WRITE/DELETE sharing and the final file without DELETE sharing while allowing the existing Node writer. This is a finite OS handle lease; its effects on generated sibling writes are tested explicitly. Liveness checks do not atomically prevent helper death. The host retains pending writes through settlement, records known successful bytes, and preserves an error-uncertain extent rather than claiming nothing was written.
+The helper retains FILE_TRAVERSE directory handles without WRITE/DELETE sharing and a FILE_READ_DATA final-file handle without DELETE sharing while allowing the existing Node writer. It performs no target content reads or directory listings. This is a finite OS handle lease; its effects on generated sibling writes are tested explicitly. Liveness checks do not atomically prevent helper death. The host retains pending writes through settlement, records known successful bytes, and preserves an error-uncertain extent rather than claiming nothing was written.
 
 Leave all generated Windows fixtures for the disposable runner. Do not delete paths after releasing the containment handles, repair existing ACLs, or touch provider data.
 
@@ -38,3 +38,5 @@ Leave all generated Windows fixtures for the disposable runner. Do not delete pa
 This is the separate AVL2/AVR2/AVC2 revision. It does not use the reviewed-and-rejected7bbc transport/oracles. Process exit revokes liveness immediately, while admission persists to close; a clean exit may drain only valid buffered terminal/refusal diagnostics, never revive READY. Typed shape/sharing reasons and complete nonce-bound refusal evidence are required for negative PASS. Metadata/ACL-query failure is preserved as unavailable. Invalid controls must produce an actual invalid-request refusal; a clean exit or a dead lease alone is insufficient. Exact byte magic rejects high-bit aliases.
 
 The separate DELETE actor uses AVD2 and exposes no containment-ready capability. It shares the same two-child ownership pool with the lease. Its binary is compiled/hashed separately and may target only the same newly generated empty fixture scope.
+
+The preceding b5a056 run passed12/14 native cases and exposed the metadata-only access-mask defect. This source changes the actual helper and holder common access policy; those old passes do not validate the revised binaries. Missing requested read/traverse access remains BLOCKED without a weaker fallback. The DELETE-holder case explicitly records unexpected READY as failure before teardown can obscure it.

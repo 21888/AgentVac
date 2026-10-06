@@ -9,6 +9,13 @@ constexpr std::size_t kControlBytes = 24;
 constexpr std::size_t kResponseBytes = 24 + 4 + avm::kResponseSize;
 constexpr std::uint64_t kCopyLimit = 16u * 1024u * 1024u;
 constexpr std::uint32_t kLeaseMs = 30000;
+// Explicit rights participating in MS-FSA sharing checks. Directory0x20 is
+// FILE_TRAVERSE (not enumeration); regular-file0x1 is FILE_READ_DATA. No target
+// content operation is performed. Constants are verified against WinNT below.
+struct RetainedOpenPolicy { std::uint32_t desiredAccess; std::uint32_t shareAccess; };
+constexpr RetainedOpenPolicy retainedOpenPolicy(bool directory,bool inspectSecurity) {
+ return {0x80u | (inspectSecurity?0x20000u:0u) | (directory?0x20u:0x1u), 0x1u | (directory?0u:0x2u)};
+}
 using Nonce = std::array<std::uint8_t,kNonceBytes>;
 enum class Phase : std::uint8_t { Ready=1, Released=2, Refused=3, Cancelled=4 };
 enum class Reason : std::uint8_t { None=0, Nonempty=1, Hardlink=2, NotRegular=3, UnsupportedFilesystem=4, SharingConflict=5 };

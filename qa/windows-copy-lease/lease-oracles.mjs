@@ -63,3 +63,26 @@ export function requireInvalidControlRefusal(evidence, exit) {
       code: "LEASE_INVALID_CONTROL_NOT_REFUSED",
     });
 }
+
+const fixtureError = (code) => Object.assign(new Error(code), { code });
+export async function requireHeldRenameRefusal(lease, attempt) {
+  if (lease?.isLive?.() !== true)
+    throw fixtureError("LEASE_LOST_AT_RENAME_ATTEMPT");
+  let refused,
+    succeeded = false;
+  try {
+    await attempt();
+    succeeded = true;
+  } catch (error) {
+    refused = error;
+  }
+  if (lease.isLive() !== true) throw fixtureError("LEASE_LOST_DURING_RENAME");
+  if (succeeded) throw fixtureError("LEASE_RENAME_SUCCEEDED");
+  if (!["EPERM", "EACCES", "EBUSY"].includes(refused?.code))
+    throw fixtureError("LEASE_RENAME_UNEXPECTED_ERROR");
+}
+
+export function requireNoReadyUnderDeleteHolder(wasReady) {
+  if (wasReady !== false)
+    throw fixtureError("LEASE_UNEXPECTED_READY_UNDER_DELETE_HOLDER");
+}

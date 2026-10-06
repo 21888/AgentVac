@@ -6,7 +6,7 @@ Status: design/implementation staging only. No app wiring or production/private-
 
 The first lease is for one exclusively created, empty, single-link regular file under the fixed generated inherited-fixture-<32hex> subtree adjacent to the reviewed research executable. Its containing generated directories must have verified inheritable private ACLs. This is a generated sentinel-copy experiment. It does not initially authorize arbitrary app paths, folders, multiple databases, SQLite WAL/SHM reconstruction, or existing destination files.
 
-The read-only helper retains verified no-reparse ancestor and destination handles without FILE_SHARE_DELETE. Node owns the already-open exclusive destination handle. Before writing any generated source bytes, Node must match native volume/file identity and its held descriptor, observe a valid ready frame with the request nonce, and confirm that the helper is still live. Path equality or a prior ACL success is insufficient.
+The read-only helper retains verified no-reparse ancestor and destination handles without FILE_SHARE_DELETE. Node owns the already-open destination handle, obtained by exclusive creation (not exclusive Windows sharing). Before writing any generated source bytes, Node must match native volume/file identity and its held descriptor, observe a valid ready frame with the request nonce, and confirm that the helper is still live. Path equality or a prior ACL success is insufficient.
 
 Keep the exact reviewed OS-pipe caller identity and current-user/authentication/session/integrity checks. Inherited administration is not requested elevation. Thread impersonation, enabled backup/restore, privileged service identities, remote/mapped/ambiguous paths and unknown ACLs remain refusals. No privileges, accounts, UAC, existing ACLs or permissions change.
 
@@ -50,3 +50,15 @@ Sources: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/ns-fileapi-
 The original7bbc checkpoint is preserved separately. The corrected lease wire uses AVL2/AVR2/AVC2 with strict typed refusal details. The shared transport revokes write eligibility on process exit, retains child ownership until close, and allows bounded late terminal/refusal draining after clean exit without accepting late READY. A negative fixture passes only on the intended complete nonce-bound refusal plus clean exit/EOF/close.
 
 The generated DELETE-access actor has its own AVD2 wire and cannot be passed as a copy lease. It requests an ordinary existing DELETE right solely to exercise Windows sharing conflicts, and never invokes deletion/rename/ACL/content-write APIs. It retains the same private initial identity and releases on a nonce control or finite watchdog.
+
+## Share-participating handle rights
+
+The b5a056 native probe passed12 of14 cases but failed leaf-rename denial and the pre-existing DELETE-handle refusal. Its metadata-only access mask did not establish those barriers. It is retained as failed containment evidence, not reclassified as a pass.
+
+This corrected design requests FILE_READ_DATA for the final ordinary file and FILE_TRAVERSE for retained directories, in addition to existing FILE_READ_ATTRIBUTES and required READ_CONTROL. FILE_TRAVERSE is the directory meaning of0x20, the same bit named FILE_EXECUTE in the sharing predicate; it does not request directory-list rights. The file retains READ/WRITE sharing for the existing Node writer and omits DELETE sharing. Directories retain READ sharing and omit WRITE/DELETE sharing. The SDK constants are compile-time checked against the portable policy that supplies the actual CreateFileW arguments.
+
+Only metadata and security descriptors are queried on these handles. No target ReadFile, directory enumeration, file execution, target write, rename/delete, ACL change or privilege adjustment is added to the helper. A requested-access refusal remains unavailable; the helper never retries with weaker metadata-only rights. This distinction matters: metadata-only **observations** do not mean a metadata-only **access mask** is sufficient for sharing checks.
+
+Microsoft's file/stream sharing algorithms gate conflicts on granted data-read/execute/write/append/delete bits. Attribute/READ_CONTROL-only handles are outside that predicate. The directory traverse and file read masks above are source-supported, but their actual NTFS barriers and sibling-write compatibility still require fresh exact-binary native tests. Privileged/same-user ACL changes and other deferred threats are not solved by requesting these rights.
+
+Sources: [file access/deletion checks](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/82b364ce-6d7b-422f-8d88-4db32eea809a), [stream/directory sharing checks](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/8c0e3f4f-0729-49f4-a14d-7f7add593819), [documented access-bit meanings](https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants).

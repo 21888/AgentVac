@@ -4,6 +4,8 @@ import {
   classifyNativeFixtureRefusal,
   requireNativeFixtureRefusal,
   requireInvalidControlRefusal,
+  requireHeldRenameRefusal,
+  requireNoReadyUnderDeleteHolder,
 } from "../lease-oracles.mjs";
 const refusal = (outcome, reason = "none") =>
   Object.freeze({
@@ -76,4 +78,67 @@ test("control rejection requires actual nonce-bound terminal invalid-request wit
   ])
     assert.throws(() => requireInvalidControlRefusal(valid, e));
   assert.throws(() => requireInvalidControlRefusal(undefined, exit));
+});
+
+test("rename witness requires a live lease and actual intended refusal", async () => {
+  let attempts = 0;
+  await assert.rejects(
+    requireHeldRenameRefusal({ isLive: () => false }, async () => {
+      attempts++;
+    }),
+    { code: "LEASE_LOST_AT_RENAME_ATTEMPT" },
+  );
+  assert.equal(attempts, 0);
+  await assert.rejects(
+    requireHeldRenameRefusal({ isLive: () => true }, async () => {}),
+    { code: "LEASE_RENAME_SUCCEEDED" },
+  );
+  for (const code of ["ENOENT", "EINVAL", "EXDEV", undefined])
+    await assert.rejects(
+      requireHeldRenameRefusal({ isLive: () => true }, async () => {
+        throw { code };
+      }),
+      { code: "LEASE_RENAME_UNEXPECTED_ERROR" },
+    );
+  for (const code of ["EPERM", "EACCES", "EBUSY"])
+    await requireHeldRenameRefusal({ isLive: () => true }, async () => {
+      throw { code };
+    });
+});
+test("rename refusal after lease loss cannot prove containment", async () => {
+  let live = true;
+  await assert.rejects(
+    requireHeldRenameRefusal({ isLive: () => live }, async () => {
+      live = false;
+      throw { code: "EACCES" };
+    }),
+    { code: "LEASE_LOST_DURING_RENAME" },
+  );
+});
+test("unexpected native READY is a distinct failure even after clean cleanup", () => {
+  assert.doesNotThrow(() => requireNoReadyUnderDeleteHolder(false));
+  for (const value of [true, undefined, null, 0])
+    assert.throws(() => requireNoReadyUnderDeleteHolder(value), {
+      code: "LEASE_UNEXPECTED_READY_UNDER_DELETE_HOLDER",
+    });
+});
+
+test("post-attempt loss is diagnosed before success or unexpected-error attribution", async () => {
+  for (const outcome of ["success", "unexpected", "undefined-throw"]) {
+    let live = true;
+    await assert.rejects(
+      requireHeldRenameRefusal({ isLive: () => live }, async () => {
+        live = false;
+        if (outcome === "unexpected") throw { code: "ENOENT" };
+        if (outcome === "undefined-throw") throw undefined;
+      }),
+      { code: "LEASE_LOST_DURING_RENAME" },
+    );
+  }
+  await assert.rejects(
+    requireHeldRenameRefusal({ isLive: () => true }, async () => {
+      throw undefined;
+    }),
+    { code: "LEASE_RENAME_UNEXPECTED_ERROR" },
+  );
 });
