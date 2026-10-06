@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "profile": "generated-private-copy-lease-v2",
+  "status": "PARTIAL_GENERATED_LEASE_PASS",
+  "productionAccepted": false,
+  "privateCopyActivated": false,
+  "nativeWindows": "PARTIAL_ONLY",
+  "evidence": {
+    "sourceTreeSha256": "05e1a6a6ce74c67073436e14c1e57b1f94504d2d5c0e187f472164381ea93385",
+    "helperSha256": "6ad254decf03b7944600b8922634c774d1130aaaf1d7688577fd6b31cd5c039b",
+    "fixtureSha256": "736b7def0f81abe19057c9fefe5218ed88c91bf4645aa4e1216165e1ee9e9d86",
+    "holderSha256": "e40e6260b70ec2d00926d117394b0394a0afde99140ba45ac7b46a40caee96df",
+    "compilerSha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+    "sdkVersion": "10.0.26100.0",
+    "provenanceSha256": "33d1b205faa19a229a6d0fed97d1ad05469cd3fa07becb3b101b6532246076c8",
+    "node": "v22.23.3",
+    "libuv": "1.51.0",
+    "nodeSha256": "9c9245166b4a8e182e0b797da9c20136117ff24368eaff1fec8343a123c8db0e",
+    "windowsRelease": "10.0.20348",
+    "architecture": "x64"
+  },
+  "cases": [
+    {
+      "id": "held-private-NTFS-file-copy-exact-size-hash-source",
+      "status": "PASS"
+    },
+    {
+      "id": "lease-does-not-block-generated-unrelated-sibling-write",
+      "status": "PASS"
+    },
+    {
+      "id": "held-leaf-rename-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "held-parent-rename-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "held-scope-rename-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "broad-destination-refuses-before-copy",
+      "status": "PASS"
+    },
+    {
+      "id": "nonempty-destination-refuses-before-copy",
+      "status": "PASS"
+    },
+    {
+      "id": "hardlink-destination-refuses-before-copy",
+      "status": "PASS"
+    },
+    {
+      "id": "preexisting-DELETE-handle-causes-exact-sharing-refusal",
+      "status": "PASS"
+    },
+    {
+      "id": "helper-exit-after-ready-prevents-first-copy-write",
+      "status": "PASS"
+    },
+    {
+      "id": "cancel-after-first-native-write-preserves-partial-fixture",
+      "status": "PASS"
+    },
+    {
+      "id": "duplicate-native-control-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "stale-native-control-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "native-30s-watchdog-releases-empty-fixture-handles",
+      "status": "PASS"
+    }
+  ],
+  "unavailableNativeCases": [
+    "preexisting-enabled-backup-or-restore-token",
+    "different-user-or-impersonated-peer",
+    "reparse-creation-without-privilege",
+    "parent-exit-with-duplicated-pipe-endpoint",
+    "ACL-change-race-not-authorized",
+    "real-kernel-pending-write-stall",
+    "SQLite-WAL-SHM-under-lease",
+    "arbitrary-app-path-containment",
+    "full-Electron-runtime-integration"
+  ],
+  "generatedFixturesLeftForRunnerDisposal": true,
+  "verification": {
+    "repositoryCommit": "3e6409ef2e329a6f1e633cbdd113bcfe379fb1cb",
+    "workflowRunId": 37405351377,
+    "jobId": 112081577644,
+    "workflowRunUrl": "https://github.com/21888/AgentVac/actions/runs/37405351377",
+    "workflowConclusion": "success",
+    "hostTests": {
+      "passed": 40,
+      "failed": 0,
+      "cancelled": 0
+    },
+    "powershellParserChecks": 69,
+    "scope": "Generated fixtures only. Not full application, SQLite-family, or Electron acceptance."
+  }
+}
