@@ -3,7 +3,7 @@
   "scope": "v0.2.0-verified-binary-source-with-reviewed-nonshipping-publication-metadata",
   "baseCommit": "4e0784b26d1cccca645d782e9fb457b0eefe182e",
   "binarySourceCommit": "4a523b95c1098eeb3e220cc58d290819ef97a01f",
-  "sourceDigest": "6324c5ae9a7628b4457e1d01606d33d25bf971927c621c0d1e6dc779de55c9bd",
+  "sourceDigest": "bac3eb6596f30250004afa4d17cb75d1b7e97e29f48cfa74fd971a6f0fad890a",
   "productionDigest": "078042cfa25d9bf0a8a9a16961e0536cc0a75ef67b644382f00bd0332ded841d",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -17,8 +17,8 @@
     },
     {
       "path": ".github/workflows/final-publication.yml",
-      "sha256": "ade4a5a28ce95d573cde381849a74e34a466def24913bd9a296b226c6ddc4248",
-      "bytes": 1511
+      "sha256": "33a03d65178418a0e32c9d6e5b314dd8f9d352862d74d0dae4be5dfa529aa4b6",
+      "bytes": 1408
     },
     {
       "path": ".github/workflows/native-desktop.yml",
@@ -2584,11 +2584,6 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
-    },
-    {
-      "path": ".github/final-publication-20261006T2255Z-6be26a90.marker",
-      "sha256": "a958e9ba640725d02da69e4883b413de3764036cd04a32a731b142cf755ed524",
-      "bytes": 188
     }
   ]
 }

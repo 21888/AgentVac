@@ -2,9 +2,6 @@ name: AgentVac reviewed final publication
 
 # Restore this manual trigger after the reviewed one-shot publication is terminal.
 on:
-  push:
-    branches: [master]
-    paths: [".github/final-publication-20261006T2255Z-6be26a90.marker"]
   workflow_dispatch:
 
 permissions:
