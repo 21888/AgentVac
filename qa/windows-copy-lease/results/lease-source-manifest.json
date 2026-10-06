@@ -2,7 +2,7 @@
   "schema": 1,
   "profile": "generated-private-copy-lease-v2",
   "status": "source-staged-not-native-accepted",
-  "sourceTreeSha256": "5f667f5c436db41483100cc703d81d0975cfa49646ec23a7656bd054b3a4182e",
+  "sourceTreeSha256": "b5a05646699aefd57f6ec3c00e46498600b82e8da9c083a398e7a9dd02a8d6d3",
   "sources": {
     "SOURCE-INPUTS.json": "eb6d17512e9c7c052fa3b329868be091bd0504cda094cb683f0f1338a1f10b42",
     "fixture-delete-holder.mjs": "15f7508d5bee622c171641f0bc36c6572ea2936d026314c2720b0ae537093adb",
@@ -35,8 +35,8 @@
     "tests/lease-delete-holder.test.mjs": "ca6aec7c3dd16ac7a792146b4f57770b16d1fd5b1142cbf68b62132dfc4d861f",
     "tests/lease-oracles.test.mjs": "623163651eb42559652c2c9f5e8f69f274993aa020071784f11090e6343a36f6",
     "tests/lease-protocol.test.mjs": "b5c01fec66db234be82af7d5f0c43a9ee90d1a5dad56a24b81455e7be47f73ac",
-    "tests/lease-real-exit.test.mjs": "42e444f1cad250275f3d5072d3257fa85f9f5831b2c47a9db6014f9dccd5d3a8",
-    "tests/lease-transport.test.mjs": "d62ab01c94bf6d45cdee6964bb772b849004c56329ea6e6c950454935f0803b6",
+    "tests/lease-real-exit.test.mjs": "48be98a37da98f459957eea457e72a5b0220f8d60ef7d5cba832b5d630d89289",
+    "tests/lease-transport.test.mjs": "a0b7ece0ce0a004203379f7ef63bd10e0b6388502208542fa28c71377ddc1aa1",
     "tests/lease-wire-probe.cpp": "4d3c588017d9c587fac631f2bb7e217ab0aaaf14df291b4641e93f8b2eaf800b",
     "tests/source-inputs.test.ps1": "54e1647fcd3495f35eff4732517890301e04c30b4bd2b23e02ab7ebef9a0d9ff"
   },

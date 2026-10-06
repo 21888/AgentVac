@@ -33,7 +33,11 @@ function frame(phase = 1) {
   b.writeUInt32LE(32, 68);
   return b;
 }
-function child() {
+function child(t) {
+  // A real ChildProcess owns a referenced OS handle; EventEmitter does not.
+  // Keep this model alive only within the bounded test and until observed close.
+  const keepAlive = setInterval(() => {}, 250);
+  t.after(() => clearInterval(keepAlive));
   const c = new EventEmitter();
   c.stdin = new PassThrough();
   c.stdout = new PassThrough();
@@ -51,6 +55,7 @@ function child() {
   c.finish = async (code = 0) => {
     if (c.closed) return;
     c.closed = true;
+    clearInterval(keepAlive);
     if (!c.exited) c.emit("exit", code, null);
     c.stdout.end();
     await new Promise((r) => setImmediate(r));
@@ -67,8 +72,8 @@ async function ready(c) {
   c.stdout.write(frame());
   return p;
 }
-test("transport admits ready once and releases only after terminal EOF and child close", async () => {
-  const c = child(),
+test("transport admits ready once and releases only after terminal EOF and child close", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   assert.equal(l.isLive(), true);
   const p = l.release();
@@ -83,8 +88,8 @@ test("transport admits ready once and releases only after terminal EOF and child
   assert.equal(l.isLive(), false);
   assert.equal(ownedGeneratedLeaseCount(), 0);
 });
-test("duplicate READY invalidates live lease and retains ownership until close", async () => {
-  const c = child(),
+test("duplicate READY invalidates live lease and retains ownership until close", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   c.stdout.write(frame());
   assert.equal(l.isLive(), false);
@@ -94,8 +99,8 @@ test("duplicate READY invalidates live lease and retains ownership until close",
   assert.equal(ownedGeneratedLeaseCount(), 0);
   await assert.rejects(l.release(), /RELEASE_STATE/);
 });
-test("stale nonce refuses before usable ready", async () => {
-  const c = child(),
+test("stale nonce refuses before usable ready", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     p = acquireGeneratedLease({ spawnPinned: () => c, request });
   const bad = frame();
   bad[12] ^= 1;
@@ -104,15 +109,15 @@ test("stale nonce refuses before usable ready", async () => {
   assert.ok(c.kills);
   await c.finish();
 });
-test("premature child exit after READY invalidates fence and cannot release", async () => {
-  const c = child(),
+test("premature child exit after READY invalidates fence and cannot release", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   await c.finish(1);
   assert.equal(l.isLive(), false);
   await assert.rejects(l.release(), /RELEASE_STATE/);
 });
-test("duplicate release cannot send a second control", async () => {
-  const c = child(),
+test("duplicate release cannot send a second control", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   let controls = 0;
   c.stdin.on("data", (b) => {
@@ -125,9 +130,9 @@ test("duplicate release cannot send a second control", async () => {
   await p;
   assert.equal(controls, 1);
 });
-test("deadline retains unreaped child admission and refuses a third helper", async () => {
-  const a = child(),
-    b = child();
+test("deadline retains unreaped child admission and refuses a third helper", { timeout: 3000 }, async (t) => {
+  const a = child(t),
+    b = child(t);
   const p = acquireGeneratedLease({
       spawnPinned: () => a,
       request,
@@ -144,7 +149,7 @@ test("deadline retains unreaped child admission and refuses a third helper", asy
     acquireGeneratedLease({
       spawnPinned: () => {
         spawned++;
-        return child();
+        return child(t);
       },
       request,
     }),
@@ -155,8 +160,8 @@ test("deadline retains unreaped child admission and refuses a third helper", asy
   await b.finish();
   assert.equal(ownedGeneratedLeaseCount(), 0);
 });
-test("cancel waits boundedly without falsely releasing admission", async () => {
-  const c = child(),
+test("cancel waits boundedly without falsely releasing admission", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   const result = await l.abort();
   assert.equal(result.teardownConfirmed, false);
@@ -165,8 +170,8 @@ test("cancel waits boundedly without falsely releasing admission", async () => {
   await c.finish();
   assert.equal(ownedGeneratedLeaseCount(), 0);
 });
-test("normal nonce-bound cancel can close cleanly", async () => {
-  const c = child(),
+test("normal nonce-bound cancel can close cleanly", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   const p = l.abort();
   c.stdout.write(frame(4));
@@ -174,14 +179,14 @@ test("normal nonce-bound cancel can close cleanly", async () => {
   assert.equal((await p).teardownConfirmed, true);
   assert.equal(ownedGeneratedLeaseCount(), 0);
 });
-test("nonfinite/over-budget timeouts and pre-cancel never spawn", async () => {
+test("nonfinite/over-budget timeouts and pre-cancel never spawn", { timeout: 3000 }, async (t) => {
   let calls = 0;
   for (const deadlineMs of [NaN, Infinity, 0, 31001])
     await assert.rejects(
       acquireGeneratedLease({
         spawnPinned: () => {
           calls++;
-          return child();
+          return child(t);
         },
         request,
         deadlineMs,
@@ -194,7 +199,7 @@ test("nonfinite/over-budget timeouts and pre-cancel never spawn", async () => {
     acquireGeneratedLease({
       spawnPinned: () => {
         calls++;
-        return child();
+        return child(t);
       },
       request,
       signal: x.signal,
@@ -204,8 +209,8 @@ test("nonfinite/over-budget timeouts and pre-cancel never spawn", async () => {
   assert.equal(calls, 0);
 });
 
-test("observed exit revokes liveness immediately while admission waits for close", async () => {
-  const c = child(),
+test("observed exit revokes liveness immediately while admission waits for close", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   c.emit("exit", 1, null);
   assert.equal(l.isLive(), false);
@@ -214,8 +219,8 @@ test("observed exit revokes liveness immediately while admission waits for close
   await c.finish(1);
   assert.equal(ownedGeneratedLeaseCount(), 0);
 });
-test("clean releasing exit can precede buffered terminal data without early success", async () => {
-  const c = child(),
+test("clean releasing exit can precede buffered terminal data without early success", { timeout: 3000 }, async (t) => {
+  const c = child(t),
     l = await ready(c);
   const p = l.release();
   c.emit("exit", 0, null);

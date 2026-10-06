@@ -13,3 +13,7 @@ The helper is read-only. Node copies only bounded generated sentinels after held
 ## PowerShell build compatibility correction
 
 The preceding fce source was refused before compilation in Windows PowerShell5.1 because collecting ConvertFrom-Json output with @() nested its top-level array. This separate variant uses direct assignment, validates actual array/string elements and canonical unique paths, and runs native PowerShell parser regressions before compiling. No lease/helper/holder/transport behavior changed. Actual PowerShell5.1 and new-binary native validation remain NOT_RUN locally; no PowerShell executable is installed here.
+
+## Native fixture ordering correction
+
+The5f667 retry passed69 Windows PowerShell5.1 parser checks and Microsoft helper/holder/fixture compilation plus the portable C++ suites. The14 native lease cases did not run because two Node fixture assumptions failed first. This variant changes only the real-exit and fake-child lifecycle tests: a parent-triggered actual exit is sampled synchronously before close, and bounded fake children keep the event loop referenced until teardown. The native helper, holder, protocol, transport and copy logic are byte-identical. This is not a relaxation of exit revocation or close-based admission.
