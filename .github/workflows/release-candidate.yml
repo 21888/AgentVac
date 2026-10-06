@@ -3,9 +3,6 @@ name: AgentVac 0.2.0 draft package verification
 # Final/default state is manual only. A separately reviewed one-shot master marker
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
-  push:
-    branches: [master]
-    paths: [".github/release-candidate-20261006T2043Z-5a90d21c.marker"]
   workflow_dispatch:
 
 permissions:
