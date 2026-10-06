@@ -28,7 +28,7 @@ export const RELEASE_TARGETS = Object.freeze({
 
 const PACKAGE_CHECKS = new Set(['native-host', 'artifact-before', 'built-payload-snapshot', 'extract-actual-artifact', 'mount-actual-dmg', 'copy-dmg-payload', 'no-existing-installation', 'silent-install', 'prepared-payload-byte-identity', 'own-installed-uninstaller', 'actual-package-native-smoke', 'actual-package-conversation-readers', 'silent-uninstall-owned-installation', 'detach-owned-dmg', 'artifact-after']);
 const NATIVE_CHECKS = new Set(['native-host', 'artifact-and-packaged-payload', 'native-launch-preload-and-sandbox', 'generated-fixture-roundtrip', 'theme-and-history-restart', 'clean-shutdown', 'harness-fatal-error']);
-const READER_CHECKS = new Set(['reader-codex', 'reader-claude-code', 'reader-cline', 'reader-cursor', 'reader-cline-explicit-read-only', 'reader-cursor-explicit-read-only']);
+const READER_CHECKS = new Set(['reader-codex', 'reader-claude-code', 'reader-cline', 'reader-cursor', 'reader-cline-explicit-read-only', 'reader-cursor-explicit-read-only', 'reader-preflight', 'reader-fixture-setup', 'reader-profile-preparation', 'reader-build-fingerprints', 'reader-native-launch', 'reader-window-ready', 'reader-sandbox-verification', 'reader-profile-isolation', 'reader-payload-manifest', 'reader-payload-binding', 'reader-source-integrity', 'reader-build-integrity', 'reader-renderer-health', 'reader-cleanup']);
 const SAFE_STATUSES = new Set(['PASS', 'FAIL', 'BLOCKED', 'INCOMPLETE', 'UNTESTED', 'UNSUPPORTED', 'PASS_PACKAGED_SMOKE_ONLY', 'PASS_WITH_LIMITATIONS', 'PENDING_RUNTIME']);
 const SAFE_ERROR_CODES = new Set(['ERR_ASSERTION', 'ENOENT', 'EACCES', 'EPERM', 'EIO', 'ENOTDIR', 'EISDIR', 'EEXIST', 'ENOSPC', 'EBUSY', 'ETIMEDOUT', 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER', 'ERR_INVALID_ARG_TYPE']);
 function firstFailedCheck(checks, allowlist) {
@@ -57,6 +57,9 @@ export function packageFailureSummary(report, error) {
     if (READER_CHECKS.has(report.packagedReaders?.failedCheck)) summary.nestedFailedCheck = report.packagedReaders.failedCheck;
     summary.expectedStatus = RELEASE_TARGETS[summary.target]?.platform === 'win32' ? 'PASS_WITH_LIMITATIONS' : 'PASS';
     if (SAFE_STATUSES.has(report.packagedReaders?.nativeOutcome)) summary.actualStatus = report.packagedReaders.nativeOutcome;
+    const readerFailure=report.packagedReaders?.failure;
+    if (['ASSERTION_MISMATCH','TIMEOUT','SYSTEM_ERROR','CHECK_FAILED'].includes(readerFailure?.category)) summary.nestedCategory=readerFailure.category;
+    if (SAFE_ERROR_CODES.has(readerFailure?.errorCode)) summary.nestedErrorCode=readerFailure.errorCode;
   }
   return summary;
 }
@@ -119,6 +122,9 @@ export function assertPackagedReaderEvidence(readers, spec, revision, artifactSh
   assert.equal(readers.platform, spec.platform); assert.equal(readers.arch, spec.arch);
   assert.equal(readers.status, spec.platform === 'win32' ? 'PASS_WITH_LIMITATIONS' : 'PASS');
   assert.equal(readers.packagedArtifactTested, true);
+  assert.equal(readers.nativeElectron, true);
+  assert.equal(readers.realMainPreloadIPC, true);
+  assert.equal(readers.profileIsolationVerified, true);
   assert.equal(readers.packagePayloadBinding?.status, 'PASS');
   assert.equal(readers.packagePayloadBinding?.artifactSha256, artifactSha256);
   assert.equal(readers.sourcesUnchanged, true); assert.equal(readers.builtUnchanged, true);
@@ -362,7 +368,7 @@ export async function main(values = process.argv.slice(2)) {
       } catch (error) { result = error; readerError = error; }
       await fs.writeFile(path.join(readerOut, 'process.log'), String(result.stdout || '') + String(result.stderr || ''));
       const readers = JSON.parse(await fs.readFile(path.join(readerOut, 'results.json'), 'utf8'));
-      report.packagedReaders = { status: 'FAIL', nativeOutcome: readers.status, report: path.relative(project, path.join(readerOut, 'results.json')).split(path.sep).join('/'), checks: readers.checks, packagePayloadBinding: readers.packagePayloadBinding };
+      report.packagedReaders = { status: 'FAIL', failure: readers.failure, nativeOutcome: readers.status, report: path.relative(project, path.join(readerOut, 'results.json')).split(path.sep).join('/'), checks: readers.checks, packagePayloadBinding: readers.packagePayloadBinding };
       const failedReader = readers.checks?.find(check => check.status === 'FAIL');
       const readerCheck = failedReader && [undefined, 'explicit-read-only'].includes(failedReader.source) ? `reader-${failedReader.provider}${failedReader.source === 'explicit-read-only' ? '-explicit-read-only' : ''}` : readers.failedCheck;
       if (READER_CHECKS.has(readerCheck)) report.packagedReaders.failedCheck = readerCheck;

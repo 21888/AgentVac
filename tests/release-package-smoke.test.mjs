@@ -130,7 +130,7 @@ test('payload snapshots retain internal links and reject escaped links without f
 
 function readers(platform) {
   return {
-    sourceRevision: revision, platform, arch: 'x64', status: platform === 'win32' ? 'PASS_WITH_LIMITATIONS' : 'PASS', packagedArtifactTested: true,
+    sourceRevision: revision, platform, arch: 'x64', status: platform === 'win32' ? 'PASS_WITH_LIMITATIONS' : 'PASS', packagedArtifactTested: true, nativeElectron:true, realMainPreloadIPC:true, profileIsolationVerified:true,
     packagePayloadBinding: { status: 'PASS', artifactSha256 }, sourcesUnchanged: true, builtUnchanged: true, errors: [], cleanup: { appClosed: true, profileRemoved: true },
     checks: [
       ...['codex', 'claude-code', 'cline', 'cursor'].map(provider => provider === 'cursor' && platform === 'win32'
@@ -144,7 +144,7 @@ test('packaged reader gate requires exact package binding and actual shipped-wor
   for (const platform of ['linux', 'darwin', 'win32']) {
     const receipt = readers(platform), spec = { platform, arch: 'x64' };
     assert.doesNotThrow(() => assertPackagedReaderEvidence(receipt, spec, revision, artifactSha256));
-    for (const mutate of [r => { r.packagedArtifactTested = false; }, r => { r.packagePayloadBinding.artifactSha256 = 'c'.repeat(64); }, r => { r.sourceRevision = 'c'.repeat(40); }, r => { r.checks.pop(); }, r => { r.checks[0].revokeInvalidates = false; }, r => { r.status = 'FAIL'; }, r => { r.cleanup.appClosed = false; }, r => { r.cleanup.profileRemoved = false; }]) {
+    for (const mutate of [r => { r.packagedArtifactTested = false; }, r => { r.nativeElectron = false; }, r => { r.realMainPreloadIPC = false; }, r => { r.profileIsolationVerified = false; }, r => { r.packagePayloadBinding.artifactSha256 = 'c'.repeat(64); }, r => { r.sourceRevision = 'c'.repeat(40); }, r => { r.checks.pop(); }, r => { r.checks[0].revokeInvalidates = false; }, r => { r.status = 'FAIL'; }, r => { r.cleanup.appClosed = false; }, r => { r.cleanup.profileRemoved = false; }]) {
       const changed = structuredClone(receipt); mutate(changed); assert.throws(() => assertPackagedReaderEvidence(changed, spec, revision, artifactSha256));
     }
   }
@@ -192,4 +192,13 @@ test('top-level CLI rejection emits only the bounded diagnostic receipt and stay
   assert.equal(receipt.target, 'UNKNOWN'); assert.equal(receipt.failedCheck, 'harness-initialization');
   assert.equal(receipt.category, 'ASSERTION_MISMATCH'); assert.equal(receipt.status, 'FAIL');
   assert.ok(!result.stderr.includes(secret)); assert.ok(!result.stderr.includes('/private/user/path'));
+});
+
+test('packaged reader early failures retain only fixed stages and bounded categories', () => {
+  for(const stage of ['reader-profile-isolation','reader-payload-binding','reader-native-launch','reader-cleanup']) {
+    const result=packageFailureSummary({target:'linux-tar',status:'FAIL',checks:{'actual-package-conversation-readers':{status:'FAIL'}},packagedReaders:{nativeOutcome:'FAIL',failedCheck:stage,failure:{stage,category:'ASSERTION_MISMATCH',errorCode:'ERR_ASSERTION',message:'DO_NOT_PRINT /private/path'}}},new Error('private'));
+    assert.equal(result.nestedFailedCheck,stage);assert.equal(result.nestedCategory,'ASSERTION_MISMATCH');assert.equal(result.nestedErrorCode,'ERR_ASSERTION');assert.ok(!JSON.stringify(result).includes('DO_NOT_PRINT'));
+  }
+  const invalid=packageFailureSummary({target:'linux-tar',status:'FAIL',checks:{'actual-package-conversation-readers':{status:'FAIL'}},packagedReaders:{nativeOutcome:'FAIL',failedCheck:'/private/path',failure:{category:'/private/path',errorCode:'/private/path'}}},{});
+  assert.ok(!JSON.stringify(invalid).includes('/private/path'));
 });

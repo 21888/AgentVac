@@ -3,6 +3,9 @@ name: AgentVac 0.2.0 draft package verification
 # Final/default state is manual only. A separately reviewed one-shot master marker
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
+  push:
+    branches: [master]
+    paths: [".github/release-candidate-20261006T2130Z-8d761fa2.marker"]
   workflow_dispatch:
 
 permissions:
@@ -33,6 +36,7 @@ jobs:
         timeout-minutes: 2
         env:
           GH_TOKEN: ${{ github.token }}
+          AGENTVAC_REVIEWED_EMPTY_DRAFT_RETARGET: "405138314:157a7ca6981bfee04fedcadb85b6922df5bf50d5"
         run: node scripts/release-draft.mjs ensure
   desktop:
     if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false }}

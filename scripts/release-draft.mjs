@@ -8,8 +8,16 @@ import { fileURLToPath } from "node:url";
 
 const REPOSITORY = "21888/AgentVac";
 const TAG = "v0.2.0";
+export const reviewedEmptyDraft = Object.freeze({
+  id: 405138314,
+  oldTarget: "157a7ca6981bfee04fedcadb85b6922df5bf50d5",
+});
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 export function validateDraft(release, revision) {
+  assert.ok(
+    release && typeof release === "object",
+    "Draft readback is unavailable; do not recreate it blindly",
+  );
   assert.equal(release.tag_name, TAG);
   assert.equal(release.draft, true, "Refuse an already published release");
   assert.equal(
@@ -21,12 +29,13 @@ export function validateDraft(release, revision) {
   assert.ok(Array.isArray(release.assets));
   return release.id;
 }
-function gh(args) {
+function gh(args, input) {
   return execFileSync("gh", args, {
     encoding: "utf8",
     timeout: 180000,
     maxBuffer: 2 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"],
+    input,
+    stdio: [input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
   });
 }
 function findDraft() {
@@ -40,6 +49,55 @@ function findDraft() {
   const matches = releases.filter((row) => row.tag_name === TAG);
   assert.ok(matches.length <= 1, "Ambiguous release inventory");
   return matches[0];
+}
+export function resolveReleaseTag(call = gh) {
+  const refs = JSON.parse(
+    call(["api", `repos/${REPOSITORY}/git/matching-refs/tags/${TAG}`]),
+  );
+  assert.ok(
+    Array.isArray(refs) && refs.length < 100,
+    "Tag inventory is incomplete",
+  );
+  const exact = refs.filter((row) => row.ref === `refs/tags/${TAG}`);
+  assert.ok(exact.length <= 1, "Ambiguous release tag");
+  if (!exact.length) return null;
+  let object = exact[0].object;
+  const seen = new Set();
+  for (let depth = 0; depth < 5; depth++) {
+    assert.match(object?.sha ?? "", /^[a-f0-9]{40}$/);
+    assert.ok(!seen.has(object.sha), "Cyclic tag object");
+    seen.add(object.sha);
+    if (object.type === "commit") return object.sha;
+    assert.equal(object.type, "tag", "Release tag must resolve to a commit");
+    object = JSON.parse(
+      call(["api", `repos/${REPOSITORY}/git/tags/${object.sha}`]),
+    ).object;
+  }
+  throw Error("Release tag depth exceeded");
+}
+export function requireTagTarget(tagTarget, revision) {
+  assert.ok(
+    tagTarget === null || tagTarget === revision,
+    "Existing release tag points to another commit; never move it automatically",
+  );
+}
+export function reviewedRetargetPayload(release, revision, tagTarget, enabled) {
+  assert.equal(
+    enabled,
+    true,
+    "Empty draft retarget was not explicitly enabled",
+  );
+  assert.match(revision, /^[a-f0-9]{40}$/);
+  assert.equal(release?.id, reviewedEmptyDraft.id);
+  assert.equal(release.tag_name, TAG);
+  assert.equal(release.draft, true);
+  assert.equal(release.target_commitish, reviewedEmptyDraft.oldTarget);
+  assert.ok(
+    Array.isArray(release.assets) && release.assets.length === 0,
+    "Only the reviewed empty draft can be retargeted",
+  );
+  requireTagTarget(tagTarget, revision);
+  return { target_commitish: revision };
 }
 export function validateAssetName(name, platform, arch) {
   const prefix = `AgentVac-0.2.0-${platform}-${arch}`;
@@ -138,24 +196,90 @@ async function main() {
   const revision = process.env.GITHUB_SHA;
   await verifySourceManifest();
   if (process.argv[2] === "ensure") {
-    let release = findDraft();
-    if (!release) {
-      gh([
-        "release",
-        "create",
-        TAG,
-        "--repo",
-        REPOSITORY,
-        "--draft",
-        "--latest=false",
-        "--target",
+    const retargetEnabled =
+      process.env.AGENTVAC_REVIEWED_EMPTY_DRAFT_RETARGET ===
+      "405138314:157a7ca6981bfee04fedcadb85b6922df5bf50d5";
+    let release = retargetEnabled
+      ? JSON.parse(
+          gh(["api", `repos/${REPOSITORY}/releases/${reviewedEmptyDraft.id}`]),
+        )
+      : findDraft();
+    const tagTarget = resolveReleaseTag();
+    requireTagTarget(tagTarget, revision);
+    if (release && release.target_commitish !== revision && retargetEnabled) {
+      const payload = reviewedRetargetPayload(
+        release,
         revision,
-        "--title",
-        "AgentVac 0.2.0",
-        "--notes-file",
-        "docs/RELEASE-NOTES-0.2.0.md",
-      ]);
-      release = findDraft();
+        tagTarget,
+        true,
+      );
+      const changed = JSON.parse(
+        gh(
+          [
+            "api",
+            "--method",
+            "PATCH",
+            `repos/${REPOSITORY}/releases/${reviewedEmptyDraft.id}`,
+            "--input",
+            "-",
+          ],
+          JSON.stringify(payload),
+        ),
+      );
+      validateDraft(changed, revision);
+      assert.equal(changed.id, reviewedEmptyDraft.id);
+      assert.deepEqual(changed.assets, []);
+      release = JSON.parse(
+        gh(["api", `repos/${REPOSITORY}/releases/${reviewedEmptyDraft.id}`]),
+      );
+      console.log(
+        JSON.stringify({
+          action: "retarget-reviewed-empty-draft",
+          releaseId: reviewedEmptyDraft.id,
+          from: reviewedEmptyDraft.oldTarget,
+          to: revision,
+          published: false,
+          assetsChanged: false,
+        }),
+      );
+    }
+    if (!release) {
+      // Preserve the authoritative creation response and read its exact ID;
+      // a delayed release-list result never triggers a duplicate creation.
+      const payload = {
+        tag_name: TAG,
+        target_commitish: revision,
+        name: "AgentVac 0.2.0",
+        body: await fs.readFile("docs/RELEASE-NOTES-0.2.0.md", "utf8"),
+        draft: true,
+        make_latest: "false",
+      };
+      const created = JSON.parse(
+        gh(
+          [
+            "api",
+            "--method",
+            "POST",
+            `repos/${REPOSITORY}/releases`,
+            "--input",
+            "-",
+          ],
+          JSON.stringify(payload),
+        ),
+      );
+      const createdId = validateDraft(created, revision);
+      console.log(
+        JSON.stringify({
+          action: "created-draft",
+          releaseId: createdId,
+          sourceRevision: revision,
+          published: false,
+        }),
+      );
+      release = JSON.parse(
+        gh(["api", `repos/${REPOSITORY}/releases/${createdId}`]),
+      );
+      assert.equal(release.id, createdId);
     }
     const id = validateDraft(release, revision);
     if (process.env.GITHUB_OUTPUT)
@@ -177,6 +301,7 @@ async function main() {
   validateAssetManifest(manifest, revision);
   let release = findDraft();
   validateDraft(release, revision);
+  requireTagTarget(resolveReleaseTag(), revision);
   assert.equal(String(release.id), process.env.AGENTVAC_DRAFT_RELEASE_ID);
   for (const row of manifest.files) {
     assert.ok(validateAssetName(row.name, manifest.platform, manifest.arch));

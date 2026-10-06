@@ -161,6 +161,59 @@ function digest(snapshot: FixtureSnapshot) {
     .digest("hex");
 }
 
+function changedFields(before: FixtureSnapshot, after: FixtureSnapshot) {
+  // Report bounded ordinals and allowlisted field names only. Entry names,
+  // field values, payload hashes and native errors are never diagnostic data.
+  const fields: (keyof Entry)[] = [
+    "kind",
+    "dev",
+    "ino",
+    "mode",
+    "uid",
+    "gid",
+    "nlink",
+    "size",
+    "mtimeNs",
+    "ctimeNs",
+    "birthtimeNs",
+    "sha256",
+  ];
+  const names = [...new Set([...before.keys(), ...after.keys()])].sort();
+  const changes: { entry: number; fields: string[] }[] = [];
+  let total = 0;
+  for (const [entry, name] of names.entries()) {
+    const original = before.get(name),
+      current = after.get(name);
+    const changed =
+      !original || !current
+        ? ["presence"]
+        : fields.filter((field) => original[field] !== current[field]);
+    if (!changed.length) continue;
+    total++;
+    if (changes.length < 8) changes.push({ entry, fields: changed });
+  }
+  return { changes, truncated: total > changes.length };
+}
+
+function assertUnchanged(
+  t: Pick<TestContext, "diagnostic">,
+  before: FixtureSnapshot,
+  after: FixtureSnapshot,
+  stage: "rename" | "cleanup",
+  message: string,
+) {
+  const unchanged = digest(before) === digest(after);
+  if (!unchanged)
+    t.diagnostic(
+      `replacement-refusal-diff ${JSON.stringify({
+        stage,
+        ...changedFields(before, after),
+      })}`,
+    );
+  assert.ok(unchanged, message);
+  return unchanged;
+}
+
 function afterOwnedCleanup(snapshot: FixtureSnapshot, temporary: string) {
   const result: FixtureSnapshot = new Map(
     [...snapshot].map(([name, entry]) => [name, { ...entry }]),
@@ -306,9 +359,11 @@ export class ReplacementInjection {
       proof?.after,
       "Windows rename refusal lacks complete generated fixture evidence",
     );
-    const originalUnchanged = digest(proof.before) === digest(proof.after);
-    assert.ok(
-      originalUnchanged,
+    const originalUnchanged = assertUnchanged(
+      t,
+      proof.before,
+      proof.after,
+      "rename",
       "refused rename changed original generated fixture bytes or metadata",
     );
     assert.ok(
@@ -328,9 +383,11 @@ export class ReplacementInjection {
       false,
       "only the app-owned temporary must be cleaned up after refused rename",
     );
-    assert.equal(
-      digest(afterOwnedCleanup(settled, temporary)),
-      digest(afterOwnedCleanup(proof.before, temporary)),
+    assertUnchanged(
+      t,
+      afterOwnedCleanup(proof.before, temporary),
+      afterOwnedCleanup(settled, temporary),
+      "cleanup",
       "refused rename unwind changed protected generated payloads, metadata or identities",
     );
     t.diagnostic(

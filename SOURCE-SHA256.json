@@ -1,8 +1,8 @@
 {
   "format": "agentvac-source-sha256-v1",
   "scope": "limited-release-candidate-unpublished",
-  "baseCommit": "f2c0408e624dd162f5c52b820dacc85c7eb38cf3",
-  "sourceDigest": "9418fd25debe2f1d141aa5ee408b2745d327467827b44bd733002e151a651fca",
+  "baseCommit": "e94e23eafd3f98c78dab12c5c8343ac8a230a3f1",
+  "sourceDigest": "f56eab663c2dac6130674ec7019465b33573ca762c7381afba624ed960aca22c",
   "productionDigest": "078042cfa25d9bf0a8a9a16961e0536cc0a75ef67b644382f00bd0332ded841d",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -26,8 +26,8 @@
     },
     {
       "path": ".github/workflows/release-candidate.yml",
-      "sha256": "5b47cc10e40c27fdc400cbd6c53bb0a16aa330f8715cece12e230db96cff665e",
-      "bytes": 10479
+      "sha256": "5c7e28943d457d63b8381e3184e195434325d528543fb7f56eea926d5a3e9d62",
+      "bytes": 10685
     },
     {
       "path": ".github/workflows/windows-copy-lease.yml",
@@ -731,7 +731,7 @@
     },
     {
       "path": "docs/RELEASE-SUPPORT-MATRIX.md",
-      "sha256": "ac9babb9ffad5423a7c8b1e302421c6aefb5685e26297ba2c0b0d10ac54d44dd",
+      "sha256": "7d4dbef6ed61db17528bb8b78d6dca57a0ecc78c37ff300b0560fa47cd14c39c",
       "bytes": 11566
     },
     {
@@ -1900,9 +1900,14 @@
       "bytes": 4633
     },
     {
+      "path": "scripts/native-conversation-harness.mjs",
+      "sha256": "78f437859a8224270d90f572abb5ba5a781163d1e01377b2cab65520de3163ae",
+      "bytes": 2882
+    },
+    {
       "path": "scripts/native-conversation-regression.mjs",
-      "sha256": "87fdc2899a4d6613605c03116f7dd3f9fda58a5c7abb219f81a96e8c1f776091",
-      "bytes": 18919
+      "sha256": "2e5e001e7991d37e39186841a8a7fe436821ebb82bc60c96d55daeea2b8d7e4a",
+      "bytes": 21197
     },
     {
       "path": "scripts/native-driver-provenance.mjs",
@@ -1951,13 +1956,13 @@
     },
     {
       "path": "scripts/release-draft.mjs",
-      "sha256": "93f72956cdc9ae2dc1362606ad5fdc03469f6b3dcfba4d2d22cc58bd67b08efc",
-      "bytes": 7401
+      "sha256": "f1143b667c78926f20dfa5c79925646317ab778adb175bafa8f96e28eecc5dc6",
+      "bytes": 11717
     },
     {
       "path": "scripts/release-package-smoke.mjs",
-      "sha256": "049331a9c3e0ad9ce4e3bc7a829f77dcedae4e333dcf44325a96039c6f8ea8e4",
-      "bytes": 33277
+      "sha256": "1f3713c3a06bf5f08f2e18d7f6d80f297d8e86e4eab74ab4ec4afc3b59f358c4",
+      "bytes": 34129
     },
     {
       "path": "scripts/scan-regression.mjs",
@@ -2091,8 +2096,8 @@
     },
     {
       "path": "tests/codex-session-safety.test.ts",
-      "sha256": "300bc9fa6b10c53fcae0628a592194ee997fe1b5f33d7b8a68f1bf4607f625ac",
-      "bytes": 7354
+      "sha256": "5cfc6fa404411f21df6056521214402bd83aec0ed8428386801d8072885ef553",
+      "bytes": 9988
     },
     {
       "path": "tests/conversation-integration.test.ts",
@@ -2236,8 +2241,8 @@
     },
     {
       "path": "tests/helpers/replacement-injection.ts",
-      "sha256": "4f3c2e712329e7dd87915874ff08aba5110e8ff901644c4f87f393863da66bfb",
-      "bytes": 11311
+      "sha256": "ae0d97b2718fdf2a05f7fb9c7822dddade2d2cc530589909ac731713095c7b57",
+      "bytes": 12786
     },
     {
       "path": "tests/helpers/sparse-fixture.ts",
@@ -2276,13 +2281,18 @@
     },
     {
       "path": "tests/mutation-receipt-ownership.test.ts",
-      "sha256": "5684045cdb836d08fdecf4378c068227c9d003dcf68e269e40bef202b79c7fed",
-      "bytes": 28295
+      "sha256": "36923863ffa4c4bf6daf946a52068cc80e42961e2cc0ec34349b0d9523e160ec",
+      "bytes": 28481
     },
     {
       "path": "tests/native-ci-summary.test.ts",
       "sha256": "dc7ebafa12b646394e4cc2901faa9c01798f23d8e9b875fff70f5bafbc7197b2",
       "bytes": 2134
+    },
+    {
+      "path": "tests/native-conversation-harness.test.mjs",
+      "sha256": "7b7d8b7d68828738f3c886cbbcb72fc4861d7a7ff4d6c7970e111c1a20f24393",
+      "bytes": 5006
     },
     {
       "path": "tests/native-conversation-summary.test.ts",
@@ -2386,13 +2396,13 @@
     },
     {
       "path": "tests/release-draft.test.mjs",
-      "sha256": "405858965381f47f486a4c4acadf18508befdb2e3ca57daaeecb08f4b0cd1f8e",
-      "bytes": 5034
+      "sha256": "29b283120524d6dcbbf372616d22026bc28a39a9bc5cf98c77b12e9a74bb13c7",
+      "bytes": 7210
     },
     {
       "path": "tests/release-package-smoke.test.mjs",
-      "sha256": "99bb613ee3d3df8740383af42b18c7779c6cb4354e29d3dfe5b645238a933b4a",
-      "bytes": 16711
+      "sha256": "f5715b6d15ccc82754eb324eb0ad37c8cff89be6b1a6dd10a2c1b840cf77b7cd",
+      "bytes": 18012
     },
     {
       "path": "tests/renderer-origin.test.ts",
@@ -2401,8 +2411,8 @@
     },
     {
       "path": "tests/replacement-injection.test.ts",
-      "sha256": "c595d8b89283bbe8ac2e1d9569d0e942c51f947d7a68894a993ee55973844aed",
-      "bytes": 19610
+      "sha256": "81dabadd00024f41331bad5bf3c2b287fa7bbf18d7dac82eeb2e4cdf6cb6f241",
+      "bytes": 23662
     },
     {
       "path": "tests/runtime-attribution.test.ts",
@@ -2493,6 +2503,11 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
+    },
+    {
+      "path": ".github/release-candidate-20261006T2130Z-8d761fa2.marker",
+      "sha256": "17e4332897f593b9589b7d8029ee8fdde1650e6a0bc87925e807f3aecd525f91",
+      "bytes": 201
     }
   ]
 }

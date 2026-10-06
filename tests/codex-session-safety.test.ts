@@ -6,6 +6,8 @@ import os from "node:os";
 import { randomUUID, randomBytes, createHmac } from "node:crypto";
 import { AgentVacEngine } from "../electron/engine.js";
 import { codexAdapter } from "../electron/providers/codex.js";
+import { installSyntheticSafeFileIds } from "./helpers/synthetic-safe-file-ids.js";
+import { trashFixture } from "./helpers/trash.js";
 const clear = async () => ({
   status: "clear" as const,
   details: "synthetic fixture only",
@@ -19,11 +21,12 @@ const fp = (s: Stats) => ({
   nlink: s.nlink,
   mode: s.mode,
 });
-async function fixture(t: TestContext) {
+async function fixture(t: TestContext, safeIds = false) {
   const root = await fs.mkdtemp(
     path.join(await fs.realpath(os.tmpdir()), "agentvac-codex-safety-"),
   );
   t.after(() => fs.rm(root, { recursive: true, force: true }));
+  if (safeIds) installSyntheticSafeFileIds(t, root);
   const key = randomBytes(32);
   const engine = new AgentVacEngine(root, key, false, clear);
   await engine.initialize();
@@ -40,8 +43,11 @@ async function signedLegacy(
   t: TestContext,
   version = 2,
   relative = "sessions/2025/01/rollout-legacy.jsonl",
+  safeIds = true,
 ) {
-  const f = await fixture(t);
+  // Positive legacy compatibility requires exact, representable numeric IDs.
+  // Model those IDs only within this generated tree; never repair native IDs.
+  const f = await fixture(t, safeIds);
   const original = await put(f.root, relative, "legacy signed session bytes");
   const before = fp(await fs.lstat(original));
   const id = randomUUID(),
@@ -81,7 +87,7 @@ async function signedLegacy(
       }),
     );
   await save();
-  return { ...f, journal, save, id, payload, original };
+  return { ...f, journal, save, id, payload, original, manifest };
 }
 test("Codex file scan and direct preview cannot quarantine even old explicitly reviewed session parents", async (t) => {
   const f = await fixture(t);
@@ -142,7 +148,7 @@ test("policy change rejects stale preview tokens before a new journal or source 
   assert.equal((await engine.history()).length, 0);
 });
 for (const version of [1, 2])
-  test(`signed legacy v${version} session remains exactly restorable across restart`, async (t) => {
+  test(`signed legacy v${version} session with synthetic safe IDs remains exactly restorable across restart`, async (t) => {
     const f = await signedLegacy(t, version);
     const restart = new AgentVacEngine(f.root, f.key, false, clear);
     await restart.initialize();
@@ -155,7 +161,7 @@ for (const version of [1, 2])
     );
     assert.equal((await restart.restore(f.id, true)).completed, 0);
   });
-test("legacy session recovery never overwrites a newly generated destination", async (t) => {
+test("legacy session recovery with synthetic safe IDs never overwrites a newly generated destination", async (t) => {
   const f = await signedLegacy(t);
   await fs.writeFile(f.original, "new generation");
   const result = await f.engine.restore(f.id, true);
@@ -166,6 +172,64 @@ test("legacy session recovery never overwrites a newly generated destination", a
     "legacy signed session bytes",
   );
 });
+for (const version of [1, 2])
+  test(`native signed legacy v${version} session with unsupported numeric IDs refuses recovery and Trash unchanged`, async (t) => {
+    // Intentionally unmocked: this control must observe this host's raw Stats.
+    const f = await signedLegacy(t, version, undefined, false);
+    const unsupported = [
+      f.journal.items[0].before,
+      f.journal.items[0].stored,
+    ].some(
+      (value) =>
+        !Number.isSafeInteger(value.dev) || !Number.isSafeInteger(value.ino),
+    );
+    if (!unsupported) {
+      t.skip(
+        "generated native IDs fit safe Numbers; native unsupported-ID rejection not exercised",
+      );
+      return;
+    }
+    const exactPayloadMetadata = async () => {
+      const stat = await fs.lstat(f.payload, { bigint: true });
+      return [
+        stat.dev,
+        stat.ino,
+        stat.size,
+        stat.mode,
+        stat.nlink,
+        stat.mtimeNs,
+        stat.ctimeNs,
+        stat.birthtimeNs,
+      ];
+    };
+    const manifest = await fs.readFile(f.manifest),
+      payload = await fs.readFile(f.payload),
+      identity = await exactPayloadMetadata(),
+      entries = (await fs.readdir(path.dirname(f.manifest))).sort(),
+      restart = new AgentVacEngine(f.root, f.key, false, clear);
+    await restart.initialize();
+    await assert.rejects(restart.restore(f.id, true), {
+      code: "ERR_AGENTVAC_FILE_IDENTITY",
+    });
+    await assert.rejects(
+      trashFixture(restart, f.id, true, true, async () => {
+        assert.fail("unsupported native legacy IDs must not reach Trash");
+      }),
+      { code: "ERR_AGENTVAC_FILE_IDENTITY" },
+    );
+    assert.equal((await restart.inspectRecovery()).batches[0].verified, false);
+    assert.deepEqual(await fs.readFile(f.manifest), manifest);
+    assert.deepEqual(await fs.readFile(f.payload), payload);
+    assert.deepEqual(await exactPayloadMetadata(), identity);
+    assert.deepEqual(
+      (await fs.readdir(path.dirname(f.manifest))).sort(),
+      entries,
+    );
+    await assert.rejects(fs.lstat(f.original), { code: "ENOENT" });
+    t.diagnostic(
+      "identity-control=native-unsupported; recovery=refused; trash=refused; fixture=unchanged",
+    );
+  });
 for (const attack of [
   "unsigned",
   "auth-path",

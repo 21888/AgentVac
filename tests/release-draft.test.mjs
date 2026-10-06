@@ -6,6 +6,10 @@ import os from "node:os";
 import { createHash } from "node:crypto";
 import {
   validateDraft,
+  reviewedEmptyDraft,
+  reviewedRetargetPayload,
+  resolveReleaseTag,
+  requireTagTarget,
   validateAssetManifest,
   verifySourceManifest,
 } from "../scripts/release-draft.mjs";
@@ -158,4 +162,71 @@ test("source inventory checks every byte and refuses traversal, duplicates and l
   await write([file]);
   await fs.writeFile(path.join(root, file.path), "changed");
   await assert.rejects(verifySourceManifest(root));
+});
+
+test("reviewed draft retarget binds exact empty draft, prior source and unchanged tag", () => {
+  const release = {
+    id: reviewedEmptyDraft.id,
+    tag_name: "v0.2.0",
+    draft: true,
+    target_commitish: reviewedEmptyDraft.oldTarget,
+    assets: [],
+  };
+  assert.deepEqual(reviewedRetargetPayload(release, sha, null, true), {
+    target_commitish: sha,
+  });
+  assert.deepEqual(reviewedRetargetPayload(release, sha, sha, true), {
+    target_commitish: sha,
+  });
+  for (const change of [
+    { id: 1 },
+    { draft: false },
+    { tag_name: "other" },
+    { target_commitish: "c".repeat(40) },
+    { assets: [{ id: 9 }] },
+    { assets: null },
+  ])
+    assert.throws(() =>
+      reviewedRetargetPayload({ ...release, ...change }, sha, null, true),
+    );
+  assert.throws(() => reviewedRetargetPayload(release, sha, null, false));
+  assert.throws(() =>
+    reviewedRetargetPayload(release, sha, reviewedEmptyDraft.oldTarget, true),
+  );
+  assert.throws(() => reviewedRetargetPayload(release, "master", null, true));
+});
+test("release tag resolver is read-only bounded and never accepts another commit", () => {
+  assert.equal(
+    resolveReleaseTag(() => "[]"),
+    null,
+  );
+  const ref = (object) => JSON.stringify([{ ref: "refs/tags/v0.2.0", object }]);
+  assert.equal(
+    resolveReleaseTag(() => ref({ type: "commit", sha })),
+    sha,
+  );
+  let calls = 0;
+  assert.equal(
+    resolveReleaseTag(() =>
+      ++calls === 1
+        ? ref({ type: "tag", sha: "b".repeat(40) })
+        : JSON.stringify({ object: { type: "commit", sha } }),
+    ),
+    sha,
+  );
+  assert.equal(calls, 2);
+  assert.throws(() => resolveReleaseTag(() => ref({ type: "blob", sha })));
+  assert.throws(() =>
+    resolveReleaseTag(() => ref({ type: "commit", sha: "invalid" })),
+  );
+  calls = 0;
+  assert.throws(() =>
+    resolveReleaseTag(() =>
+      ++calls === 1
+        ? ref({ type: "tag", sha })
+        : JSON.stringify({ object: { type: "tag", sha } }),
+    ),
+  );
+  assert.throws(() => requireTagTarget("c".repeat(40), sha));
+  assert.doesNotThrow(() => requireTagTarget(null, sha));
 });

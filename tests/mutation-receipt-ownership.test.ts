@@ -124,6 +124,12 @@ function replacementCase(
   for (const controlled of controls ? [false, true] : [false]) {
     test(
       name + (controlled ? " [generated Windows refusal control]" : ""),
+      {
+        skip:
+          controlled && process.platform === "darwin"
+            ? "Windows filesystem classification fixture not validated on APFS"
+            : false,
+      },
       (t) => run(t, controlled),
     );
   }
