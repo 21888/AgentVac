@@ -1,1 +1,0 @@
-AgentVac 0.2.0 one-shot draft package validation. Restore the reviewed manual workflow and source manifest, then remove this marker after every job is terminal. This trigger never publishes the draft.
