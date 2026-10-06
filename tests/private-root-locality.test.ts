@@ -17,7 +17,8 @@ for (const root of [
   "C:\\Mapped\\Private",
 ])
   test(
-    "private-root locality blocks before mkdir and never falls back: " + root,
+    "Windows 0.2 release gate blocks every private-root form before filesystem/helper access: " +
+      root,
     async (t) => {
       const platform = Object.getOwnPropertyDescriptor(process, "platform")!,
         env = { ...process.env };
@@ -68,10 +69,10 @@ for (const root of [
       assert.equal(getCursorSnapshotStorageAvailability().available, false);
       assert.equal(
         getCursorSnapshotStorageAvailability().reason,
-        "windows-locality-unverified",
+        "windows-reader-disabled",
       );
       await assert.rejects(createCursorSnapshotDirectory());
       assert.equal(mkdir.mock.callCount(), 0);
-      assert.equal(spawned, root === "C:\\Mapped\\Private" ? 1 : 0);
+      assert.equal(spawned, 0);
     },
   );

@@ -70,16 +70,22 @@ The startup scavenger operates only inside the configured app-owned snapshot
 root, validates root/session/snapshot markers and file identities, retains live
 or reused PID leases, and removes only verified dead-session files. Unknown,
 linked or unrecognized contents remain untouched. No broad temporary-directory
-glob or recursive deletion is used. POSIX owner-only modes are verified; Windows
-ACL verification is a distinct native acceptance gate. The implementation has
-a read-only `Get-Acl` helper and strict synthetic parser tests. Actual directory and destination-file ACL validation is mandatory at runtime; native Windows acceptance remains pending. Failed initialization
-disables SQLite copying; there is no insecure OS-temp fallback. Explicit JSONL
-viewing remains independent of database snapshot availability.
+glob or recursive deletion is used. POSIX owner-only modes are verified.
 
-SQLite runs in a memory-bounded worker
-with a ten-second query deadline and termination on cancellation. SQL values,
-record counts, output pages and transcript reads are bounded. Content is never
-written to application logs, telemetry, remote APIs, or uploads.
+In v0.2.0, Cursor IDE database reading and private snapshot creation are disabled
+on Windows before filesystem or helper access. A successful standalone helper
+probe does not enable this path. Users can explicitly select an `agent-transcripts`
+directory for supported read-only JSONL viewing, with separate content consent.
+The retained read-only ACL helper and its synthetic tests are research and
+validation components; they do not establish application private-copy acceptance.
+There is no alternate copy destination or source-SQLite fallback.
+
+SQLite queries run in a separate worker with V8 heap limits, a ten-second
+request timeout, and worker termination on cancellation. V8 limits do not
+establish a hard bound on native SQLite allocations. SQL values, record counts,
+output pages, transcript reads, and the cumulative private-copy size are bounded;
+those limits are not a guarantee of peak process memory. Content is never written
+to application logs, telemetry, remote APIs, or uploads.
 
 Long supported text and tool-input records are paginated through continuation
 segments, with stable source identity and Unicode-safe boundaries. The displayed

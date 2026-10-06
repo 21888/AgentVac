@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import {
   promises as fs,
   type PathLike,
-  type Stats,
+  Stats,
   type BigIntStats,
 } from "node:fs";
 import os from "node:os";
@@ -31,9 +31,43 @@ const clear = async () => ({
   details: "Synthetic closed process",
 });
 
+/** Project the requested numeric interface from one exact sample. Identity
+ * rounding is intentional only after the fixture has assigned controlled IDs.
+ * Keep timestamp arithmetic independent of the production converter.
+ */
+function numericStats(s: BigIntStats): Stats {
+  const numeric = Object.create(Stats.prototype) as Stats;
+  for (const field of [
+    "dev",
+    "ino",
+    "mode",
+    "nlink",
+    "uid",
+    "gid",
+    "rdev",
+    "blksize",
+    "size",
+    "blocks",
+  ] as const)
+    numeric[field] = Number(s[field]);
+  for (const field of ["atime", "mtime", "ctime", "birthtime"] as const) {
+    const ns = s[`${field}Ns`];
+    let seconds = ns / 1_000_000_000n,
+      remainder = ns % 1_000_000_000n;
+    if (remainder < 0n) {
+      seconds--;
+      remainder += 1_000_000_000n;
+    }
+    numeric[`${field}Ms`] =
+      Number(seconds) * 1000 + Number(remainder) / 1_000_000;
+  }
+  return numeric;
+}
+
 /** Pure numeric precision model. The host's native IDs are only used to keep
  * generated aliases stable through rename/link. This is NOT an NTFS collision.
- * Both lstat and fstat honor bigint options, as Node does.
+ * Each lstat/fstat takes one exact native sample, then honors the requested
+ * numeric/bigint interface. Native IDs must never be rounded before keying.
  */
 async function fixture(t: TestContext, large = true) {
   const base = await fs.mkdtemp(
@@ -52,13 +86,10 @@ async function fixture(t: TestContext, large = true) {
     overrides = new Map<string, { ino?: bigint; dev?: bigint }>();
   const observed = new Map<string, { ino: bigint; dev: bigint }>();
   let next = large ? A : 100n;
-  const patch = (
-    s: Stats | BigIntStats,
-    p: string,
-    bigint: boolean,
-    kind = "path",
-  ) => {
-    if (p !== root && !p.startsWith(root + path.sep)) return s;
+  const inFixture = (p: string) => p === root || p.startsWith(root + path.sep);
+  const patch = (s: BigIntStats, p: string, bigint: boolean, kind = "path") => {
+    assert.equal(typeof s.dev, "bigint");
+    assert.equal(typeof s.ino, "bigint");
     const key = `${s.dev}:${s.ino}`;
     if (!ids.has(key)) {
       ids.set(key, next);
@@ -68,21 +99,24 @@ async function fixture(t: TestContext, large = true) {
     const ino = change?.ino ?? ids.get(key)!,
       dev = change?.dev ?? (large ? A + 100n : 1n);
     observed.set(p, { ino, dev });
-    Object.assign(s, {
-      ino: bigint ? ino : Number(ino),
-      dev: bigint ? dev : Number(dev),
-    });
-    return s;
+    Object.assign(s, { ino, dev });
+    return bigint ? s : numericStats(s);
   };
-  t.mock.method(fs, "lstat", async (p: PathLike, options?: any) =>
-    patch(await (lstat as any)(p, options), String(p), !!options?.bigint),
-  );
+  t.mock.method(fs, "lstat", async (p: PathLike, options?: any) => {
+    if (!inFixture(String(p))) return (lstat as any)(p, options);
+    return patch(
+      await lstat(p, { bigint: true }),
+      String(p),
+      !!options?.bigint,
+    );
+  });
   t.mock.method(fs, "open", async (...args: Parameters<typeof open>) => {
-    const h = await open(...args),
-      stat = h.stat.bind(h);
+    const h = await open(...args);
+    if (!inFixture(String(args[0]))) return h;
+    const stat = h.stat.bind(h);
     h.stat = (async (options?: any) =>
       patch(
-        await stat(options),
+        await stat({ bigint: true }),
         String(args[0]),
         !!options?.bigint,
         "handle",
@@ -212,10 +246,96 @@ test("decimal ID schema is bounded and refuses rounded numbers, missing/zero ino
     assert.equal(sameFileFingerprint(a, { ...b, [k]: b[k] + 1 }), false, k);
 });
 
+for (const field of ["dev", "ino"] as const)
+  test(`precision fixture keys generated large native ${field} exactly across numeric/bigint paths and handles`, async (t) => {
+    const lstat = fs.lstat,
+      open = fs.open,
+      large = 1n << 60n,
+      nativeIds = new Map<string, bigint>(),
+      samples: boolean[] = [];
+    // Model native IDs that numeric Stats aliases. These remain synthetic
+    // positive controls; they do not establish native safe-ID availability.
+    const nativeSample = (s: BigIntStats, bigint: boolean) => {
+      const key = `${s.dev}:${s.ino}`;
+      if (!nativeIds.has(key))
+        nativeIds.set(key, large + BigInt(nativeIds.size) + 1n);
+      Object.assign(s, {
+        dev: field === "dev" ? nativeIds.get(key)! : large + 1n,
+        ino: field === "ino" ? nativeIds.get(key)! : large + 1n,
+      });
+      return bigint ? s : numericStats(s);
+    };
+    t.mock.method(fs, "lstat", async (p: PathLike, options?: any) => {
+      samples.push(!!options?.bigint);
+      return nativeSample(await lstat(p, { bigint: true }), !!options?.bigint);
+    });
+    t.mock.method(fs, "open", async (...args: Parameters<typeof open>) => {
+      const h = await open(...args),
+        stat = h.stat.bind(h);
+      t.mock.method(h, "stat", async (options?: any) => {
+        samples.push(!!options?.bigint);
+        return nativeSample(await stat({ bigint: true }), !!options?.bigint);
+      });
+      return h;
+    });
+    const f = await fixture(t, false),
+      sibling = path.join(path.dirname(f.source), "codex-tui.log.2"),
+      linked = path.join(path.dirname(f.source), "linked"),
+      renamed = path.join(path.dirname(f.source), "renamed");
+    await fs.writeFile(sibling, "distinct generated file");
+    samples.length = 0;
+    const numeric = await fs.lstat(f.source),
+      exact = await fs.lstat(f.source, { bigint: true });
+    assert.equal(
+      JSON.stringify(fileFingerprint(numeric)),
+      JSON.stringify(fileFingerprint(exact)),
+    );
+    assert.deepEqual(
+      samples,
+      [true, true],
+      "one exact native read per request",
+    );
+    const other = await fs.lstat(sibling, { bigint: true });
+    assert.notEqual(
+      other.ino,
+      exact.ino,
+      "distinct exact native keys stay distinct",
+    );
+    assert.equal(nativeIds.size, 2);
+    assert.equal(Number(large + 1n), Number(large + 2n));
+    await fs.link(f.source, linked);
+    await fs.rename(f.source, renamed);
+    const h = await fs.open(renamed, "r");
+    try {
+      samples.length = 0;
+      const handleNumeric = await h.stat(),
+        handleExact = await h.stat({ bigint: true }),
+        linkExact = await fs.lstat(linked, { bigint: true });
+      assert.equal(handleNumeric.ino, numeric.ino);
+      assert.equal(handleExact.ino, exact.ino);
+      assert.equal(linkExact.ino, exact.ino);
+      assert.equal(handleNumeric.nlink, 2);
+      assert.equal(handleExact.nlink, 2n);
+      assert.deepEqual(samples, [true, true, true]);
+      assert.equal(
+        JSON.stringify(fileFingerprint(handleNumeric)),
+        JSON.stringify(fileFingerprint(handleExact)),
+      );
+    } finally {
+      await h.close();
+    }
+  });
+
 test("single bigint sample preserves real numeric Stats timestamp bytes and synthetic negative-epoch edges", async (t) => {
+  const nativeLstat = fs.lstat;
   const f = await fixture(t, false);
-  const numeric = await fs.lstat(f.source),
+  const native = await nativeLstat(f.source),
+    numeric = await fs.lstat(f.source),
     exact = await fs.lstat(f.source, { bigint: true });
+  for (const field of ["atime", "mtime", "ctime", "birthtime"] as const) {
+    assert.equal(numeric[`${field}Ms`], native[`${field}Ms`], field);
+    assert.equal(numeric[field].getTime(), native[field].getTime(), field);
+  }
   assert.equal(
     JSON.stringify(fileFingerprint(numeric)),
     JSON.stringify(fileFingerprint(exact)),

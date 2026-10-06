@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ConversationWorkspace from "./ConversationWorkspace.vue";
+import { cleanupScope } from "./release-support";
 import { TrashConsent } from "./trash-consent";
 import type {
   ConversationAPI,
@@ -199,8 +200,7 @@ const supportsSessionCleanup = computed(
 const providerScope = computed(
   () =>
     appData.value?.providers?.find((item) => item.id === selectedProvider.value)
-      ?.scope ??
-    "旧轮转日志可隔离；会话需单独复核。数据库、配置和未知文件始终保留。",
+      ?.scope ?? cleanupScope[selectedProvider.value],
 );
 const isCleanupWorkspace = (kind: string) =>
   providerOptions.some((item) => item.id === kind);

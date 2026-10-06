@@ -191,12 +191,15 @@ app
         provider === "cursor" &&
         !getCursorSnapshotStorageAvailability().available
           ? getCursorSnapshotStorageAvailability().reason ===
-            "windows-locality-unverified"
-            ? "Windows 私有副本目录尚未确认为本机固定磁盘路径，暂不能读取 Cursor 数据库会话；不会改用其他目录。"
+            "windows-reader-disabled"
+            ? "AgentVac 0.2.0 在 Windows 上不提供 Cursor IDE 数据库读取。可选择 agent-transcripts 查看支持的对话文本；不会创建数据库副本。"
             : getCursorSnapshotStorageAvailability().reason ===
-                "windows-acl-unverified"
-              ? "当前 Windows 私有副本目录未通过实际权限验证，暂不能读取 Cursor 数据库会话。"
-              : "无法建立已验证的私有本地数据库副本目录，暂不能读取 Cursor 数据库会话。"
+                "windows-locality-unverified"
+              ? "Windows 私有副本目录尚未确认为本机固定磁盘路径，暂不能读取 Cursor 数据库会话；不会改用其他目录。"
+              : getCursorSnapshotStorageAvailability().reason ===
+                  "windows-acl-unverified"
+                ? "当前 Windows 私有副本目录未通过实际权限验证，暂不能读取 Cursor 数据库会话。"
+                : "无法建立已验证的私有本地数据库副本目录，暂不能读取 Cursor 数据库会话。"
           : undefined,
     });
     preferences = new PreferenceStore(app.getPath("userData"));

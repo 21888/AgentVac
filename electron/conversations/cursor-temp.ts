@@ -2,11 +2,7 @@ import { promises as fs, type Stats } from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { openConversationFile } from "./safe-read.js";
-import {
-  inspectCursorSnapshotWindowsAcl,
-  inspectCursorSnapshotWindowsLocality,
-  canonicalizeCursorSnapshotWindowsPath,
-} from "./cursor-windows-acl.js";
+import { inspectCursorSnapshotWindowsAcl } from "./cursor-windows-acl.js";
 
 const ROOT_MARKER = "owner.json";
 const SESSION = /^session-([0-9a-f]{32})$/;
@@ -24,12 +20,15 @@ const own = (s: Stats) =>
 let runtime: Promise<{ root: string; session: string }> | undefined;
 let availabilityReason:
   | "not-initialized"
+  | "windows-reader-disabled"
   | "windows-acl-unverified"
   | "windows-locality-unverified"
   | "storage-unavailable"
   | null = "not-initialized";
 const fail = () => new Error("CURSOR_PRIVATE_SNAPSHOT_STORAGE_UNAVAILABLE");
 export function getCursorSnapshotStorageAvailability() {
+  if (process.platform === "win32")
+    return { available: false, reason: "windows-reader-disabled" as const };
   return { available: !!runtime, reason: availabilityReason };
 }
 
@@ -197,18 +196,11 @@ async function initializeCursorSnapshotStorageInner(
   root: string,
 ): Promise<CursorSnapshotStorageStatus> {
   runtime = undefined;
-  availabilityReason = "storage-unavailable";
   if (process.platform === "win32") {
-    const canonical = canonicalizeCursorSnapshotWindowsPath(root);
-    if (
-      !canonical ||
-      !(await inspectCursorSnapshotWindowsLocality(canonical, true))
-    ) {
-      availabilityReason = "windows-locality-unverified";
-      throw fail();
-    }
-    root = canonical;
+    availabilityReason = "windows-reader-disabled";
+    throw fail();
   }
+  availabilityReason = "storage-unavailable";
   if (
     !path.isAbsolute(root) ||
     path.normalize(root) !== root ||
@@ -262,7 +254,7 @@ async function initializeCursorSnapshotStorageInner(
 }
 
 async function createCursorSnapshotDirectoryInner(): Promise<string> {
-  if (!runtime) throw fail();
+  if (process.platform === "win32" || !runtime) throw fail();
   const state = await runtime;
   await directory(state.root);
   await directory(state.session);

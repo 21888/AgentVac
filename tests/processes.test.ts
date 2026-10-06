@@ -199,51 +199,67 @@ test("macOS OS-derived helper executable is available before role parsing of unq
 
 import { collectStableProcessSnapshot } from "../electron/processes.js";
 import { claudeCodeAdapter } from "../electron/providers/claude-code.js";
-test("fresh-inventory retry accepts only a newly complete snapshot and sees a newly started writer", async () => {
+test("fresh inventories can stabilize on the fourth or eighth attempt and see a newly started writer", async () => {
+  for (const completeAt of [4, 8]) {
+    let calls = 0;
+    const complete: ProcessSnapshot = {
+      platform: "darwin",
+      complete: true,
+      processes: [{ name: "claude", commandLine: "/usr/bin/claude" }],
+    };
+    const snapshot = await collectStableProcessSnapshot(
+      async () =>
+        ++calls === completeAt
+          ? complete
+          : { platform: "darwin", complete: false, processes: [] },
+      { retryDelayMs: 0 },
+    );
+    assert.equal(calls, completeAt);
+    assert.equal(snapshot, complete);
+    assert.equal(claudeCodeAdapter.assessProcesses(snapshot).status, "running");
+  }
+});
+test("complete unknown/running inventories never get retried into a clear observation", async () => {
+  for (const [row, status] of [
+    [{ name: "claude", commandLine: "claude" }, "running"],
+    [{ name: "node", commandLine: "node -e unknown" }, "unknown"],
+  ] as const) {
+    for (const completeAt of [1, 4]) {
+      let calls = 0;
+      const result = await collectStableProcessSnapshot(
+        async () => ({
+          platform: "linux",
+          complete: ++calls >= completeAt,
+          processes: calls === completeAt ? [row] : [],
+        }),
+        { retryDelayMs: 0 },
+      );
+      assert.equal(calls, completeAt);
+      assert.equal(claudeCodeAdapter.assessProcesses(result).status, status);
+    }
+  }
+});
+test("incomplete inventory retry stops at eight attempts and stays unknown", async () => {
   let calls = 0;
-  const snapshot = await collectStableProcessSnapshot(
+  const result = await collectStableProcessSnapshot(
     async () => ({
       platform: "linux",
-      complete: ++calls > 1,
-      processes: [{ name: "claude", commandLine: "/usr/bin/claude" }],
+      complete: false,
+      processes: [{ pid: ++calls, name: "init", commandLine: "/sbin/init" }],
     }),
     { retryDelayMs: 0 },
   );
-  assert.equal(calls, 2);
-  assert.equal(snapshot.complete, true);
-  assert.equal(claudeCodeAdapter.assessProcesses(snapshot).status, "running");
+  assert.equal(calls, 8);
+  assert.equal(result.complete, false);
+  assert.deepEqual(result.processes, [
+    { pid: 8, name: "init", commandLine: "/sbin/init" },
+  ]);
+  assert.equal(claudeCodeAdapter.assessProcesses(result).status, "unknown");
 });
-test("complete unknown/running inventories never get retried into a clear observation", async () => {
-  for (const row of [
-    { name: "claude", commandLine: "claude" },
-    { name: "node", commandLine: "node -e unknown" },
-  ]) {
-    let calls = 0;
-    const result = await collectStableProcessSnapshot(
-      async () => {
-        calls++;
-        return { platform: "linux", complete: true, processes: [row] };
-      },
-      { retryDelayMs: 0 },
-    );
-    assert.equal(calls, 1);
-    assert.notEqual(claudeCodeAdapter.assessProcesses(result).status, "clear");
-  }
-});
-test("incomplete inventory retry has a three-attempt cap, cancellation and an OS-call deadline", async () => {
+test("an already cancelled inventory check starts no OS collection", async () => {
   let calls = 0;
-  const bad = await collectStableProcessSnapshot(
-    async () => {
-      calls++;
-      return { platform: "linux", complete: false, processes: [] };
-    },
-    { retryDelayMs: 0 },
-  );
-  assert.equal(calls, 3);
-  assert.equal(bad.complete, false);
   const abort = new AbortController();
   abort.abort();
-  calls = 0;
   const cancelled = await collectStableProcessSnapshot(
     async () => {
       calls++;
@@ -253,21 +269,128 @@ test("incomplete inventory retry has a three-attempt cap, cancellation and an OS
   );
   assert.equal(calls, 0);
   assert.equal(cancelled.complete, false);
-  let sawAbort = false;
-  const timed = await collectStableProcessSnapshot(
-    (signal) =>
-      new Promise((resolve) =>
-        signal.addEventListener(
-          "abort",
-          () => {
-            sawAbort = true;
+});
+
+const flushInventoryCallbacks = () =>
+  new Promise<void>((resolve) => setImmediate(resolve));
+
+for (const deadlineMs of [undefined, 20_000]) {
+  test(`the 5500 ms deadline is shared across fresh attempts (requested ${deadlineMs ?? "default"})`, async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const signals: AbortSignal[] = [];
+    const pending = collectStableProcessSnapshot(
+      (signal) => {
+        signals.push(signal);
+        return new Promise((resolve) => {
+          const finish = () => {
+            clearTimeout(timer);
+            signal.removeEventListener("abort", aborted);
+            resolve({ platform: "linux", complete: false, processes: [] });
+          };
+          const aborted = () => {
+            clearTimeout(timer);
+            // Even an OS callback reporting complete at the deadline cannot clear.
             resolve({ platform: "linux", complete: true, processes: [] });
-          },
-          { once: true },
-        ),
-      ),
-    { deadlineMs: 20 },
+          };
+          const timer = setTimeout(finish, 1700);
+          signal.addEventListener("abort", aborted, { once: true });
+        });
+      },
+      { deadlineMs },
+    );
+    for (let attempt = 0; attempt < 3; attempt++) {
+      t.mock.timers.tick(1700);
+      await flushInventoryCallbacks();
+      t.mock.timers.tick(75);
+      await flushInventoryCallbacks();
+    }
+    assert.equal(signals.length, 4);
+    assert.ok(signals.every((signal) => signal === signals[0]));
+    t.mock.timers.tick(174);
+    assert.equal(signals[0].aborted, false);
+    t.mock.timers.tick(1);
+    const result = await pending;
+    assert.equal(signals[0].aborted, true);
+    assert.equal(signals.length, 4);
+    assert.equal(result.complete, false);
+    assert.equal(claudeCodeAdapter.assessProcesses(result).status, "unknown");
+    t.mock.timers.tick(10_000);
+    await flushInventoryCallbacks();
+    assert.equal(signals.length, 4);
+  });
+}
+
+for (const stop of ["cancellation", "deadline"] as const) {
+  test(`${stop} during the retry delay prevents another inventory`, async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const abort = new AbortController();
+    let calls = 0;
+    const pending = collectStableProcessSnapshot(
+      async () => {
+        calls++;
+        return { platform: "linux", complete: false, processes: [] };
+      },
+      { signal: abort.signal, deadlineMs: 20 },
+    );
+    await flushInventoryCallbacks();
+    assert.equal(calls, 1);
+    if (stop === "cancellation") abort.abort();
+    else t.mock.timers.tick(20);
+    const result = await pending;
+    assert.equal(result.complete, false);
+    t.mock.timers.tick(10_000);
+    await flushInventoryCallbacks();
+    assert.equal(calls, 1);
+  });
+
+  for (const late of ["complete", "rejection"] as const) {
+    test(`${stop} during collection rejects a late ${late} without retrying`, async (t) => {
+      t.mock.timers.enable({ apis: ["setTimeout"] });
+      const abort = new AbortController();
+      let calls = 0;
+      let activeSignal: AbortSignal | undefined;
+      let resolve!: (snapshot: ProcessSnapshot) => void;
+      let reject!: (error: Error) => void;
+      const pending = collectStableProcessSnapshot(
+        (signal) => {
+          calls++;
+          activeSignal = signal;
+          return new Promise((accept, fail) => {
+            resolve = accept;
+            reject = fail;
+          });
+        },
+        { signal: abort.signal, deadlineMs: 20 },
+      );
+      if (stop === "cancellation") abort.abort();
+      else t.mock.timers.tick(20);
+      assert.equal(activeSignal?.aborted, true);
+      if (late === "complete")
+        resolve({ platform: "linux", complete: true, processes: [] });
+      else reject(new Error("late collection failure"));
+      const result = await pending;
+      assert.equal(result.complete, false);
+      assert.equal(claudeCodeAdapter.assessProcesses(result).status, "unknown");
+      t.mock.timers.tick(10_000);
+      await flushInventoryCallbacks();
+      assert.equal(calls, 1);
+    });
+  }
+}
+
+test("a completed inventory check removes its deadline and external cancellation listener", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const abort = new AbortController();
+  let activeSignal: AbortSignal | undefined;
+  const result = await collectStableProcessSnapshot(
+    async (signal) => {
+      activeSignal = signal;
+      return { platform: "linux", complete: true, processes: [] };
+    },
+    { signal: abort.signal },
   );
-  assert.equal(sawAbort, true);
-  assert.equal(timed.complete, false);
+  assert.equal(result.complete, true);
+  abort.abort();
+  t.mock.timers.tick(10_000);
+  assert.equal(activeSignal?.aborted, false);
 });

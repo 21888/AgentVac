@@ -116,6 +116,72 @@ async function authentic(manifest: string, key: Buffer, policy = 4) {
   return saved;
 }
 
+function replacementCase(
+  name: string,
+  run: (t: TestContext, controlled: boolean) => Promise<void>,
+  controls = true,
+) {
+  for (const controlled of controls ? [false, true] : [false]) {
+    test(
+      name + (controlled ? " [generated Windows refusal control]" : ""),
+      (t) => run(t, controlled),
+    );
+  }
+}
+
+function refuseFixtureRename(
+  t: TestContext,
+  controlled: boolean,
+  target: string,
+  destination: string,
+) {
+  if (!controlled) return;
+  const rename = fs.rename;
+  t.mock.method(fs, "rename", async (from: any, to: any) => {
+    if (from === target && to === destination) {
+      throw Object.assign(new Error("generated fixture rename refusal"), {
+        code: "EPERM",
+        errno: -4048,
+      });
+    }
+    return rename(from, to);
+  });
+}
+
+async function classifyRefusal(
+  t: TestContext,
+  injection: ReplacementInjection,
+  controlled: boolean,
+) {
+  const reasons: string[] = [];
+  const blocked = await injection.skipIfVerifiedWindowsRefusal(
+    controlled
+      ? {
+          diagnostic: (message) => t.diagnostic(message),
+          skip: (reason) => {
+            reasons.push(String(reason));
+          },
+        }
+      : t,
+  );
+  if (controlled) {
+    assert.equal(
+      blocked,
+      true,
+      "generated refusal control must classify only after preservation checks",
+    );
+    assert.equal(reasons.length, 1);
+    assert.match(
+      reasons[0],
+      /BLOCKED.*installed-replacement branch not exercised/,
+    );
+    t.diagnostic(
+      "generated refusal classifier control; not native Windows or installed-replacement coverage",
+    );
+  }
+  return blocked;
+}
+
 for (const action of ["cancel", "invalidate"]) {
   test(`${action} during an unpublished initial journal write preserves prior manifest and payload`, async (t) => {
     const f = await fixture(t),
@@ -359,53 +425,66 @@ test("checkpoint refuses a substituted temporary file before replacing the authe
   );
 });
 
-test("receipt cleanup preserves replacement temporary after pending write failure and invalidation", async (t) => {
-  const f = await fixture(t),
-    e = f.engine(),
-    open = fs.open,
-    injection = new ReplacementInjection();
-  let replacementTemp = "";
-  const mock = t.mock.method(fs, "open", async (...args: any[]) => {
-    const h = await (open as any)(...args);
-    if (String(args[0]).endsWith(".receipt.tmp")) {
-      const write = h.writeFile.bind(h);
-      h.writeFile = async (...writeArgs: any[]) => {
-        await write(...writeArgs);
-        replacementTemp = String(args[0]);
-        await injection.run(
-          () => fs.rename(f.q, f.q + "-preserved"),
-          async () => {
-            await fs.mkdir(f.q);
-            await fs.writeFile(
-              replacementTemp,
-              "replacement temporary sentinel",
-            );
-          },
-        );
-        e.invalidate();
-        throw new Error("synthetic failure of pending receipt write");
-      };
+replacementCase(
+  "receipt cleanup preserves replacement temporary after pending write failure and invalidation",
+  async (t, controlled) => {
+    const f = await fixture(t),
+      e = f.engine(),
+      open = fs.open,
+      injection = new ReplacementInjection(
+        controlled ? "win32" : process.platform,
+      );
+    refuseFixtureRename(t, controlled, f.q, f.q + "-preserved");
+    let replacementTemp = "";
+    const mock = t.mock.method(fs, "open", async (...args: any[]) => {
+      const h = await (open as any)(...args);
+      if (String(args[0]).endsWith(".receipt.tmp")) {
+        const write = h.writeFile.bind(h);
+        h.writeFile = async (...writeArgs: any[]) => {
+          await write(...writeArgs);
+          replacementTemp = String(args[0]);
+          await injection.run(
+            () => fs.rename(f.q, f.q + "-preserved"),
+            async () => {
+              await fs.mkdir(f.q);
+              await fs.writeFile(
+                replacementTemp,
+                "replacement temporary sentinel",
+              );
+            },
+            {
+              root: f.base,
+              target: f.q,
+              destination: f.q + "-preserved",
+              ownedTemporary: replacementTemp,
+            },
+          );
+          e.invalidate();
+          throw new Error("synthetic failure of pending receipt write");
+        };
+      }
+      return h;
+    });
+    let result;
+    try {
+      result = await trashFixture(e, f.id, true, true, async (dir) =>
+        fs.rename(dir, path.join(f.base, "fake-os-trash")),
+      );
+    } finally {
+      mock.mock.restore();
+      injection.diagnose(t);
     }
-    return h;
-  });
-  let result;
-  try {
-    result = await trashFixture(e, f.id, true, true, async (dir) =>
-      fs.rename(dir, path.join(f.base, "fake-os-trash")),
+    assert.equal(result.completed, 1);
+    assert.equal(result.failed.length, 1);
+    if (await classifyRefusal(t, injection, controlled)) return;
+    injection.assertInstalled();
+    await injection.assertSentinel(
+      replacementTemp,
+      "replacement temporary sentinel",
+      "temporary",
     );
-  } finally {
-    mock.mock.restore();
-    injection.diagnose(t);
-  }
-  injection.assertInstalled();
-  assert.equal(result.completed, 1);
-  assert.equal(result.failed.length, 1);
-  await injection.assertSentinel(
-    replacementTemp,
-    "replacement temporary sentinel",
-    "temporary",
-  );
-});
+  },
+);
 
 test("receipt publication preserves a preexisting unrelated receipt", async (t) => {
   const f = await fixture(t),
@@ -458,166 +537,217 @@ for (const replacement of ["quarantine", "batch"]) {
 }
 
 for (const replacement of ["root", "quarantine", "batch", "manifest"]) {
-  test(`checkpoint pending write refuses replaced ${replacement} without overwriting replacement`, async (t) => {
-    const f = await fixture(t),
-      e = f.engine(),
-      open = fs.open,
-      injection = new ReplacementInjection();
-    const target =
-      replacement === "root"
-        ? f.root
-        : replacement === "quarantine"
-          ? f.q
-          : replacement === "batch"
-            ? f.dir
-            : f.manifest;
-    const preserved = target + "-preserved";
-    let writes = 0;
-    const mock = t.mock.method(fs, "open", async (...args: any[]) => {
-      const h = await (open as any)(...args);
-      if (
-        String(args[0]).endsWith(".tmp") &&
-        String(args[0]).startsWith(f.dir)
-      ) {
-        const write = h.writeFile.bind(h);
-        h.writeFile = async (...writeArgs: any[]) => {
-          await write(...writeArgs);
-          if (++writes === 2) {
-            await injection.run(
-              () => fs.rename(target, preserved),
-              async () => {
-                if (replacement !== "manifest")
-                  await fs.mkdir(path.dirname(f.manifest), { recursive: true });
-                await fs.writeFile(f.manifest, "replacement sentinel");
-              },
-            );
-            e.invalidate();
-          }
-        };
+  replacementCase(
+    `checkpoint pending write refuses replaced ${replacement} without overwriting replacement`,
+    async (t, controlled) => {
+      const f = await fixture(t),
+        e = f.engine(),
+        open = fs.open,
+        injection = new ReplacementInjection(
+          controlled ? "win32" : process.platform,
+        );
+      const target =
+        replacement === "root"
+          ? f.root
+          : replacement === "quarantine"
+            ? f.q
+            : replacement === "batch"
+              ? f.dir
+              : f.manifest;
+      const preserved = target + "-preserved";
+      refuseFixtureRename(t, controlled, target, preserved);
+      let writes = 0;
+      const mock = t.mock.method(fs, "open", async (...args: any[]) => {
+        const h = await (open as any)(...args);
+        if (
+          String(args[0]).endsWith(".tmp") &&
+          String(args[0]).startsWith(f.dir)
+        ) {
+          const write = h.writeFile.bind(h);
+          h.writeFile = async (...writeArgs: any[]) => {
+            await write(...writeArgs);
+            if (++writes === 2) {
+              await injection.run(
+                () => fs.rename(target, preserved),
+                async () => {
+                  if (replacement !== "manifest")
+                    await fs.mkdir(path.dirname(f.manifest), {
+                      recursive: true,
+                    });
+                  await fs.writeFile(f.manifest, "replacement sentinel");
+                },
+                replacement === "manifest"
+                  ? undefined
+                  : {
+                      root: f.base,
+                      target,
+                      destination: preserved,
+                      ownedTemporary: String(args[0]),
+                    },
+              );
+              e.invalidate();
+            }
+          };
+        }
+        return h;
+      });
+      let first;
+      try {
+        first = await attempt(() => e.restore(f.id, true));
+      } finally {
+        mock.mock.restore();
+        injection.diagnose(t);
       }
-      return h;
-    });
-    let first;
-    try {
-      first = await attempt(() => e.restore(f.id, true));
-    } finally {
-      mock.mock.restore();
-      injection.diagnose(t);
-    }
-    injection.assertInstalled();
-    assert.ok(first.error);
-    await injection.assertSentinel(
-      f.manifest,
-      "replacement sentinel",
-      "manifest",
-    );
-  });
+      assert.ok(first.error);
+      if (
+        replacement !== "manifest" &&
+        (await classifyRefusal(t, injection, controlled))
+      )
+        return;
+      injection.assertInstalled();
+      await injection.assertSentinel(
+        f.manifest,
+        "replacement sentinel",
+        "manifest",
+      );
+    },
+    replacement !== "manifest",
+  );
 }
 
-test("receipt write refuses a quarantine parent replaced while the write is pending", async (t) => {
-  const f = await fixture(t),
-    e = f.engine(),
-    open = fs.open,
-    injection = new ReplacementInjection();
-  const preserved = f.q + "-preserved",
-    receipt = path.join(f.q, f.id + ".receipt.json");
-  const mock = t.mock.method(fs, "open", async (...args: any[]) => {
-    const h = await (open as any)(...args);
-    if (String(args[0]).endsWith(".receipt.tmp")) {
-      const write = h.writeFile.bind(h);
-      h.writeFile = async (...writeArgs: any[]) => {
-        await write(...writeArgs);
-        await injection.run(
-          () => fs.rename(f.q, preserved),
-          async () => {
-            await fs.mkdir(f.q);
-            await fs.writeFile(receipt, "replacement receipt sentinel");
-            await fs.writeFile(
-              String(args[0]),
-              "replacement temporary sentinel",
-            );
-          },
-        );
-        e.invalidate();
-      };
-    }
-    return h;
-  });
-  let result;
-  try {
-    result = await trashFixture(e, f.id, true, true, async (dir) =>
-      fs.rename(dir, path.join(f.base, "fake-os-trash")),
-    );
-  } finally {
-    mock.mock.restore();
-    injection.diagnose(t);
-  }
-  injection.assertInstalled();
-  assert.equal(result.completed, 1);
-  assert.equal(result.failed.length, 1);
-  await injection.assertSentinel(
-    receipt,
-    "replacement receipt sentinel",
-    "receipt",
-  );
-});
-
-for (const checkpoint of [false, true]) {
-  test(`${checkpoint ? "checkpoint" : "initial"} journal cleanup preserves a replacement temporary file after invalidation`, async (t) => {
+replacementCase(
+  "receipt write refuses a quarantine parent replaced while the write is pending",
+  async (t, controlled) => {
     const f = await fixture(t),
       e = f.engine(),
       open = fs.open,
-      injection = new ReplacementInjection();
-    let writes = 0,
-      replacementTemp = "";
+      injection = new ReplacementInjection(
+        controlled ? "win32" : process.platform,
+      );
+    const preserved = f.q + "-preserved",
+      receipt = path.join(f.q, f.id + ".receipt.json");
+    refuseFixtureRename(t, controlled, f.q, preserved);
     const mock = t.mock.method(fs, "open", async (...args: any[]) => {
       const h = await (open as any)(...args);
-      if (
-        String(args[0]).endsWith(".tmp") &&
-        String(args[0]).startsWith(f.dir)
-      ) {
+      if (String(args[0]).endsWith(".receipt.tmp")) {
         const write = h.writeFile.bind(h);
         h.writeFile = async (...writeArgs: any[]) => {
           await write(...writeArgs);
-          if (++writes === (checkpoint ? 2 : 1)) {
-            replacementTemp = String(args[0]);
-            await injection.run(
-              () => fs.rename(f.dir, f.dir + "-preserved"),
-              async () => {
-                await fs.mkdir(f.dir);
-                await fs.writeFile(f.manifest, "replacement manifest sentinel");
-                await fs.writeFile(
-                  replacementTemp,
-                  "replacement temporary sentinel",
-                );
-              },
-            );
-            e.invalidate();
-          }
+          await injection.run(
+            () => fs.rename(f.q, preserved),
+            async () => {
+              await fs.mkdir(f.q);
+              await fs.writeFile(receipt, "replacement receipt sentinel");
+              await fs.writeFile(
+                String(args[0]),
+                "replacement temporary sentinel",
+              );
+            },
+            {
+              root: f.base,
+              target: f.q,
+              destination: preserved,
+              ownedTemporary: String(args[0]),
+            },
+          );
+          e.invalidate();
         };
       }
       return h;
     });
-    let first;
+    let result;
     try {
-      first = await attempt(() => e.restore(f.id, true));
+      result = await trashFixture(e, f.id, true, true, async (dir) =>
+        fs.rename(dir, path.join(f.base, "fake-os-trash")),
+      );
     } finally {
       mock.mock.restore();
       injection.diagnose(t);
     }
+    assert.equal(result.completed, 1);
+    assert.equal(result.failed.length, 1);
+    if (await classifyRefusal(t, injection, controlled)) return;
     injection.assertInstalled();
-    assert.ok(first.error);
     await injection.assertSentinel(
-      f.manifest,
-      "replacement manifest sentinel",
-      "manifest",
+      receipt,
+      "replacement receipt sentinel",
+      "receipt",
     );
-    await injection.assertSentinel(
-      replacementTemp,
-      "replacement temporary sentinel",
-      "temporary",
-    );
-  });
+  },
+);
+
+for (const checkpoint of [false, true]) {
+  replacementCase(
+    `${checkpoint ? "checkpoint" : "initial"} journal cleanup preserves a replacement temporary file after invalidation`,
+    async (t, controlled) => {
+      const f = await fixture(t),
+        e = f.engine(),
+        open = fs.open,
+        injection = new ReplacementInjection(
+          controlled ? "win32" : process.platform,
+        );
+      refuseFixtureRename(t, controlled, f.dir, f.dir + "-preserved");
+      let writes = 0,
+        replacementTemp = "";
+      const mock = t.mock.method(fs, "open", async (...args: any[]) => {
+        const h = await (open as any)(...args);
+        if (
+          String(args[0]).endsWith(".tmp") &&
+          String(args[0]).startsWith(f.dir)
+        ) {
+          const write = h.writeFile.bind(h);
+          h.writeFile = async (...writeArgs: any[]) => {
+            await write(...writeArgs);
+            if (++writes === (checkpoint ? 2 : 1)) {
+              replacementTemp = String(args[0]);
+              await injection.run(
+                () => fs.rename(f.dir, f.dir + "-preserved"),
+                async () => {
+                  await fs.mkdir(f.dir);
+                  await fs.writeFile(
+                    f.manifest,
+                    "replacement manifest sentinel",
+                  );
+                  await fs.writeFile(
+                    replacementTemp,
+                    "replacement temporary sentinel",
+                  );
+                },
+                {
+                  root: f.base,
+                  target: f.dir,
+                  destination: f.dir + "-preserved",
+                  ownedTemporary: replacementTemp,
+                },
+              );
+              e.invalidate();
+            }
+          };
+        }
+        return h;
+      });
+      let first;
+      try {
+        first = await attempt(() => e.restore(f.id, true));
+      } finally {
+        mock.mock.restore();
+        injection.diagnose(t);
+      }
+      assert.ok(first.error);
+      if (await classifyRefusal(t, injection, controlled)) return;
+      injection.assertInstalled();
+      await injection.assertSentinel(
+        f.manifest,
+        "replacement manifest sentinel",
+        "manifest",
+      );
+      await injection.assertSentinel(
+        replacementTemp,
+        "replacement temporary sentinel",
+        "temporary",
+      );
+    },
+  );
 }
 
 for (const action of ["cancel", "invalidate"]) {

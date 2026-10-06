@@ -16,7 +16,7 @@ const expected = {
 const reader = () => ({
   ...expected,
   format: "agentvac-native-conversations-v1",
-  status: "PASS",
+  status: "PASS_WITH_LIMITATIONS",
   nativeElectron: true,
   realMainPreloadIPC: true,
   syntheticFixturesOnly: true,
@@ -41,7 +41,17 @@ const reader = () => ({
   checks: [
     ...["codex", "claude-code", "cline", "cursor"].map((provider) => ({
       provider,
-      status: "PASS",
+      ...(provider === "cursor"
+        ? {
+            status: "UNSUPPORTED",
+            reason: "WINDOWS_CURSOR_IDE_DISABLED_0_2",
+            disabledGateVerified: true,
+            consentRefused: true,
+            listRefused: true,
+            noSnapshotCreated: true,
+            sourceUnchanged: true,
+          }
+        : { status: "PASS" }),
       lateContentSearch: true,
       fullUnicodePaging: true,
       actualTimestamp: true,
@@ -161,4 +171,42 @@ test("native durability cannot pass without real process-kill restart and exact 
       tags,
     ).length,
   );
+});
+
+test("Windows disabled capability cannot masquerade as database success or missing proof", () => {
+  for (const field of [
+    "disabledGateVerified",
+    "consentRefused",
+    "listRefused",
+    "noSnapshotCreated",
+    "sourceUnchanged",
+  ]) {
+    const value = reader();
+    (value.checks[3] as any)[field] = false;
+    assert.ok(validateConversationEvidence(value, expected).length, field);
+  }
+  for (const status of ["PASS", "BLOCKED", "FAIL", "SKIP"]) {
+    const value = reader();
+    value.checks[3].status = status;
+    assert.ok(validateConversationEvidence(value, expected).length);
+  }
+  const value = reader();
+  Object.assign(value.checks[3], { reason: "OTHER" });
+  assert.ok(validateConversationEvidence(value, expected).length);
+  assert.ok(
+    validateConversationEvidence({ ...reader(), status: "PASS" }, expected)
+      .length,
+  );
+});
+test("disabled Windows database exception never applies to another platform or version", () => {
+  for (const change of [
+    { platform: "linux" },
+    { platform: "darwin" },
+    { appVersion: "0.3.0" },
+  ]) {
+    const tags = { ...expected, ...change };
+    assert.ok(
+      validateConversationEvidence({ ...reader(), ...change }, tags).length,
+    );
+  }
 });

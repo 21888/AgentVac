@@ -53,15 +53,16 @@ jobs:
         id: install
         timeout-minutes: 4
         run: npm ci --no-audit --no-fund
-      - name: Verify actual Windows private-copy ACL boundaries
+      - name: Verify Windows disabled database boundary and transcript alternative
+        id: cursor-boundary
         if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Windows' }}
         timeout-minutes: 2
-        run: node --import tsx scripts/native-conversation-acl.mjs
+        run: node --import tsx --test --test-reporter=tap tests/windows-cursor-release.test.ts
       - name: Run fixture unit and policy tests
         id: units
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         timeout-minutes: 12
-        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/*.test.ts
+        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/*.test.ts tests/*.test.mjs
       - name: Build and typecheck source
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}

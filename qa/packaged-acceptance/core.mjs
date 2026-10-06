@@ -9,6 +9,7 @@ export const TARGETS = Object.freeze({
   'linux-appimage': { platform: 'linux', arch: 'x64', type: 'appimage-fuse', artifact: 'linux/AgentVac-0.1.0.AppImage' },
   'windows-portable': { platform: 'win32', arch: 'x64', type: 'portable-launcher', artifact: 'windows/AgentVac 0.1.0.exe', launcherArch: 'ia32' },
   'windows-unpacked': { platform: 'win32', arch: 'x64', type: 'unpacked-payload', artifact: 'windows/win-unpacked/AgentVac.exe' },
+  'windows-portable-built': { platform: 'win32', arch: 'x64', type: 'portable-launcher', launcherArch: 'ia32', candidateOnly: true },
   'macos-arm64': { platform: 'darwin', arch: 'arm64', type: 'app-zip', artifact: 'macos/AgentVac-0.1.0-macos-arm64.zip', executable: 'AgentVac.app/Contents/MacOS/AgentVac' },
   'macos-x64': { platform: 'darwin', arch: 'x64', type: 'app-zip', artifact: 'macos/AgentVac-0.1.0-macos-x64.zip', executable: 'AgentVac.app/Contents/MacOS/AgentVac' },
   'linux-unpacked': { platform: 'linux', arch: 'x64', type: 'unpacked-payload', candidateOnly: true },
@@ -40,7 +41,7 @@ export function parseArgs(args) {
       assert.equal(result[option.slice(2)], undefined, `Duplicate option ${option}`);
       result[option.slice(2)] = true;
     } else {
-      assert.ok(['--target', '--release-root', '--playwright-root', '--candidate-executable', '--candidate-id'].includes(option), `Unknown option ${option}; extra launch flags and installer targets are forbidden`);
+      assert.ok(['--target', '--release-root', '--playwright-root', '--candidate-executable', '--candidate-id', '--payload-manifest', '--evidence-root'].includes(option), `Unknown option ${option}; extra launch flags and installer targets are forbidden`);
       assert.equal(result[option.slice(2)], undefined, `Duplicate option ${option}`);
       const value = args[++i];
       assert.ok(value && !value.startsWith('--'), `Missing value for ${option}`);
@@ -51,11 +52,14 @@ export function parseArgs(args) {
     assert.ok(Object.hasOwn(TARGETS, result.target), `Choose --target ${Object.keys(TARGETS).join('|')}`);
     const spec = TARGETS[result.target];
     if (spec.candidateOnly || result['candidate-executable'] || result['candidate-id']) {
-      assert.equal(spec.type, 'unpacked-payload', 'Candidate inputs require an explicitly unpacked target, never a frozen archive/portable claim');
+      assert.ok(spec.type === 'unpacked-payload' || result.target === 'windows-portable-built', 'Candidate inputs require an explicitly unpacked or built portable target, never a frozen archive/portable claim');
       assert.ok(result['candidate-executable'] && path.isAbsolute(result['candidate-executable']), 'Provide an absolute --candidate-executable');
       assert.match(result['candidate-id'] || '', /^[A-Za-z0-9._-]{1,120}$/, 'Provide a bounded --candidate-id (for example the exact CI commit SHA)');
       assert.equal(result['release-root'], undefined, 'Candidate executable and frozen release-root inputs must not be mixed');
     }
+    for (const option of ['payload-manifest', 'evidence-root']) if (result[option]) assert.ok(path.isAbsolute(result[option]), `--${option} must be absolute`);
+    if (result['payload-manifest']) assert.ok(result['candidate-executable'], 'A payload manifest requires an explicit candidate');
+    if (result.target === 'windows-portable-built') assert.ok(result['payload-manifest'], 'Built portable launch requires a runtime payload manifest');
   }
   return result;
 }
@@ -128,6 +132,92 @@ export async function inspectExecutable(file) {
     const { bytesRead } = await h.read(buf, 0, buf.length, 0);
     return { ...binaryHeader(buf.subarray(0, bytesRead)), bytes: st.size };
   } finally { await h.close(); }
+}
+export const PACKAGED_HELPERS = Object.freeze(['diagnostic-supervisor.cjs', 'diagnostic-worker.cjs', 'cursor-sql-worker.cjs', 'process-argv-worker.cjs']);
+export async function fileIdentity(file) {
+  const st = await fs.lstat(file);
+  assert.ok(st.isFile() && !st.isSymbolicLink(), 'Expected a regular file for byte identity');
+  const digest = createHash('sha256');
+  for await (const chunk of createReadStream(file)) digest.update(chunk);
+  return { bytes: st.size, sha256: digest.digest('hex') };
+}
+export function isWithin(root, file) {
+  const relative = path.relative(path.resolve(root), path.resolve(file));
+  return relative !== '' && !relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative);
+}
+// Snapshot every shipped file and relative link, without following directory links.
+// The root is Contents on macOS and the executable directory on Linux/Windows.
+export async function snapshotPayload(root) {
+  root = path.resolve(root);
+  const rootStat = await fs.lstat(root);
+  assert.ok(rootStat.isDirectory() && !rootStat.isSymbolicLink(), 'Payload root must be a real directory');
+  const realRoot = await fs.realpath(root);
+  const entries = [];
+  async function visit(dir) {
+    for (const name of (await fs.readdir(dir)).sort()) {
+      const file = path.join(dir, name), st = await fs.lstat(file);
+      const relative = path.relative(root, file).split(path.sep).join('/');
+      if (st.isSymbolicLink()) {
+        const target = await fs.readlink(file);
+        assert.ok(!path.isAbsolute(target) && isWithin(root, path.resolve(path.dirname(file), target)), `Payload link escapes root: ${relative}`);
+        assert.ok(isWithin(realRoot, await fs.realpath(file)), `Payload link resolves outside root: ${relative}`);
+        entries.push({ relative, kind: 'symlink', target });
+      } else if (st.isDirectory()) await visit(file);
+      else {
+        assert.ok(st.isFile(), `Unsupported payload entry: ${relative}`);
+        entries.push({ relative, kind: 'file', ...await fileIdentity(file) });
+      }
+    }
+  }
+  await visit(root);
+  assert.ok(entries.length, 'Empty payload');
+  return entries.sort((a, b) => a.relative.localeCompare(b.relative, 'en'));
+}
+export function validatePayloadManifest(manifest) {
+  assert.equal(manifest.schemaVersion, 1);
+  assert.match(manifest.sourceRevision || '', /^[0-9a-f]{40}$/);
+  assert.match(manifest.artifactSha256 || '', /^[0-9a-f]{64}$/);
+  assert.ok(['exact', 'inside'].includes(manifest.rootMode));
+  assert.ok(path.isAbsolute(manifest.root));
+  assert.ok(Array.isArray(manifest.entries) && manifest.entries.length > 0);
+  const seen = new Set();
+  for (const entry of manifest.entries) {
+    fixturePath(manifest.root, entry.relative);
+    assert.ok(!seen.has(entry.relative), 'Duplicate payload entry');
+    seen.add(entry.relative);
+    if (entry.kind === 'file') {
+      assert.ok(Number.isSafeInteger(entry.bytes) && entry.bytes >= 0);
+      assert.match(entry.sha256 || '', /^[0-9a-f]{64}$/);
+    } else {
+      assert.equal(entry.kind, 'symlink');
+      assert.ok(typeof entry.target === 'string' && !path.isAbsolute(entry.target));
+      assert.ok(isWithin(manifest.root, path.resolve(path.dirname(fixturePath(manifest.root, entry.relative)), entry.target)), 'Manifest link escapes root');
+    }
+  }
+  fixturePath(manifest.root, manifest.executable);
+  fixturePath(manifest.root, manifest.resources + '/app.asar');
+  for (const relative of [manifest.executable, manifest.resources + '/app.asar', ...PACKAGED_HELPERS.map(name => manifest.resources + '/app.asar.unpacked/dist-electron/' + name)])
+    assert.ok(manifest.entries.some(entry => entry.relative === relative && entry.kind === 'file' && entry.bytes > 0), `Missing required payload identity: ${relative}`);
+  assert.deepEqual(manifest.allowedExtraFiles || [], manifest.installer === true ? ['Uninstall AgentVac.exe'] : []);
+  return manifest;
+}
+export async function verifyPayload(root, manifest) {
+  validatePayloadManifest(manifest);
+  const actual = await snapshotPayload(root);
+  const allowed = new Set(manifest.allowedExtraFiles || []);
+  for (const entry of actual.filter(entry => allowed.has(entry.relative))) assert.equal(entry.kind, 'file', 'Installer-only addition must be regular');
+  assert.deepEqual(actual.filter(entry => !allowed.has(entry.relative)), manifest.entries, 'Launched payload bytes/links differ from the verified built package');
+  return { status: 'PASS', fileCount: manifest.entries.filter(e => e.kind === 'file').length, symlinkCount: manifest.entries.filter(e => e.kind === 'symlink').length, artifactSha256: manifest.artifactSha256 };
+}
+export async function bindRuntimePayload(runtime, manifest) {
+  validatePayloadManifest(manifest);
+  const root = path.resolve(runtime.resourcesPath, '..');
+  const realRoot = await fs.realpath(root), realExpected = await fs.realpath(manifest.root);
+  if (manifest.rootMode === 'exact') assert.equal(realRoot, realExpected, 'Runtime was not launched from the prepared/installed payload');
+  else assert.ok(isWithin(realExpected, realRoot), 'Portable runtime did not extract inside its generated temp root');
+  assert.equal(path.resolve(runtime.execPath), path.join(root, ...manifest.executable.split('/')), 'Unexpected running executable');
+  assert.equal(path.resolve(runtime.appPath), path.join(root, manifest.resources, 'app.asar'), 'Unexpected loaded ASAR');
+  return { ...await verifyPayload(root, manifest), root, execPath: runtime.execPath, appPath: runtime.appPath };
 }
 export function assertRuntime(runtime, spec, profile) {
   assert.equal(runtime.packaged, true, 'Source-launched Electron cannot pass packaged acceptance');

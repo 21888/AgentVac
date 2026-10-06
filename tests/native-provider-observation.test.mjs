@@ -212,15 +212,24 @@ const source = readFileSync(
   new URL("../scripts/native-provider-regression.mjs", import.meta.url),
   "utf8",
 );
-const functionSource = source.slice(
-  source.indexOf("async function runProvider("),
-  source.indexOf('\nlet status = "FAIL";'),
+const pureHelpers = source.slice(
+  source.indexOf("// Pure bounded helpers."),
+  source.indexOf("// End pure bounded helpers."),
 );
+const functionSource =
+  pureHelpers +
+  "\n" +
+  source.slice(
+    source.indexOf("async function runProvider("),
+    source.indexOf('\nlet status = "FAIL";'),
+  );
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 async function exercise(provider, config = {}) {
   const anchor = provider === "cursor" ? "GPUCache" : "synthetic-unit";
   const lines = [],
-    calls = [];
+    calls = [],
+    diagnostics = [];
+  let preservationChecks = 0;
   const roots = { [provider]: `/synthetic/${marker}` };
   const row = {
     id: marker,
@@ -237,8 +246,13 @@ async function exercise(provider, config = {}) {
       const body = callback.toString();
       if (body.includes("window.agentvac.quarantine")) {
         calls.push("quarantine");
-        if (++quarantines > 1 || config.guard)
-          throw new Error("另一项操作正在进行，请稍候。");
+        if (++quarantines > 1) throw new Error("另一项操作正在进行，请稍候。");
+        if (config.guard) {
+          if (config.guardResult) return config.guardResult;
+          throw (
+            config.guardError ?? new Error("无法确认进程状态，已阻止文件操作。")
+          );
+        }
         if (config.quarantineError) throw config.quarantineError;
         return config.quarantineResult ?? result();
       }
@@ -293,7 +307,24 @@ async function exercise(provider, config = {}) {
     path,
     launch: noop,
     close: noop,
-    verifyOriginals: noop,
+    verifyOriginals: async () => {
+      preservationChecks++;
+    },
+    providerEvidence: { [provider]: { checkpoints: [] } },
+    recordProviderBaseline: noop,
+    diagnoseProviderFailure: async (_provider, outcome, allowRecovery) => {
+      diagnostics.push({ outcome, allowRecovery });
+      context.providerEvidence[provider].checkpoints.push({
+        stage: "after-quarantine-failure",
+        sourceUnchanged: true,
+        quarantineFiles: 0,
+        duplicateCopies: 0,
+      });
+    },
+    captureProviderState: async () => ({
+      accounting: { sourceUnchanged: true, quarantineFiles: 0 },
+    }),
+    saveProviderEvidence: noop,
     fs: {
       mkdir: noop,
       writeFile: noop,
@@ -303,10 +334,11 @@ async function exercise(provider, config = {}) {
     },
     nativeProcessObservation: async () => ({ status: "clear" }),
     console: { log: (line) => lines.push(line) },
-    providerMutationObservationHandlers: (name, operation) =>
-      providerMutationObservationHandlers(name, operation, (line) =>
-        lines.push(line),
-      ),
+    providerMutationObservationHandlers: (
+      name,
+      operation,
+      write = (line) => lines.push(line),
+    ) => providerMutationObservationHandlers(name, operation, write),
   };
   const run = new AsyncFunction(
     ...Object.keys(context),
@@ -314,9 +346,21 @@ async function exercise(provider, config = {}) {
   );
   try {
     const value = await run(...Object.values(context));
-    return { value, observations: parseObservations(lines), calls };
+    return {
+      value,
+      observations: parseObservations(lines),
+      calls,
+      diagnostics,
+      preservationChecks,
+    };
   } catch (error) {
-    return { error, observations: parseObservations(lines), calls };
+    return {
+      error,
+      observations: parseObservations(lines),
+      calls,
+      diagnostics,
+      preservationChecks,
+    };
   }
 }
 
@@ -406,4 +450,48 @@ test("actual success path preserves all assertions and records expected conflict
     "INFERRED_ENGINE_RESTORE_LINK_CHANGED",
   ]);
   assert.equal(observed.observations[4].completed, 0);
+});
+
+test("actual guard accepts a typed failed batch only after preservation verification", async () => {
+  const observed = await exercise("cursor", {
+    guard: true,
+    guardResult: {
+      batchId: "11111111-1111-4111-8111-111111111111",
+      completed: 0,
+      bytes: 0,
+      failed: [
+        { path: "GPUCache", error: "无法确认进程状态，已阻止文件操作。" },
+      ],
+    },
+  });
+  assert.equal(observed.error, undefined);
+  assert.equal(observed.value.status, "FAIL");
+  assert.equal(observed.value.refusalVerified, true);
+  assert.equal(observed.value.mutationNotTested, true);
+  assert.equal(observed.preservationChecks, 1);
+  assert.equal(observed.diagnostics.length, 1);
+  assert.equal(observed.diagnostics[0].allowRecovery, false);
+});
+
+test("actual guard rejects unrelated BUSY even after source preservation", async () => {
+  const observed = await exercise("cursor", {
+    guard: true,
+    guardError: new Error("另一项操作正在进行，请稍候。"),
+  });
+  assert.equal(observed.error?.name, "AssertionError");
+  assert.match(observed.error.message, /TYPED_PROCESS_REFUSAL_REQUIRED/);
+  assert.equal(observed.preservationChecks, 1);
+});
+
+test("partial Cline quarantine records diagnostics and retains failed completed=1 assertion", async () => {
+  const observed = await exercise("cline", {
+    quarantineResult: failed(
+      "移动已完成或部分完成，记录待协调；请刷新隔离记录。无法确认进程状态，已阻止文件操作。 回滚尚未完成；数据仍保留：无法确认进程状态，已阻止文件操作。",
+    ),
+  });
+  assert.equal(observed.error?.name, "AssertionError");
+  assert.equal(observed.error.actual, 0);
+  assert.equal(observed.error.expected, 1);
+  assert.equal(observed.diagnostics.length, 1);
+  assert.equal(observed.diagnostics[0].allowRecovery, true);
 });

@@ -229,51 +229,60 @@ async function setup(t: TestContext, provider: ProviderId) {
   return { root, base, anchor, engine, service, makeEngine, originals, put };
 }
 for (const provider of ["codex", "claude-code", "cline", "cursor"] as const)
-  test(`${provider} real reader/service: consent, actual timestamps, full late-content search and source-byte preservation`, async (t) => {
-    const f = await setup(t, provider);
-    await assert.rejects(
-      f.service.list({ requestId: randomUUID() }),
-      /明确允许/,
-    );
-    await f.service.setAccess(true);
-    const list = await f.service.list({
-      requestId: randomUUID(),
-      keyword: "LATE_INTEGRATION_KEYWORD",
-      from: "2026-06-01T00:00:00Z",
-      to: "2026-06-02T00:00:00Z",
-    });
-    assert.equal(list.items.length, 1);
-    assert.equal(list.items[0].createdAt, created);
-    assert.ok(!JSON.stringify(list).includes("NEVER-AUTH-DISPLAY"));
-    let cursor: string | undefined;
-    let actual = "";
-    let pages = 0;
-    do {
-      const page = await f.service.read({
+  test(
+    `${provider} real reader/service: consent, actual timestamps, full late-content search and source-byte preservation`,
+    {
+      skip:
+        provider === "cursor" && process.platform === "win32"
+          ? "v0.2.0 Windows Cursor IDE database reading and private snapshot storage are disabled"
+          : false,
+    },
+    async (t) => {
+      const f = await setup(t, provider);
+      await assert.rejects(
+        f.service.list({ requestId: randomUUID() }),
+        /明确允许/,
+      );
+      await f.service.setAccess(true);
+      const list = await f.service.list({
         requestId: randomUUID(),
-        conversationId: list.items[0].id,
-        cursor,
-        limit: 1,
+        keyword: "LATE_INTEGRATION_KEYWORD",
+        from: "2026-06-01T00:00:00Z",
+        to: "2026-06-02T00:00:00Z",
       });
-      actual += page.messages
-        .flatMap((m) =>
-          m.parts.filter((p) => p.type === "text").map((p) => p.text),
-        )
-        .join("");
-      cursor = page.nextCursor ?? undefined;
-      assert.ok(++pages < 20);
-    } while (cursor);
-    assert.equal(actual, BODY);
-    for (const [rel, bytes] of f.originals)
-      assert.deepEqual(await fs.readFile(path.join(f.root, rel)), bytes);
-    await f.service.setAccess(false);
-    await assert.rejects(
-      f.service.read({
-        requestId: randomUUID(),
-        conversationId: list.items[0].id,
-      }),
-    );
-  });
+      assert.equal(list.items.length, 1);
+      assert.equal(list.items[0].createdAt, created);
+      assert.ok(!JSON.stringify(list).includes("NEVER-AUTH-DISPLAY"));
+      let cursor: string | undefined;
+      let actual = "";
+      let pages = 0;
+      do {
+        const page = await f.service.read({
+          requestId: randomUUID(),
+          conversationId: list.items[0].id,
+          cursor,
+          limit: 1,
+        });
+        actual += page.messages
+          .flatMap((m) =>
+            m.parts.filter((p) => p.type === "text").map((p) => p.text),
+          )
+          .join("");
+        cursor = page.nextCursor ?? undefined;
+        assert.ok(++pages < 20);
+      } while (cursor);
+      assert.equal(actual, BODY);
+      for (const [rel, bytes] of f.originals)
+        assert.deepEqual(await fs.readFile(path.join(f.root, rel)), bytes);
+      await f.service.setAccess(false);
+      await assert.rejects(
+        f.service.read({
+          requestId: randomUUID(),
+          conversationId: list.items[0].id,
+        }),
+      );
+    },
+  );
 test("Claude real conversation preview, complete bundle quarantine, restart and exact restore", async (t) => {
   const f = await setup(t, "claude-code");
   await f.service.setAccess(true);

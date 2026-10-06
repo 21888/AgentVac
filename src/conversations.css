@@ -783,7 +783,9 @@
     padding: 12px 0 9px;
   }
   .conversation-heading p {
-    display: none;
+    /* Provider limitations must remain visible in short windows. */
+    font-size: 11px;
+    line-height: 1.5;
   }
   .conversation-eyebrow {
     font-size: 8px;

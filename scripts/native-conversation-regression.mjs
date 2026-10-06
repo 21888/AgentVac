@@ -7,7 +7,27 @@ import { randomUUID, createHash } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import assert from "node:assert/strict";
 import { AppDataServices } from "../electron/app-services.ts";
+import {
+  bindRuntimePayload,
+  validatePayloadManifest,
+} from "../qa/packaged-acceptance/core.mjs";
 const project = await fs.realpath(path.resolve("."));
+const packageExecutable = process.env.AGENTVAC_PACKAGE_EXECUTABLE;
+if (packageExecutable) {
+  assert.ok(
+    path.isAbsolute(packageExecutable),
+    "Packaged reader target must be absolute",
+  );
+  assert.ok(
+    process.env.AGENTVAC_PACKAGE_PAYLOAD_MANIFEST,
+    "Packaged readers require the verified payload manifest",
+  );
+  const st = await fs.lstat(packageExecutable);
+  assert.ok(
+    st.isFile() && !st.isSymbolicLink(),
+    "Packaged reader target must be a regular generated executable",
+  );
+}
 await fs.mkdir(path.join(project, ".qa"), { recursive: true });
 const base = await fs.mkdtemp(
   path.join(project, ".qa", "native-conversations-"),
@@ -237,7 +257,7 @@ const results = {
   appVersion: JSON.parse(
     await fs.readFile(path.join(project, "package.json"), "utf8"),
   ).version,
-  packagedArtifactTested: false,
+  packagedArtifactTested: !!packageExecutable,
   at: new Date().toISOString(),
   platform: process.platform,
   arch: process.arch,
@@ -255,7 +275,9 @@ try {
   const env = { ...process.env, AGENTVAC_TEST_USER_DATA: profile };
   delete env.ELECTRON_RUN_AS_NODE;
   app = await electron.launch({
-    args: [project],
+    ...(packageExecutable
+      ? { executablePath: packageExecutable, args: [] }
+      : { args: [project] }),
     chromiumSandbox: true,
     env,
     timeout: 45000,
@@ -272,6 +294,8 @@ try {
     const p =
       BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences();
     return {
+      packaged: app.isPackaged,
+      arch: process.arch,
       sandbox: p.sandbox,
       nodeIntegration: p.nodeIntegration,
       contextIsolation: p.contextIsolation,
@@ -280,12 +304,35 @@ try {
     };
   });
   assert.deepEqual(results.security, {
+    packaged: !!packageExecutable,
+    arch: process.arch,
     sandbox: true,
     nodeIntegration: false,
     contextIsolation: true,
     webSecurity: true,
     noSandbox: false,
   });
+  assert.equal(
+    path.resolve(await app.evaluate(({ app }) => app.getPath("userData"))),
+    path.resolve(profile),
+  );
+  if (packageExecutable) {
+    const manifest = validatePayloadManifest(
+      JSON.parse(
+        await fs.readFile(
+          process.env.AGENTVAC_PACKAGE_PAYLOAD_MANIFEST,
+          "utf8",
+        ),
+      ),
+    );
+    assert.equal(manifest.sourceRevision, results.sourceRevision);
+    const runtime = await app.evaluate(({ app }) => ({
+      resourcesPath: process.resourcesPath,
+      execPath: process.execPath,
+      appPath: app.getAppPath(),
+    }));
+    results.packagePayloadBinding = await bindRuntimePayload(runtime, manifest);
+  }
   let staleId;
   for (const provider of Object.keys(roots)) {
     await page.evaluate(
@@ -303,6 +350,43 @@ try {
     );
     assert.equal(access.provider, provider);
     assert.equal(access.allowed, false);
+    if (provider === "cursor" && process.platform === "win32") {
+      assert.match(
+        access.unavailableReason ?? "",
+        /0\.2\.0.*Windows.*Cursor IDE/,
+      );
+      await assert.rejects(
+        page.evaluate(() => window.agentvac.setConversationAccess(true)),
+        /Cursor IDE/,
+      );
+      await assert.rejects(
+        page.evaluate(
+          (requestId) => window.agentvac.listConversations({ requestId }),
+          randomUUID(),
+        ),
+      );
+      assert.equal(
+        (await page.evaluate(() => window.agentvac.getConversationAccess()))
+          .allowed,
+        false,
+      );
+      await assert.rejects(
+        fs.lstat(path.join(profile, "conversation-snapshots")),
+        { code: "ENOENT" },
+      );
+      assert.equal(await fileHash(cursorDb), originals.get(cursorDb));
+      results.checks.push({
+        provider,
+        status: "UNSUPPORTED",
+        reason: "WINDOWS_CURSOR_IDE_DISABLED_0_2",
+        disabledGateVerified: true,
+        consentRefused: true,
+        listRefused: true,
+        noSnapshotCreated: true,
+        sourceUnchanged: true,
+      });
+      continue;
+    }
     assert.ok(!access.unavailableReason, access.unavailableReason);
     await assert.rejects(
       page.evaluate(
@@ -484,14 +568,38 @@ try {
   assert.deepEqual(results.errors, []);
   results.sourcesUnchanged = true;
   results.builtUnchanged = true;
-  results.status = "PASS";
+  if (process.platform === "win32")
+    await assert.rejects(
+      fs.lstat(path.join(profile, "conversation-snapshots")),
+      { code: "ENOENT" },
+    );
+  results.status =
+    process.platform === "win32" ? "PASS_WITH_LIMITATIONS" : "PASS";
 } catch (error) {
   results.status = "FAIL";
   results.failure = String(error?.stack ?? error);
   process.exitCode = 1;
 } finally {
-  await app?.close().catch(() => {});
-  await fs.rm(profileBase, { recursive: true, force: true });
+  let appClosed = !app;
+  try {
+    if (app) await app.close();
+    appClosed = true;
+  } catch {
+    results.status = "FAIL";
+    results.cleanupFailure = "NATIVE_READER_APP_CLOSE_FAILED";
+    process.exitCode = 1;
+  }
+  results.cleanup = { appClosed, profileRemoved: false };
+  if (appClosed) {
+    try {
+      await fs.rm(profileBase, { recursive: true, force: true });
+      results.cleanup.profileRemoved = true;
+    } catch {
+      results.status = "FAIL";
+      results.cleanupFailure = "NATIVE_READER_PROFILE_CLEANUP_FAILED";
+      process.exitCode = 1;
+    }
+  }
   await fs.writeFile(
     path.join(out, `conversations-${process.platform}-${process.arch}.json`),
     JSON.stringify(results, null, 2) + "\n",

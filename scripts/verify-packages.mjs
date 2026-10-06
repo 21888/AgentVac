@@ -7,36 +7,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const asar = require("@electron/asar");
 const base = path.resolve(process.argv[2] || "release-final");
-const targets = [
-  {
-    platform: "linux",
-    arch: "x64",
-    app: "linux/linux-unpacked",
-    exe: "agentvac",
-    kind: "elf",
-  },
-  {
-    platform: "windows",
-    arch: "x64",
-    app: "windows/win-unpacked",
-    exe: "AgentVac.exe",
-    kind: "pe",
-  },
-  {
-    platform: "macos",
-    arch: "x64",
-    app: "macos/mac/AgentVac.app/Contents",
-    exe: "MacOS/AgentVac",
-    kind: "macho",
-  },
-  {
-    platform: "macos",
-    arch: "arm64",
-    app: "macos/mac-arm64/AgentVac.app/Contents",
-    exe: "MacOS/AgentVac",
-    kind: "macho",
-  },
-];
+import { selectPackageTargets } from "./package-targets.mjs";
 const hash = (b) => createHash("sha256").update(b).digest("hex");
 async function files(dir) {
   let out = [];
@@ -55,14 +26,8 @@ const expected = [
 ];
 const report = [];
 const onlyPlatform = process.argv[3];
-if (onlyPlatform)
-  assert.ok(
-    ["linux", "windows", "macos"].includes(onlyPlatform),
-    "unknown platform filter",
-  );
-for (const target of targets.filter(
-  (target) => !onlyPlatform || target.platform === onlyPlatform,
-)) {
+const onlyArch = process.argv[4];
+for (const target of selectPackageTargets(onlyPlatform, onlyArch)) {
   const app = path.join(base, target.app);
   const resources = path.join(
     app,
@@ -159,7 +124,7 @@ for (const target of targets.filter(
 }
 await fs.writeFile(
   onlyPlatform
-    ? `docs/package-verification-${onlyPlatform}.json`
+    ? `docs/package-verification-${onlyPlatform}${onlyArch ? "-" + onlyArch : ""}.json`
     : "docs/package-verification.json",
   JSON.stringify(
     {

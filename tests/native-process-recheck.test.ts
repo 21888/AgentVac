@@ -27,7 +27,7 @@ test("fresh inventory is rechecked before quarantine and restore; a newly runnin
           observations++;
           return {
             platform: "linux",
-            complete: ++attempt > 1,
+            complete: ++attempt > 3,
             processes: [
               running
                 ? { name: "codex", commandLine: "/usr/bin/codex" }

@@ -1,0 +1,202 @@
+name: AgentVac 0.2.0 draft package verification
+
+# Final/default state is manual only. A separately reviewed one-shot master marker
+# may temporarily add a push trigger, then this file is restored byte-for-byte.
+on:
+  push:
+    branches: [master]
+    paths: [".github/release-candidate-20261006T2043Z-5a90d21c.marker"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentvac-release-draft-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 4
+    permissions:
+      contents: write
+    outputs:
+      release_id: ${{ steps.draft.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - name: Create or verify exact-source draft only
+        id: draft
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release-draft.mjs ensure
+  desktop:
+    if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false }}
+    needs: draft
+    permissions:
+      contents: write
+    name: Verify and draft ${{ matrix.platform }} ${{ matrix.arch }}
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            platform: Linux
+            arch: x64
+          - os: windows-2022
+            platform: Windows
+            arch: x64
+          - os: macos-15-intel
+            platform: macOS
+            arch: x64
+          - os: macos-15
+            platform: macOS
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      CI: "true"
+      AGENTVAC_EXPECTED_ARCH: ${{ matrix.arch }}
+      AGENTVAC_NATIVE_EVIDENCE_DIR: ${{ github.workspace }}/.qa/agentvac-native-${{ github.run_id }}-${{ github.run_attempt }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up verified Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+          # No Actions dependency cache or artifact storage.
+      - name: Install locked dependencies
+        id: install
+        timeout-minutes: 4
+        run: npm ci --no-audit --no-fund
+      - name: Verify Windows disabled database boundary and transcript alternative
+        id: cursor-boundary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 2
+        run: node --import tsx --test --test-reporter=tap tests/windows-cursor-release.test.ts
+      - name: Run fixture unit and policy tests
+        id: units
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 12
+        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/*.test.ts tests/*.test.mjs
+      - name: Build and typecheck source
+        id: build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 3
+        run: npm run build && node scripts/build-native-provider-harness.mjs
+      - name: Verify native filesystem committed-unit crash recovery
+        id: durability
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 2
+        run: node --import tsx scripts/native-unit-durability.mjs
+      - name: Install standard Linux desktop tools
+        id: linux-tools
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xdotool openbox dbus-x11 libgtk-3-0 libnss3 libasound2 libgbm1 libglib2.0-bin xdg-utils
+      - name: Native Linux window and OS integration
+        id: desktop-linux
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-openbox.log 2>&1 & npm run test:desktop:built'
+      - name: Native Windows or macOS window and OS integration
+        id: desktop-native
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 3
+        run: npm run test:desktop:built
+      - name: Native provider quarantine and restart recovery on Linux
+        id: providers-linux
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 4
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-provider-openbox.log 2>&1 & node "$GITHUB_WORKSPACE/.qa/native-harness/native-provider-driver.mjs"'
+      - name: Native provider quarantine and restart recovery on Windows or macOS
+        id: providers-native
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 4
+        run: node "${{ github.workspace }}/.qa/native-harness/native-provider-driver.mjs"
+      - name: Native conversation readers and explicit-source consent on Linux
+        id: readers-linux
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 3
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-conversation-openbox.log 2>&1 & node --import tsx "$GITHUB_WORKSPACE/scripts/native-conversation-regression.mjs"'
+      - name: Native conversation readers and explicit-source consent on Windows or macOS
+        id: readers-native
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os != 'Linux' }}
+        timeout-minutes: 3
+        run: node --import tsx "${{ github.workspace }}/scripts/native-conversation-regression.mjs"
+      - name: Generate native distribution files from the tested build
+        id: packages
+        if: ${{ !cancelled() && steps.units.outcome == 'success' && steps.build.outcome == 'success' }}
+        timeout-minutes: 10
+        run: node scripts/build-release-artifacts.mjs
+      - name: Verify exact packaged source and all unpacked helpers
+        id: package-bytes
+        if: ${{ !cancelled() && steps.packages.outcome == 'success' }}
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            Linux) platform=linux ;;
+            Windows) platform=windows ;;
+            macOS) platform=macos ;;
+            *) exit 1 ;;
+          esac
+          node scripts/verify-packages.mjs release-final "$platform" "$AGENTVAC_EXPECTED_ARCH"
+      - name: Launch Linux archive payload with sandbox and generated recovery
+        id: package-smoke-linux
+        if: ${{ !cancelled() && steps.package-bytes.outcome == 'success' && steps.linux-tools.outcome == 'success' && runner.os == 'Linux' }}
+        timeout-minutes: 8
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- bash -c 'openbox >/tmp/agentvac-package-openbox.log 2>&1 & node scripts/release-package-smoke.mjs --target linux-tar --release-root release-final --source-revision "$GITHUB_SHA"'
+      - name: Launch Windows portable and install launch uninstall the generated NSIS package
+        id: package-smoke-windows
+        if: ${{ !cancelled() && steps.package-bytes.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          node scripts/release-package-smoke.mjs --target windows-portable --release-root release-final --source-revision "$GITHUB_SHA"
+          node scripts/release-package-smoke.mjs --target windows-setup --release-root release-final --source-revision "$GITHUB_SHA"
+      - name: Launch native macOS ZIP and DMG payloads
+        id: package-smoke-macos
+        if: ${{ !cancelled() && steps.package-bytes.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 10
+        run: |
+          node scripts/release-package-smoke.mjs --target "macos-$AGENTVAC_EXPECTED_ARCH-zip" --release-root release-final --source-revision "$GITHUB_SHA"
+          node scripts/release-package-smoke.mjs --target "macos-$AGENTVAC_EXPECTED_ARCH-dmg" --release-root release-final --source-revision "$GITHUB_SHA"
+      - name: Prepare checksums and explicit stage outcomes
+        id: asset-manifest
+        if: ${{ !cancelled() && steps.package-bytes.outcome == 'success' && (steps.package-smoke-linux.outcome == 'success' || steps.package-smoke-windows.outcome == 'success' || steps.package-smoke-macos.outcome == 'success') }}
+        timeout-minutes: 2
+        env:
+          AGENTVAC_RELEASE_STAGE_RESULTS: >-
+            {"cursorBoundary":"${{ steps.cursor-boundary.outcome }}","units":"${{ steps.units.outcome }}","build":"${{ steps.build.outcome }}","durability":"${{ steps.durability.outcome }}","desktop":"${{ steps.desktop-linux.outcome == 'skipped' && steps.desktop-native.outcome || steps.desktop-linux.outcome }}","providers":"${{ steps.providers-linux.outcome == 'skipped' && steps.providers-native.outcome || steps.providers-linux.outcome }}","readers":"${{ steps.readers-linux.outcome == 'skipped' && steps.readers-native.outcome || steps.readers-linux.outcome }}","packages":"${{ steps.packages.outcome }}","packageSmoke":"${{ steps.package-smoke-linux.outcome == 'success' && 'success' || steps.package-smoke-windows.outcome == 'success' && 'success' || steps.package-smoke-macos.outcome }}"}
+        run: node scripts/prepare-release-assets.mjs
+      - name: Upload verified packages to the exact draft only
+        if: ${{ !cancelled() && steps.asset-manifest.outcome == 'success' }}
+        timeout-minutes: 6
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AGENTVAC_DRAFT_RELEASE_ID: ${{ needs.draft.outputs.release_id }}
+        run: node scripts/release-draft.mjs upload
+      - name: Keep source-native failures visible
+        if: always()
+        timeout-minutes: 1
+        run: node scripts/native-ci-summary.mjs
+      # Draft upload is not application acceptance. No publish step, Actions artifacts,
+      # dependency cache, paid runner, new credential or security-setting changes.

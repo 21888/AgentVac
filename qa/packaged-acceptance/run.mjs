@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
-import { TARGETS, CapabilityBlock, classifyLaunchError, recordCheck, parseArgs, resolveInput, assertNativeHost, isolatedEnv, assertArchiveEntries, inspectExecutable, assertRuntime, fixturePath, fixtureDigest, summarize } from './core.mjs';
+import { TARGETS, CapabilityBlock, classifyLaunchError, recordCheck, parseArgs, resolveInput, assertNativeHost, isolatedEnv, assertArchiveEntries, inspectExecutable, assertRuntime, fixturePath, fixtureDigest, summarize, PACKAGED_HELPERS, validatePayloadManifest, bindRuntimePayload } from './core.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const run = promisify(execFile);
 let args;
@@ -21,14 +21,17 @@ const spec = TARGETS[args.target];
 const releaseRoot = path.resolve(args['release-root'] || path.join(here, '../AgentVac-next/release-next'));
 const dependencyRoot = path.resolve(args['playwright-root'] || path.join(here, '../AgentVac-next'));
 const preflight = args['preflight-only'] === true;
-await fs.mkdir(path.join(here, 'evidence'), { recursive: true });
+const evidenceRoot = args['evidence-root'] || path.join(here, 'evidence');
+await fs.mkdir(evidenceRoot, { recursive: true });
 await fs.mkdir(path.join(here, '.runs'), { recursive: true });
 const ownedRoot = await fs.mkdtemp(path.join(await fs.realpath(path.join(here, '.runs')), args.target + '-'));
 const profile = path.join(ownedRoot, 'profile');
-const evidence = path.join(here, 'evidence', path.basename(ownedRoot));
+const evidence = path.join(evidenceRoot, path.basename(ownedRoot));
 await fs.mkdir(profile);
 await fs.mkdir(evidence);
 const input = resolveInput(args, releaseRoot);
+const payloadManifest = args['payload-manifest'] ? validatePayloadManifest(JSON.parse(await fs.readFile(args['payload-manifest'], 'utf8'))) : null;
+if (payloadManifest) assert.equal(payloadManifest.sourceRevision, args['candidate-id'], 'Payload manifest and candidate revision must match');
 const artifact = input.artifact;
 const env = isolatedEnv(process.env, profile);
 await fs.mkdir(env.CODEX_HOME);
@@ -39,13 +42,14 @@ const report = {
   schemaVersion: 1, startedAt: new Date().toISOString(), suite: 'packaged-executable-smoke', mode: preflight ? 'preflight' : 'native',
   target: args.target, artifactType: spec.type, artifact, inputProvenance: input.provenance, host, ownedRoot, profile,
   nativeLaunchAttempted: false, packagedRuntimeVerified: false,
+  payloadBindings: [],
   sourceImported: false, applicationPatched: false, sandboxDisabled: false,
   fixtureOnly: true, mockDialogs: false, mockFilesystem: false, mockPreload: false,
   checks: Object.fromEntries(planned.map(name => [name, { status: 'UNTESTED' }])),
   separateReleaseGates: {
     firstLaunchViaOS: 'UNTESTED: Inspector-driven direct executable launch is not Finder/Explorer/Gatekeeper/SmartScreen first-launch acceptance.',
     signingAndNotarization: 'UNTESTED: Recovery-history signing is unrelated to macOS Developer ID/notarization or Windows Authenticode.',
-    installer: 'NOT_APPLICABLE: Frozen deliverables include portable files and .app ZIPs, not an NSIS setup installer, DMG, PKG, MSI, deb or rpm.',
+    installer: 'NOT_TESTED_BY_THIS_HARNESS: Installation, artifact hashes and disk-image preparation belong to the release-package wrapper; an unpacked launch is never installer evidence.',
     nativeDialogsAndTrash: 'UNTESTED: This minimal smoke uses only generated-demo IPC; no system Trash, restore UI or native file picker.',
     sqliteHelperLifecycle: 'UNTESTED: Native parser, cancel/close and owned-child cleanup require the separate diagnostic harness on a clear authorized machine.',
     appimageFuse: args.target === 'linux-appimage' ? 'PENDING: Only direct successful AppImage launch may count; extraction fallback is prohibited.' : 'UNTESTED: This target does not establish AppImage/FUSE acceptance.',
@@ -118,7 +122,7 @@ async function prepare() {
     const resources = spec.platform === 'darwin'
       ? path.resolve(path.dirname(executable), '../Resources')
       : path.join(path.dirname(executable), 'resources');
-    for (const name of ['app.asar', 'app.asar.unpacked/dist-electron/diagnostic-supervisor.cjs', 'app.asar.unpacked/dist-electron/diagnostic-worker.cjs']) {
+    for (const name of ['app.asar', ...PACKAGED_HELPERS.map(name => 'app.asar.unpacked/dist-electron/' + name)]) {
       const st = await fs.lstat(path.join(resources, name));
       assert.ok(st.isFile() && !st.isSymbolicLink() && st.size > 0, `Missing regular packaged resource ${name}`);
     }
@@ -150,10 +154,13 @@ async function launch(executable) {
   });
   mainPid = runtime.mainPid;
   assertRuntime(runtime, spec, profile);
-  for (const name of ['diagnostic-supervisor.cjs', 'diagnostic-worker.cjs']) {
+  for (const name of PACKAGED_HELPERS) {
     const st = await fs.lstat(path.join(runtime.resourcesPath, 'app.asar.unpacked/dist-electron', name));
-    assert.ok(st.isFile() && !st.isSymbolicLink(), `Packaged helper is missing: ${name}`);
+    assert.ok(st.isFile() && !st.isSymbolicLink() && st.size > 0, `Packaged helper is missing: ${name}`);
   }
+  if (payloadManifest) report.payloadBindings.push(await bindRuntimePayload(runtime, payloadManifest));
+  // Validate transient launch arguments above, but do not publish process argv.
+  delete runtime.argv;
   report.packagedRuntimeVerified = true;
   await page.getByRole('complementary', { name: '工作空间导航' }).waitFor();
   await page.waitForFunction(() => typeof window.agentvac?.getContext === 'function' && typeof window.agentvac?.scan === 'function' && typeof window.agentvac?.restore === 'function');

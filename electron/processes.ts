@@ -311,7 +311,7 @@ export async function collectProcessSnapshot(
   }
 }
 /** Retry only incomplete observations, never a complete running/unknown result.
- * A shared abort deadline also bounds OS commands across retries. */
+ * Allow up to eight fresh inventories within one shared OS-command deadline. */
 export async function collectStableProcessSnapshot(
   collect: (signal: AbortSignal) => Promise<ProcessSnapshot>,
   options: {
@@ -322,6 +322,7 @@ export async function collectStableProcessSnapshot(
 ): Promise<ProcessSnapshot> {
   const controller = new AbortController();
   const cancel = () => controller.abort();
+  const maxAttempts = 8;
   const budget = Math.max(1, Math.min(options.deadlineMs ?? 5500, 5500));
   const timer = setTimeout(cancel, budget);
   timer.unref();
@@ -335,7 +336,7 @@ export async function collectStableProcessSnapshot(
   try {
     for (
       let attempt = 0;
-      attempt < 3 && !controller.signal.aborted;
+      attempt < maxAttempts && !controller.signal.aborted;
       attempt++
     ) {
       try {
@@ -345,7 +346,7 @@ export async function collectStableProcessSnapshot(
       }
       if (controller.signal.aborted) return { ...last, complete: false };
       if (last.complete) return last;
-      if (attempt < 2)
+      if (attempt + 1 < maxAttempts)
         await new Promise<void>((resolve) => {
           const finish = () => {
             clearTimeout(wait);

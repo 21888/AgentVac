@@ -147,7 +147,10 @@ export function validateConversationEvidence(result, expected) {
       problems.push(`Mismatched conversation ${field}`);
   if (
     result.format !== "agentvac-native-conversations-v1" ||
-    result.status !== "PASS" ||
+    result.status !==
+      (expected.platform === "win32" && expected.appVersion === "0.2.0"
+        ? "PASS_WITH_LIMITATIONS"
+        : "PASS") ||
     result.nativeElectron !== true ||
     result.realMainPreloadIPC !== true ||
     result.syntheticFixturesOnly !== true ||
@@ -180,6 +183,27 @@ export function validateConversationEvidence(result, expected) {
     const row = result.checks?.find(
       (r) => r.provider === provider && !r.source,
     );
+    if (
+      provider === "cursor" &&
+      expected.platform === "win32" &&
+      expected.appVersion === "0.2.0"
+    ) {
+      if (
+        row?.status !== "UNSUPPORTED" ||
+        row.reason !== "WINDOWS_CURSOR_IDE_DISABLED_0_2" ||
+        [
+          "disabledGateVerified",
+          "consentRefused",
+          "listRefused",
+          "noSnapshotCreated",
+          "sourceUnchanged",
+        ].some((key) => row[key] !== true)
+      )
+        problems.push(
+          "Windows Cursor database must be explicitly disabled with verified refusal and no snapshot",
+        );
+      continue;
+    }
     if (
       row?.status !== "PASS" ||
       [
@@ -360,7 +384,11 @@ async function main() {
       appVersion: version,
     }),
   );
-  if (process.platform === "win32") {
+  if (process.platform === "win32" && version === "0.2.0") {
+    console.log(
+      "UNSUPPORTED: Windows Cursor IDE database reading is disabled in 0.2.0; verified refusal and explicit transcript reading are required above. ACL research is not release acceptance.",
+    );
+  } else if (process.platform === "win32") {
     const acl = JSON.parse(
       await fs.readFile(
         path.join(

@@ -12,6 +12,10 @@ import type {
 } from "../shared/conversations";
 import ConversationMessageView from "./conversations/ConversationMessage.vue";
 import {
+  conversationScope,
+  conversationPlatformLimit,
+} from "./release-support";
+import {
   dateBoundary,
   formatConversationSize,
   formatConversationTime,
@@ -693,7 +697,9 @@ onUnmounted(() => {
       <div>
         <div class="conversation-eyebrow">LOCAL CONVERSATIONS</div>
         <h1 id="conversation-workspace-title" tabindex="-1">对话管理</h1>
-        <p>找到一段对话，读清上下文，再决定如何整理。</p>
+        <p data-testid="conversation-release-scope">
+          {{ conversationScope[context.provider] }}
+        </p>
       </div>
       <div class="conversation-heading-actions">
         <span v-if="context.demo" class="demo-pill">合成演示数据</span
@@ -706,6 +712,19 @@ onUnmounted(() => {
         </button>
       </div>
     </header>
+    <p
+      class="conversation-feedback"
+      role="note"
+      data-testid="conversation-platform-limit"
+    >
+      {{
+        conversationPlatformLimit(
+          context.provider,
+          context.platform,
+          !!access?.readOnlySource,
+        )
+      }}
+    </p>
     <div v-if="error" class="conversation-feedback is-warning" role="alert">
       <span>{{ error }}</span
       ><button class="text-button" @click="error = ''">关闭提示</button>
@@ -789,9 +808,12 @@ onUnmounted(() => {
       v-else-if="!contentAllowed"
       class="conversation-onboarding conversation-consent"
       data-testid="conversation-consent"
+      tabindex="0"
+      role="region"
+      aria-labelledby="conversation-consent-heading"
     >
       <div class="conversation-empty-symbol" aria-hidden="true">◎</div>
-      <h2>只在本机，读懂你的对话</h2>
+      <h2 id="conversation-consent-heading">只在本机，读懂你的对话</h2>
       <p>
         列表、内容搜索与正文预览需要读取所选目录中的对话记录。标题、项目、消息和工具结果可能包含敏感信息。
       </p>
