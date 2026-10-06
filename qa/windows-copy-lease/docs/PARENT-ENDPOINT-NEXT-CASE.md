@@ -1,0 +1,9 @@
+# Owned parent-exit / retained-endpoint fixture plan
+
+This case is still NOT_IMPLEMENTED and cannot be counted as native acceptance. It is a concrete next test, not a request to alter accounts, privileges, ACLs or system settings.
+
+Use a fixed-source generated-fixture coordinator with three bounded owned roles: supervisor, pipe-creator actor and endpoint keeper. The actor creates the request pipe, launches only the exact pinned lease helper, and is the actual OS pipe-server caller bound by the helper. After READY, duplicate only the actor's request-write endpoint into the keeper, using ordinary DuplicateHandle rights on the already-owned child process; the keeper holds it open without writing. Transfer a query/synchronization-only helper process handle to the supervisor through a bounded inherited-handle channel so cleanup/proof never depends on an arbitrary PID.
+
+Terminate or exit the owned pipe creator while the keeper remains live and its endpoint remains open. The supervisor must observe that the helper revokes/refuses and exits before the keeper closes that endpoint, proving parent-liveness handling rather than merely broken-pipe EOF. No generated source bytes are copied. Bound every role to a job/deadline, record actual process exit/handle closure, and preserve fixtures on uncertain teardown. The supervisor must not kill any process obtained from an untrusted numeric request.
+
+Require exact source/binary provenance, selective inherited handle lists and a fresh random fixture nonce. Do not open arbitrary processes, enable privileges, change impersonation/accounts/UAC, modify existing ACLs, launch unrecognized binaries, or inspect real provider data. This fixture needs independent source review and actual Windows validation before it closes the gate. Ordinary parent exit without a keeper is a separate simpler control, not a substitute for this case.

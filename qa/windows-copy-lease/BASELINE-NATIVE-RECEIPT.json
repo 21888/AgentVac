@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "profile": "same-caller-inherited-context-v1",
+  "status": "PARTIAL_INHERITED_FIXTURE_PASS",
+  "nativeWindows": "PARTIAL_ONLY",
+  "productionAccepted": false,
+  "privateCopyActivated": false,
+  "evidence": {
+    "sourceTreeSha256": "9aa841b040191b4e705aabfed6913b2f6d3b3d79a45daeda87a4824665eb088b",
+    "helperSha256": "62266b1d708bd469ff7e26f69abe9972e73f9a93a18bfbcba634213ba35ddaa9",
+    "fixtureBuild": "built",
+    "fixtureSha256": "736b7def0f81abe19057c9fefe5218ed88c91bf4645aa4e1216165e1ee9e9d86",
+    "compilerSha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+    "compilerVersion": "19.44.35229.0",
+    "sdkVersion": "10.0.26100.0",
+    "provenanceSha256": "2a3fae444d9007cfb6683d89a1e3457a0d8cd2b76b2038774590008966deda38",
+    "node": "v22.23.3",
+    "libuv": "1.51.0",
+    "nodeSha256": "9c9245166b4a8e182e0b797da9c20136117ff24368eaff1fec8343a123c8db0e",
+    "windowsRelease": "10.0.20348",
+    "architecture": "x64",
+    "fixtureConstructorInheritedElevated": true
+  },
+  "cases": [
+    {
+      "id": "reject-old-protocol",
+      "status": "PASS",
+      "expected": "invalid-request",
+      "actual": "invalid-request"
+    },
+    {
+      "id": "reject-reserved-field",
+      "status": "PASS",
+      "expected": "invalid-request",
+      "actual": "invalid-request"
+    },
+    {
+      "id": "reject-invalid-utf8",
+      "status": "PASS",
+      "expected": "invalid-request",
+      "actual": "invalid-request"
+    },
+    {
+      "id": "reject-oversize-frame",
+      "status": "PASS",
+      "expected": "invalid-request",
+      "actual": "invalid-request"
+    },
+    {
+      "id": "reject-truncated-frame",
+      "status": "PASS",
+      "expected": "invalid-request",
+      "actual": "invalid-request"
+    },
+    {
+      "id": "native-watchdog",
+      "status": "PASS",
+      "expected": "native-watchdog",
+      "actual": "native-watchdog"
+    },
+    {
+      "id": "cancel-waits-for-exit",
+      "status": "PASS",
+      "expected": "cancelled-and-exited",
+      "actual": "cancelled-and-exited"
+    },
+    {
+      "id": "private-initial-directory-acl",
+      "status": "PASS",
+      "expected": "verified-private",
+      "actual": "verified-private"
+    },
+    {
+      "id": "broad-initial-directory-acl",
+      "status": "PASS",
+      "expected": "acl-rejected",
+      "actual": "acl-rejected"
+    },
+    {
+      "id": "private-empty-file-acl",
+      "status": "PASS",
+      "expected": "verified-private",
+      "actual": "verified-private"
+    },
+    {
+      "id": "broad-empty-file-acl",
+      "status": "PASS",
+      "expected": "acl-rejected",
+      "actual": "acl-rejected"
+    },
+    {
+      "id": "private-directory-locality",
+      "status": "PASS",
+      "expected": "verified-local",
+      "actual": "verified-local"
+    },
+    {
+      "id": "missing-final-leaf",
+      "status": "PASS",
+      "expected": "verified-local",
+      "actual": "verified-local"
+    },
+    {
+      "id": "missing-intermediate",
+      "status": "PASS",
+      "expected": "locality-rejected",
+      "actual": "locality-rejected"
+    },
+    {
+      "id": "wrong-caller-pid",
+      "status": "PASS",
+      "expected": "caller-rejected",
+      "actual": "caller-rejected"
+    },
+    {
+      "id": "outside-scope-rejected-before-filesystem",
+      "status": "PASS",
+      "expected": "scope-rejected",
+      "actual": "scope-rejected"
+    },
+    {
+      "id": "scope-prefix-lookalike",
+      "status": "PASS",
+      "expected": "scope-rejected",
+      "actual": "scope-rejected"
+    },
+    {
+      "id": "held-empty-node-file-identity",
+      "status": "PASS",
+      "actual": "same-observed-empty-object"
+    }
+  ],
+  "unavailableNativeCases": [
+    "preexisting-enabled-backup-token",
+    "preexisting-enabled-restore-token",
+    "different-user-peer",
+    "thread-impersonation",
+    "system-service-identity",
+    "security-races",
+    "null-write-before-eof",
+    "pipe-creator-exit-duplicated-endpoint",
+    "syscall-traces",
+    "write-containment-lease"
+  ],
+  "generatedFixturesLeftForRunnerDisposal": true
+}

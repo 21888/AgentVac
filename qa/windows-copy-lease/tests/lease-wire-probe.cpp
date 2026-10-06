@@ -1,0 +1,3 @@
+#include "../include/lease-core.hpp"
+#include <iostream>
+int main(){std::vector<std::uint8_t> bytes;bytes.reserve(avm_lease::kMaxRequest+1);char c=0;while(std::cin.get(c)){if(bytes.size()>=avm_lease::kMaxRequest)return 2;bytes.push_back(static_cast<std::uint8_t>(c));}avm_lease::Request request;if(!avm_lease::parseRequest(bytes,request))return 2;avm_lease::Identity identity;identity.volume32=12;identity.fileIndex64=34;identity.links=1;identity.attributes=32;avm_lease::Reply reply{};if(!avm_lease::makeReply(avm_lease::Phase::Ready,request.nonce,avm::Code::Private,&identity,reply))return 3;std::cout.write(reinterpret_cast<const char*>(reply.data()),static_cast<std::streamsize>(reply.size()));return std::cout.good()?0:4;}
