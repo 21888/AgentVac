@@ -1,8 +1,8 @@
 {
   "format": "agentvac-source-sha256-v1",
-  "scope": "reconstructed-recovery-trash-native-validation-unreleased-one-shot",
+  "scope": "reconstructed-recovery-trash-native-validation-unreleased",
   "baseCommit": "da565af18cc4940777cafb2483247dd9647a6b56",
-  "sourceDigest": "4d831587886af52126d8ea17401ba2ea36e6983e6065b008e4964e0ae9f12148",
+  "sourceDigest": "4e9159b3e11619b85b8a942984247372ad68e337d95bc178fe2b02c9910912c6",
   "productionDigest": "260021d77224da299a7aa0ca9a69440c61a853965cb2a8fa8eeb60255397190b",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -16,8 +16,8 @@
     },
     {
       "path": ".github/workflows/native-desktop.yml",
-      "sha256": "d5e678a38f0f7bad60a843fe625e9b2dca379ca5958ce5daa8dcc5963ceceb97",
-      "bytes": 5492
+      "sha256": "a198595979debd518fe38b29e6b41d543a3edf8565e686713b6a40afde5e48b8",
+      "bytes": 5378
     },
     {
       "path": ".github/workflows/windows-copy-lease.yml",
@@ -2208,11 +2208,6 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
-    },
-    {
-      "path": ".github/native-recovery-validation-20261006T063142Z-d97ea61d.marker",
-      "sha256": "de2bb3300d250da716cb5a4234ed204c9b67621761385f951a22c1676f6f5dbd",
-      "bytes": 312
     }
   ]
 }
