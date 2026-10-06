@@ -3,9 +3,6 @@ name: AgentVac original-source Windows installer verification
 # Maintainers restore this manual workflow and remove only its dedicated marker
 # after the reviewed one-shot validation finishes.
 on:
-  push:
-    branches: [master]
-    paths: [".github/windows-setup-20261006T2232Z-589a5fd1.marker"]
   workflow_dispatch:
 
 permissions:
