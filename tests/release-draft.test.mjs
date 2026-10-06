@@ -167,15 +167,17 @@ test("source inventory checks every byte and refuses traversal, duplicates and l
 test("reviewed draft retarget binds exact empty draft, prior source and unchanged tag", () => {
   const release = {
     id: reviewedEmptyDraft.id,
-    tag_name: "v0.2.0",
+    tag_name: reviewedEmptyDraft.oldTag,
     draft: true,
     target_commitish: reviewedEmptyDraft.oldTarget,
     assets: [],
   };
   assert.deepEqual(reviewedRetargetPayload(release, sha, null, true), {
+    tag_name: "v0.2.0",
     target_commitish: sha,
   });
   assert.deepEqual(reviewedRetargetPayload(release, sha, sha, true), {
+    tag_name: "v0.2.0",
     target_commitish: sha,
   });
   for (const change of [

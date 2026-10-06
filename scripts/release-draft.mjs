@@ -10,7 +10,8 @@ const REPOSITORY = "21888/AgentVac";
 const TAG = "v0.2.0";
 export const reviewedEmptyDraft = Object.freeze({
   id: 405138314,
-  oldTarget: "157a7ca6981bfee04fedcadb85b6922df5bf50d5",
+  oldTarget: "8ccbaf20b84b87132a37d7f792b5eddc8d6718c2",
+  oldTag: "untagged-1fa330df1c815fd9bf60",
 });
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 export function validateDraft(release, revision) {
@@ -46,7 +47,9 @@ function findDraft() {
     Array.isArray(releases) && releases.length < 100,
     "Release inventory needs explicit pagination review",
   );
-  const matches = releases.filter((row) => row.tag_name === TAG);
+  const matches = releases.filter(
+    (row) => row.tag_name === TAG || row.id === reviewedEmptyDraft.id,
+  );
   assert.ok(matches.length <= 1, "Ambiguous release inventory");
   return matches[0];
 }
@@ -89,7 +92,7 @@ export function reviewedRetargetPayload(release, revision, tagTarget, enabled) {
   );
   assert.match(revision, /^[a-f0-9]{40}$/);
   assert.equal(release?.id, reviewedEmptyDraft.id);
-  assert.equal(release.tag_name, TAG);
+  assert.equal(release.tag_name, reviewedEmptyDraft.oldTag);
   assert.equal(release.draft, true);
   assert.equal(release.target_commitish, reviewedEmptyDraft.oldTarget);
   assert.ok(
@@ -97,7 +100,8 @@ export function reviewedRetargetPayload(release, revision, tagTarget, enabled) {
     "Only the reviewed empty draft can be retargeted",
   );
   requireTagTarget(tagTarget, revision);
-  return { target_commitish: revision };
+  // GitHub requires preserving tag_name on PATCH; omission can detach it.
+  return { tag_name: TAG, target_commitish: revision };
 }
 export function validateAssetName(name, platform, arch) {
   const prefix = `AgentVac-0.2.0-${platform}-${arch}`;
@@ -198,7 +202,7 @@ async function main() {
   if (process.argv[2] === "ensure") {
     const retargetEnabled =
       process.env.AGENTVAC_REVIEWED_EMPTY_DRAFT_RETARGET ===
-      "405138314:157a7ca6981bfee04fedcadb85b6922df5bf50d5";
+      "405138314:8ccbaf20b84b87132a37d7f792b5eddc8d6718c2:untagged-1fa330df1c815fd9bf60";
     let release = retargetEnabled
       ? JSON.parse(
           gh(["api", `repos/${REPOSITORY}/releases/${reviewedEmptyDraft.id}`]),
@@ -206,7 +210,11 @@ async function main() {
       : findDraft();
     const tagTarget = resolveReleaseTag();
     requireTagTarget(tagTarget, revision);
-    if (release && release.target_commitish !== revision && retargetEnabled) {
+    if (
+      release &&
+      (release.target_commitish !== revision || release.tag_name !== TAG) &&
+      retargetEnabled
+    ) {
       const payload = reviewedRetargetPayload(
         release,
         revision,

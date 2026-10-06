@@ -1,8 +1,8 @@
 {
   "format": "agentvac-source-sha256-v1",
   "scope": "limited-release-candidate-unpublished",
-  "baseCommit": "e94e23eafd3f98c78dab12c5c8343ac8a230a3f1",
-  "sourceDigest": "5575c139da270b54214d74f3880f25f156350941ff6fd455613c911d562419f1",
+  "baseCommit": "ad529d22c67ce34b0526a40d9458f2722acc7c56",
+  "sourceDigest": "cb3ee4e46cc06bf6fdf15361539f72867dd5e8096a3029ea5b4a56d3646ad2ea",
   "productionDigest": "078042cfa25d9bf0a8a9a16961e0536cc0a75ef67b644382f00bd0332ded841d",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -26,8 +26,8 @@
     },
     {
       "path": ".github/workflows/release-candidate.yml",
-      "sha256": "a07288688d177845d95b9d49b2a75ff735ba3fdc8bce4a45c75e76cb673c94a8",
-      "bytes": 10582
+      "sha256": "03fae8fa03f0417d15ababfbc4498408cc02aa60bcf11c28e56b88ccb6dbdb78",
+      "bytes": 10715
     },
     {
       "path": ".github/workflows/windows-copy-lease.yml",
@@ -1956,8 +1956,8 @@
     },
     {
       "path": "scripts/release-draft.mjs",
-      "sha256": "f1143b667c78926f20dfa5c79925646317ab778adb175bafa8f96e28eecc5dc6",
-      "bytes": 11717
+      "sha256": "c22c00deefad41ef7107b6917d7d793529c7010fc83e959f509ec8a34e53adbd",
+      "bytes": 12001
     },
     {
       "path": "scripts/release-package-smoke.mjs",
@@ -2396,8 +2396,8 @@
     },
     {
       "path": "tests/release-draft.test.mjs",
-      "sha256": "29b283120524d6dcbbf372616d22026bc28a39a9bc5cf98c77b12e9a74bb13c7",
-      "bytes": 7210
+      "sha256": "b28a201614833a48862287d8a55b753cd8b039171066c1c18613a5f111826547",
+      "bytes": 7275
     },
     {
       "path": "tests/release-package-smoke.test.mjs",
@@ -2503,6 +2503,11 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
+    },
+    {
+      "path": ".github/release-candidate-20261006T2147Z-e211aa74.marker",
+      "sha256": "17e4332897f593b9589b7d8029ee8fdde1650e6a0bc87925e807f3aecd525f91",
+      "bytes": 201
     }
   ]
 }
