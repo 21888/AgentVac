@@ -1,4 +1,6 @@
 import { trashFixture } from "./helpers/trash.js";
+import { installSyntheticSafeFileIds } from "./helpers/synthetic-safe-file-ids.js";
+import { ReplacementInjection } from "./helpers/replacement-injection.js";
 // Generated-fixture regressions preserved from the independent review.
 // Replayed here by the implementation owner; this is not a completed independent review.
 import { test, type TestContext } from "node:test";
@@ -28,11 +30,17 @@ const attempt = async (fn: () => Promise<any>) => {
     return { error };
   }
 };
-async function fixture(t: TestContext, unit = false, count = 1) {
+async function fixture(
+  t: TestContext,
+  unit = false,
+  count = 1,
+  safeIds = false,
+) {
   const base = await fs.mkdtemp(
     path.join(await fs.realpath(os.tmpdir()), "agentvac-receipt-review-"),
   );
   t.after(() => fs.rm(base, { recursive: true, force: true }));
+  if (safeIds) installSyntheticSafeFileIds(t, base);
   const root = path.join(base, unit ? "Cursor" : "Codex");
   const key = randomBytes(32),
     adapter = unit ? cursorAdapter : codexAdapter;
@@ -230,8 +238,8 @@ for (const action of ["cancel", "invalidate"]) {
   }
 
   for (const version of [1, 2, 3, 4]) {
-    test(`${action} after linking storage v${version} preserves original key under rotation and retry`, async (t) => {
-      const f = await fixture(t),
+    test(`${action} after linking storage v${version}${version < 4 ? " with synthetic safe IDs" : ""} preserves original key under rotation and retry`, async (t) => {
+      const f = await fixture(t, false, 1, version < 4),
         rotated = randomBytes(32),
         saved = f.saved;
       saved.journal.version = version;
@@ -354,20 +362,26 @@ test("checkpoint refuses a substituted temporary file before replacing the authe
 test("receipt cleanup preserves replacement temporary after pending write failure and invalidation", async (t) => {
   const f = await fixture(t),
     e = f.engine(),
-    open = fs.open;
-  let replacementTemp = "",
-    hit = false;
+    open = fs.open,
+    injection = new ReplacementInjection();
+  let replacementTemp = "";
   const mock = t.mock.method(fs, "open", async (...args: any[]) => {
     const h = await (open as any)(...args);
     if (String(args[0]).endsWith(".receipt.tmp")) {
       const write = h.writeFile.bind(h);
       h.writeFile = async (...writeArgs: any[]) => {
         await write(...writeArgs);
-        hit = true;
         replacementTemp = String(args[0]);
-        await fs.rename(f.q, f.q + "-preserved");
-        await fs.mkdir(f.q);
-        await fs.writeFile(replacementTemp, "replacement temporary sentinel");
+        await injection.run(
+          () => fs.rename(f.q, f.q + "-preserved"),
+          async () => {
+            await fs.mkdir(f.q);
+            await fs.writeFile(
+              replacementTemp,
+              "replacement temporary sentinel",
+            );
+          },
+        );
         e.invalidate();
         throw new Error("synthetic failure of pending receipt write");
       };
@@ -381,13 +395,15 @@ test("receipt cleanup preserves replacement temporary after pending write failur
     );
   } finally {
     mock.mock.restore();
+    injection.diagnose(t);
   }
-  assert.equal(hit, true);
+  injection.assertInstalled();
   assert.equal(result.completed, 1);
   assert.equal(result.failed.length, 1);
-  assert.equal(
-    await fs.readFile(replacementTemp, "utf8"),
+  await injection.assertSentinel(
+    replacementTemp,
     "replacement temporary sentinel",
+    "temporary",
   );
 });
 
@@ -445,7 +461,8 @@ for (const replacement of ["root", "quarantine", "batch", "manifest"]) {
   test(`checkpoint pending write refuses replaced ${replacement} without overwriting replacement`, async (t) => {
     const f = await fixture(t),
       e = f.engine(),
-      open = fs.open;
+      open = fs.open,
+      injection = new ReplacementInjection();
     const target =
       replacement === "root"
         ? f.root
@@ -455,8 +472,7 @@ for (const replacement of ["root", "quarantine", "batch", "manifest"]) {
             ? f.dir
             : f.manifest;
     const preserved = target + "-preserved";
-    let writes = 0,
-      hit = false;
+    let writes = 0;
     const mock = t.mock.method(fs, "open", async (...args: any[]) => {
       const h = await (open as any)(...args);
       if (
@@ -467,94 +483,13 @@ for (const replacement of ["root", "quarantine", "batch", "manifest"]) {
         h.writeFile = async (...writeArgs: any[]) => {
           await write(...writeArgs);
           if (++writes === 2) {
-            hit = true;
-            await fs.rename(target, preserved);
-            if (replacement !== "manifest")
-              await fs.mkdir(path.dirname(f.manifest), { recursive: true });
-            await fs.writeFile(f.manifest, "replacement sentinel");
-            e.invalidate();
-          }
-        };
-      }
-      return h;
-    });
-    let first;
-    try {
-      first = await attempt(() => e.restore(f.id, true));
-    } finally {
-      mock.mock.restore();
-    }
-    assert.equal(hit, true);
-    assert.ok(first.error);
-    assert.equal(await fs.readFile(f.manifest, "utf8"), "replacement sentinel");
-  });
-}
-
-test("receipt write refuses a quarantine parent replaced while the write is pending", async (t) => {
-  const f = await fixture(t),
-    e = f.engine(),
-    open = fs.open;
-  const preserved = f.q + "-preserved",
-    receipt = path.join(f.q, f.id + ".receipt.json");
-  let hit = false;
-  const mock = t.mock.method(fs, "open", async (...args: any[]) => {
-    const h = await (open as any)(...args);
-    if (String(args[0]).endsWith(".receipt.tmp")) {
-      const write = h.writeFile.bind(h);
-      h.writeFile = async (...writeArgs: any[]) => {
-        await write(...writeArgs);
-        hit = true;
-        await fs.rename(f.q, preserved);
-        await fs.mkdir(f.q);
-        await fs.writeFile(receipt, "replacement receipt sentinel");
-        await fs.writeFile(String(args[0]), "replacement temporary sentinel");
-        e.invalidate();
-      };
-    }
-    return h;
-  });
-  let result;
-  try {
-    result = await trashFixture(e, f.id, true, true, async (dir) =>
-      fs.rename(dir, path.join(f.base, "fake-os-trash")),
-    );
-  } finally {
-    mock.mock.restore();
-  }
-  assert.equal(hit, true);
-  assert.equal(
-    await fs.readFile(receipt, "utf8"),
-    "replacement receipt sentinel",
-  );
-  assert.equal(result.failed.length, 1);
-});
-
-for (const checkpoint of [false, true]) {
-  test(`${checkpoint ? "checkpoint" : "initial"} journal cleanup preserves a replacement temporary file after invalidation`, async (t) => {
-    const f = await fixture(t),
-      e = f.engine(),
-      open = fs.open;
-    let writes = 0,
-      hit = false,
-      replacementTemp = "";
-    const mock = t.mock.method(fs, "open", async (...args: any[]) => {
-      const h = await (open as any)(...args);
-      if (
-        String(args[0]).endsWith(".tmp") &&
-        String(args[0]).startsWith(f.dir)
-      ) {
-        const write = h.writeFile.bind(h);
-        h.writeFile = async (...writeArgs: any[]) => {
-          await write(...writeArgs);
-          if (++writes === (checkpoint ? 2 : 1)) {
-            hit = true;
-            replacementTemp = String(args[0]);
-            await fs.rename(f.dir, f.dir + "-preserved");
-            await fs.mkdir(f.dir);
-            await fs.writeFile(f.manifest, "replacement manifest sentinel");
-            await fs.writeFile(
-              replacementTemp,
-              "replacement temporary sentinel",
+            await injection.run(
+              () => fs.rename(target, preserved),
+              async () => {
+                if (replacement !== "manifest")
+                  await fs.mkdir(path.dirname(f.manifest), { recursive: true });
+                await fs.writeFile(f.manifest, "replacement sentinel");
+              },
             );
             e.invalidate();
           }
@@ -567,16 +502,120 @@ for (const checkpoint of [false, true]) {
       first = await attempt(() => e.restore(f.id, true));
     } finally {
       mock.mock.restore();
+      injection.diagnose(t);
     }
-    assert.equal(hit, true);
+    injection.assertInstalled();
     assert.ok(first.error);
-    assert.equal(
-      await fs.readFile(f.manifest, "utf8"),
-      "replacement manifest sentinel",
+    await injection.assertSentinel(
+      f.manifest,
+      "replacement sentinel",
+      "manifest",
     );
-    assert.equal(
-      await fs.readFile(replacementTemp, "utf8"),
+  });
+}
+
+test("receipt write refuses a quarantine parent replaced while the write is pending", async (t) => {
+  const f = await fixture(t),
+    e = f.engine(),
+    open = fs.open,
+    injection = new ReplacementInjection();
+  const preserved = f.q + "-preserved",
+    receipt = path.join(f.q, f.id + ".receipt.json");
+  const mock = t.mock.method(fs, "open", async (...args: any[]) => {
+    const h = await (open as any)(...args);
+    if (String(args[0]).endsWith(".receipt.tmp")) {
+      const write = h.writeFile.bind(h);
+      h.writeFile = async (...writeArgs: any[]) => {
+        await write(...writeArgs);
+        await injection.run(
+          () => fs.rename(f.q, preserved),
+          async () => {
+            await fs.mkdir(f.q);
+            await fs.writeFile(receipt, "replacement receipt sentinel");
+            await fs.writeFile(
+              String(args[0]),
+              "replacement temporary sentinel",
+            );
+          },
+        );
+        e.invalidate();
+      };
+    }
+    return h;
+  });
+  let result;
+  try {
+    result = await trashFixture(e, f.id, true, true, async (dir) =>
+      fs.rename(dir, path.join(f.base, "fake-os-trash")),
+    );
+  } finally {
+    mock.mock.restore();
+    injection.diagnose(t);
+  }
+  injection.assertInstalled();
+  assert.equal(result.completed, 1);
+  assert.equal(result.failed.length, 1);
+  await injection.assertSentinel(
+    receipt,
+    "replacement receipt sentinel",
+    "receipt",
+  );
+});
+
+for (const checkpoint of [false, true]) {
+  test(`${checkpoint ? "checkpoint" : "initial"} journal cleanup preserves a replacement temporary file after invalidation`, async (t) => {
+    const f = await fixture(t),
+      e = f.engine(),
+      open = fs.open,
+      injection = new ReplacementInjection();
+    let writes = 0,
+      replacementTemp = "";
+    const mock = t.mock.method(fs, "open", async (...args: any[]) => {
+      const h = await (open as any)(...args);
+      if (
+        String(args[0]).endsWith(".tmp") &&
+        String(args[0]).startsWith(f.dir)
+      ) {
+        const write = h.writeFile.bind(h);
+        h.writeFile = async (...writeArgs: any[]) => {
+          await write(...writeArgs);
+          if (++writes === (checkpoint ? 2 : 1)) {
+            replacementTemp = String(args[0]);
+            await injection.run(
+              () => fs.rename(f.dir, f.dir + "-preserved"),
+              async () => {
+                await fs.mkdir(f.dir);
+                await fs.writeFile(f.manifest, "replacement manifest sentinel");
+                await fs.writeFile(
+                  replacementTemp,
+                  "replacement temporary sentinel",
+                );
+              },
+            );
+            e.invalidate();
+          }
+        };
+      }
+      return h;
+    });
+    let first;
+    try {
+      first = await attempt(() => e.restore(f.id, true));
+    } finally {
+      mock.mock.restore();
+      injection.diagnose(t);
+    }
+    injection.assertInstalled();
+    assert.ok(first.error);
+    await injection.assertSentinel(
+      f.manifest,
+      "replacement manifest sentinel",
+      "manifest",
+    );
+    await injection.assertSentinel(
+      replacementTemp,
       "replacement temporary sentinel",
+      "temporary",
     );
   });
 }

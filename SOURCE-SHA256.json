@@ -1,8 +1,8 @@
 {
   "format": "agentvac-source-sha256-v1",
-  "scope": "reconstructed-recovery-trash-native-validation-unreleased",
-  "baseCommit": "da565af18cc4940777cafb2483247dd9647a6b56",
-  "sourceDigest": "4e9159b3e11619b85b8a942984247372ad68e337d95bc178fe2b02c9910912c6",
+  "scope": "bounded-platform-diagnostics-unreleased",
+  "baseCommit": "4783d2a027d8be72d757985b98d1072940d49812",
+  "sourceDigest": "67c2f284a8d6f44488b59f3fdf4de7f93334b320a8b4eaa5dbfab9391c40397f",
   "productionDigest": "260021d77224da299a7aa0ca9a69440c61a853965cb2a8fa8eeb60255397190b",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -1676,8 +1676,8 @@
     },
     {
       "path": "scripts/desktop-e2e.mjs",
-      "sha256": "c74f4f390ee618e59988ee4187da9dd8b183f9f7f19a5658264576c4e5e80b6a",
-      "bytes": 50756
+      "sha256": "e637086794702db370f6ad352e6ec8231b02808f80166ad8038f21c0e8fc6f2d",
+      "bytes": 51098
     },
     {
       "path": "scripts/dev.mjs",
@@ -1736,8 +1736,8 @@
     },
     {
       "path": "scripts/native-provider-regression.mjs",
-      "sha256": "ca29ffc4d514cec3fcd5d95a0b9b4b56593673c0902b79ee011c5e161b268fd8",
-      "bytes": 11930
+      "sha256": "830ac3906d2e5e615c922305614b7276c3b1b712d739484244755c2393abda6c",
+      "bytes": 12534
     },
     {
       "path": "scripts/native-unit-durability.mjs",
@@ -2026,8 +2026,8 @@
     },
     {
       "path": "tests/journal-v4-recovery.test.ts",
-      "sha256": "f2a4618e5b94aeaa49970a3c741ba5ff2ec494e2027a00bf551cac08c7ceabe4",
-      "bytes": 20002
+      "sha256": "772062cc58581359211f9f84deba72e4f55dceaafb10d1db1e520a1286a9f8cd",
+      "bytes": 22246
     },
     {
       "path": "tests/linux-process-argv-host.test.ts",
@@ -2046,8 +2046,8 @@
     },
     {
       "path": "tests/mutation-receipt-ownership.test.ts",
-      "sha256": "140f9f98f6b9f9b33cc4ca99af841efd9bda0e08d861b3a4072d8003e37eada1",
-      "bytes": 23309
+      "sha256": "ba1cd32cf26b65451e8b443081cad1c241a6ec2a6982f5ed4ef067cd31219d4b",
+      "bytes": 24354
     },
     {
       "path": "tests/native-ci-summary.test.ts",
@@ -2208,6 +2208,221 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
+    },
+    {
+      "path": ".github/workflows/platform-diagnostics.yml",
+      "sha256": "f4babdb7709e90a0dc2d52f9f39db8aa2e38dc775a98243a03f7cdf894a28bfe",
+      "bytes": 7066
+    },
+    {
+      "path": "docs/PLATFORM-DIAGNOSTICS.md",
+      "sha256": "e636d42fe70c2f7c3c0492be5796394e0c39c5da028598be1693b2fb9fd3e9c1",
+      "bytes": 3502
+    },
+    {
+      "path": "qa/platform-diagnostics/report-stages.mjs",
+      "sha256": "9f9c24b64284a86a8a33666ef9c907fa442df915ac60845107ea9412d862951c",
+      "bytes": 2382
+    },
+    {
+      "path": "qa/platform-diagnostics/report-stages.test.mjs",
+      "sha256": "703ebebc7845f3d07dafc998c747189f6f9535bcd8b95ab942c9a7d9ae2f979e",
+      "bytes": 2362
+    },
+    {
+      "path": "qa/platform-diagnostics/verify-source.mjs",
+      "sha256": "f36c5c1415618fe84bf634cbec139bdec4e326ee8cfc2e19c121b24579c3ef07",
+      "bytes": 4779
+    },
+    {
+      "path": "qa/process-observation/core-observer.patch",
+      "sha256": "001843d05cef09d8cc9ac82e84b7f6f20ae7c8cabf2e4150865e1d76a0f7645a",
+      "bytes": 43717
+    },
+    {
+      "path": "qa/process-observation/core.mjs",
+      "sha256": "25a11424ab6a6d96e9f8e16aa4d276f14ab9d84f1d01ba813694e594b55dbb49",
+      "bytes": 18015
+    },
+    {
+      "path": "qa/process-observation/observer-overlay.patch",
+      "sha256": "2a0bfb2e87ed6fdee0bd589b83a10b06713e00759f7002867e9a1c4ecf55cef3",
+      "bytes": 86355
+    },
+    {
+      "path": "qa/process-observation/overlay/electron/main.ts",
+      "sha256": "88e3430a76857f5f5f727c5dd8a5f49225717bb331c91b223536b53c70e79356",
+      "bytes": 20040
+    },
+    {
+      "path": "qa/process-observation/overlay/electron/process-observations.ts",
+      "sha256": "a089e64d293984bcf7f269b486acc5ff42b55dc79ff91202122da6a48a172a79",
+      "bytes": 6721
+    },
+    {
+      "path": "qa/process-observation/overlay/electron/processes.ts",
+      "sha256": "cc9c99fa15874e1ccbcd467af29ab4bac30c18fcb082e8b0ed71486168a4afa9",
+      "bytes": 21543
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/build-native-provider-harness.mjs",
+      "sha256": "78d15c6542368a786f64aa6e3a2c98845319b344bc4c507c24d831876aba6934",
+      "bytes": 2888
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/desktop-e2e.mjs",
+      "sha256": "b87acf49011efbc6ef8b2ad74c16d2cb38dda55f0361c1246e460a0183a13e9f",
+      "bytes": 52783
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/native-driver-provenance.mjs",
+      "sha256": "ec46d61815a38b113fcc43d502612384e75e7ad4d200bdb15799649f3cf47b67",
+      "bytes": 3550
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/native-process-diagnostics.d.mts",
+      "sha256": "bbbb21aafb4c87c97d65e4eac9f92ec82dbba7afacb6fbc12e58767595796254",
+      "bytes": 1429
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/native-process-diagnostics.mjs",
+      "sha256": "e25a2a0cf4bef4488dc785933e217e457e3f6d039154af03dcbc56a0a387c640",
+      "bytes": 5493
+    },
+    {
+      "path": "qa/process-observation/overlay/scripts/native-provider-regression.mjs",
+      "sha256": "09d3e7eed9ad2407a96cd0135ff7909c1e176f5549635871da92c33effe2ddea",
+      "bytes": 13512
+    },
+    {
+      "path": "qa/process-observation/overlay/tests/helpers/process-observation-child.ts",
+      "sha256": "391c748a0abcd3213ad212d0d1eee9f7e47ea7bedb6b1a5cccb89255df8d18e0",
+      "bytes": 6631
+    },
+    {
+      "path": "qa/process-observation/overlay/tests/native-process-diagnostics.test.ts",
+      "sha256": "e2873b0813b314aee785466ef7a888bc1efaeb70aefa4a420d84f51c8be5c830",
+      "bytes": 10769
+    },
+    {
+      "path": "qa/process-observation/overlay/tests/native-provider-observation.test.mjs",
+      "sha256": "10e752b620201eaca10616a68c4a22a8f28fc8a29cc0097b4a1ea51b0e57ed97",
+      "bytes": 14877
+    },
+    {
+      "path": "qa/process-observation/overlay/tests/process-observations.test.ts",
+      "sha256": "75c2a4a99135a4622d6418745108910204df1d76ee320e05cb54364ddf249fa5",
+      "bytes": 13135
+    },
+    {
+      "path": "qa/process-observation/prepare.mjs",
+      "sha256": "255e81fd551a9d346fbb1e330ca202408e713dc436a85c060ae34db761a544d4",
+      "bytes": 1137
+    },
+    {
+      "path": "qa/process-observation/README.md",
+      "sha256": "c11bc084f8c85843d3d18952cb078819613dcd1d97c74ae1cedaf511b541d576",
+      "bytes": 4337
+    },
+    {
+      "path": "qa/process-observation/source-pins.json",
+      "sha256": "49f5cce3cccdc09e12abc2da9d6d2bb3ca64b9e386a934f36edd2eec30460801",
+      "bytes": 35513
+    },
+    {
+      "path": "qa/process-observation/tests/package.test.mjs",
+      "sha256": "701842dc74eb056553475554dfee2d3c72035b72bafb5031baf2e4cb653976aa",
+      "bytes": 12965
+    },
+    {
+      "path": "qa/process-observation/verify.mjs",
+      "sha256": "28c92b68359dad6a74c880ad7d7828e0112cbff6807e54edaa9225802cdda4df",
+      "bytes": 752
+    },
+    {
+      "path": "qa/windows-acl-startup/artifact-lock.json",
+      "sha256": "46c62885c53fb086289a336ab794d7d618609510ce0c1946d799df5b22ef793e",
+      "bytes": 869
+    },
+    {
+      "path": "qa/windows-acl-startup/observer.mjs",
+      "sha256": "30fa68c26126e6ee8dea9665199b67f74450962fb88bbc7870edc361748f5b31",
+      "bytes": 14154
+    },
+    {
+      "path": "qa/windows-acl-startup/pins.mjs",
+      "sha256": "7f06170dee733007873460f8a8a2e9bdc80f1b11703ce17710f53d151ef8d463",
+      "bytes": 2379
+    },
+    {
+      "path": "qa/windows-acl-startup/prepare.mjs",
+      "sha256": "0e60588d3543305c7eca6fff243cc2dec23bbc95abbd1942544e1242ec137293",
+      "bytes": 3748
+    },
+    {
+      "path": "qa/windows-acl-startup/README.md",
+      "sha256": "82c781c7c3d876bea4ef2ee604743e111e0d060176982fa0f5e56fd72f2c9a83",
+      "bytes": 9112
+    },
+    {
+      "path": "qa/windows-acl-startup/run.mjs",
+      "sha256": "dfb0ced30dd7db208eeb17f265d531eb6743dc487bba1dc9fac52953ee6fac5a",
+      "bytes": 8725
+    },
+    {
+      "path": "qa/windows-acl-startup/source-lock.json",
+      "sha256": "0a0617d25f7a6a51bc2b6cf84e0e5c0ef821a3fd74b7b3346e5b5cfea9adc03d",
+      "bytes": 741
+    },
+    {
+      "path": "qa/windows-acl-startup/tests.mjs",
+      "sha256": "55f5fd111ca87482972f6475c8ec95f7255e58969700236acd77847e36f926c0",
+      "bytes": 32267
+    },
+    {
+      "path": "scripts/native-mutation-observation.mjs",
+      "sha256": "ae4f86ab4c720dee9d6aa142b8babddbd66406c8bf31df7603c0457bffe312be",
+      "bytes": 11978
+    },
+    {
+      "path": "tests/helpers/replacement-injection.ts",
+      "sha256": "6d1c21709247809a6c26d64d8d19abe33abb34aa0b81ac366c2ab5adeaaf28d0",
+      "bytes": 3456
+    },
+    {
+      "path": "tests/helpers/synthetic-safe-file-ids.ts",
+      "sha256": "b81dbbabc92a7c8592e7297f8b7e3bec5514398aad6e67556ad08b531c92500b",
+      "bytes": 3809
+    },
+    {
+      "path": "tests/native-mutation-observation-bounds.test.mjs",
+      "sha256": "78bc7fa520787d054f1b8ce8044157138c1375837b60df73651aedf88eb798bf",
+      "bytes": 10281
+    },
+    {
+      "path": "tests/native-mutation-observation.test.mjs",
+      "sha256": "8f52ffde6388fb8e3964fdc3fc84b5223f0b68d617485594c71485434843b7eb",
+      "bytes": 9555
+    },
+    {
+      "path": "tests/native-provider-observation.test.mjs",
+      "sha256": "3a5eb82f9c2134be2d2850fea0bac6a426f4c2168c96e1008a9af1033de0a5d7",
+      "bytes": 14820
+    },
+    {
+      "path": "tests/replacement-injection.test.ts",
+      "sha256": "af0d5947447ee2537a3d301b51c6e5ff308ce6c76de00914735da601a52eab76",
+      "bytes": 9936
+    },
+    {
+      "path": "tests/synthetic-safe-file-ids.test.ts",
+      "sha256": "697ae56fe54dff192e07cf96278451c3e517c923fe181f73a9490938baf7c0ec",
+      "bytes": 3643
+    },
+    {
+      "path": ".github/platform-diagnostic-20261006T0739Z-54a22a01.marker",
+      "sha256": "55a85a059c7bece173e3f586cc12af561517893ede95d9c8936ea7aa509185b6",
+      "bytes": 121
     }
   ]
 }

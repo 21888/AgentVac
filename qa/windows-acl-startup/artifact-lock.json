@@ -1,0 +1,29 @@
+{
+  "format": "agentvac-acl-startup-artifacts-v1",
+  "files": {
+    "source-lock.json": {
+      "sha256": "0a0617d25f7a6a51bc2b6cf84e0e5c0ef821a3fd74b7b3346e5b5cfea9adc03d",
+      "bytes": 741
+    },
+    "pins.mjs": {
+      "sha256": "7f06170dee733007873460f8a8a2e9bdc80f1b11703ce17710f53d151ef8d463",
+      "bytes": 2379
+    },
+    "observer.mjs": {
+      "sha256": "30fa68c26126e6ee8dea9665199b67f74450962fb88bbc7870edc361748f5b31",
+      "bytes": 14154
+    },
+    "run.mjs": {
+      "sha256": "dfb0ced30dd7db208eeb17f265d531eb6743dc487bba1dc9fac52953ee6fac5a",
+      "bytes": 8725
+    },
+    "prepare.mjs": {
+      "sha256": "0e60588d3543305c7eca6fff243cc2dec23bbc95abbd1942544e1242ec137293",
+      "bytes": 3748
+    },
+    "helper.observed.mjs": {
+      "sha256": "1aedcba191975457a31a031101d671c0b6f4d1170c73a3f0f764c68fa79541da",
+      "bytes": 16947
+    }
+  }
+}

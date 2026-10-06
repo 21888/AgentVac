@@ -1,0 +1,1347 @@
+--- a/electron/main.ts
++++ b/electron/main.ts
+@@ -29,6 +29,10 @@
+ import { shutdownDiagnosticWorkers } from "./diagnostics.js";
+ import { shutdownLinuxArgumentObservationWorkers } from "./process-argv-linux/host.js";
+ import { PreferenceStore } from "./preferences.js";
++import {
++  createProcessObservationSink,
++  processObservationProfileEnabled,
++} from "./process-observations.js";
+ import {
+   checkCodexProcesses,
+   checkProviderProcesses,
+@@ -142,6 +146,21 @@
+     const profile = app.getPath("userData");
+     const isolatedTest =
+       !app.isPackaged && !!process.env.AGENTVAC_TEST_USER_DATA;
++    const processObservations = (await processObservationProfileEnabled({
++      packaged: app.isPackaged,
++      optIn: process.env.AGENTVAC_TEST_PROCESS_OBSERVATIONS,
++      testUserData: process.env.AGENTVAC_TEST_USER_DATA,
++      profile,
++    }))
++      ? createProcessObservationSink()
++      : undefined;
++    if (processObservations)
++      Object.defineProperty(globalThis, "__agentvacReadProcessObservations", {
++        value: () => processObservations.read(),
++        writable: false,
++        configurable: false,
++        enumerable: false,
++      });
+     services = new AppDataServices(profile, {
+       home: isolatedTest ? profile : os.homedir(),
+       env: isolatedTest
+@@ -159,7 +178,10 @@
+             VSCODE_PORTABLE: process.env.VSCODE_PORTABLE,
+           },
+       cwd: isolatedTest ? profile : process.cwd(),
+-      processCheck: checkCodexProcesses,
++      processCheck: () =>
++        checkCodexProcesses(
++          processObservations?.begin("codex", operationName || "startup"),
++        ),
+       providerProcessCheck: (provider) =>
+         checkProviderProcesses(
+           provider,
+@@ -171,6 +193,7 @@
+               process.platform,
+             ),
+           },
++          processObservations?.begin(provider, operationName || "startup"),
+         ),
+       trashItem: (directory) => shell.trashItem(directory),
+     });
+--- /dev/null
++++ b/electron/process-observations.ts
+@@ -0,0 +1,234 @@
++import path from "node:path";
++import { constants, promises as fs } from "node:fs";
++import type { ProviderId } from "../shared/types.js";
++
++const stages = [
++  "windows-enumeration",
++  "windows-parse",
++  "posix-names",
++  "posix-commands",
++  "posix-parse-names",
++  "posix-parse-commands",
++  "posix-reconcile",
++  "linux-arguments",
++  "snapshot",
++  "stable-attempt",
++  "stable-result",
++  "provider-result",
++] as const;
++const outcomes = [
++  "complete",
++  "incomplete",
++  "invalid-data",
++  "unsupported",
++  "command-failed",
++  "command-terminated",
++  "timeout",
++  "cancelled",
++  "truncated",
++  "clear",
++  "running",
++  "unknown",
++] as const;
++const operations = [
++  "preview",
++  "quarantine",
++  "restore",
++  "prepare-trash",
++  "trash",
++  "diagnose-storage",
++  "scan",
++  "startup",
++  "other",
++] as const;
++const counts = [
++  "elapsedMs",
++  "bytes",
++  "rows",
++  "namesRows",
++  "commandRows",
++  "missingRows",
++  "extraRows",
++  "parentChanges",
++  "stateChanges",
++  "attempt",
++  "attempts",
++  "verifiedRows",
++  "unavailableRows",
++  "truncatedRows",
++] as const;
++const flags = ["complete", "timeout", "truncated", "cancelled"] as const;
++export type ProcessInspectionObservation = {
++  stage: (typeof stages)[number];
++  outcome: (typeof outcomes)[number];
++} & Partial<Record<(typeof counts)[number], number>> &
++  Partial<Record<(typeof flags)[number], boolean>>;
++export type ProcessInspectionObserver = (
++  event: ProcessInspectionObservation,
++) => void;
++type RetainedObservation = ProcessInspectionObservation & {
++  call: number;
++  provider: ProviderId;
++  operation: (typeof operations)[number];
++};
++
++/** Copy only fixed enums, booleans and bounded counters. No free text crosses this boundary. */
++export function sanitizeProcessObservation(
++  value: ProcessInspectionObservation,
++): ProcessInspectionObservation | undefined {
++  if (
++    !value ||
++    !stages.includes(value.stage) ||
++    !outcomes.includes(value.outcome)
++  )
++    return;
++  const output: ProcessInspectionObservation = {
++    stage: value.stage,
++    outcome: value.outcome,
++  };
++  for (const key of counts) {
++    const count = value[key];
++    if (typeof count === "number" && Number.isFinite(count) && count >= 0)
++      output[key] = Math.min(1_000_000_000, Math.floor(count));
++  }
++  for (const key of flags)
++    if (typeof value[key] === "boolean") output[key] = value[key];
++  return output;
++}
++
++/** Observation must never change a guard result, including a throwing/rejecting observer. */
++export function observeProcessInspection(
++  observer: ProcessInspectionObserver | undefined,
++  value: ProcessInspectionObservation,
++): void {
++  if (!observer) return;
++  try {
++    const clean = sanitizeProcessObservation(value);
++    if (!clean) return;
++    const result: unknown = observer(Object.freeze(clean));
++    if (result && typeof (result as PromiseLike<unknown>).then === "function")
++      void Promise.resolve(result).catch(() => {});
++  } catch {
++    /* Diagnostics have no authority over process safety. */
++  }
++}
++
++export function createProcessObservationSink(capacity = 512) {
++  const limit = Number.isSafeInteger(capacity)
++    ? Math.max(1, Math.min(capacity, 512))
++    : 512;
++  let observations: RetainedObservation[] = [],
++    dropped = 0,
++    calls = 0;
++  return {
++    begin(provider: ProviderId, operation: string): ProcessInspectionObserver {
++      const call = ++calls;
++      const safeOperation = operations.includes(
++        operation as (typeof operations)[number],
++      )
++        ? (operation as (typeof operations)[number])
++        : "other";
++      return (value) => {
++        const clean = sanitizeProcessObservation(value);
++        if (
++          !clean ||
++          !["codex", "claude-code", "cursor", "cline"].includes(provider)
++        )
++          return;
++        if (observations.length >= limit) {
++          observations.shift();
++          dropped++;
++        }
++        observations.push({
++          ...clean,
++          call,
++          provider,
++          operation: safeOperation,
++        });
++      };
++    },
++    read() {
++      const result = {
++        version: 1 as const,
++        observations: observations.map((row) => ({ ...row })),
++        dropped,
++        calls,
++      };
++      observations = [];
++      dropped = 0;
++      return result;
++    },
++  };
++}
++
++/** A QA marker in an isolated generated profile is required in addition to explicit opt-in. */
++export async function processObservationProfileEnabled(options: {
++  packaged: boolean;
++  optIn?: string;
++  testUserData?: string;
++  profile: string;
++}): Promise<boolean> {
++  if (options.packaged || options.optIn !== "1" || !options.testUserData)
++    return false;
++  try {
++    const profile = path.resolve(options.testUserData);
++    if (
++      profile !== options.profile ||
++      path.basename(profile) !== "profile" ||
++      !/^(?:native-providers|agentvac-native-suite)-[A-Za-z0-9]{6}$/.test(
++        path.basename(path.dirname(profile)),
++      )
++    )
++      return false;
++    if ((await fs.realpath(profile)) !== profile) return false;
++    const directory = await fs.lstat(profile);
++    if (!directory.isDirectory() || directory.isSymbolicLink()) return false;
++    const marker = path.join(profile, ".agentvac-process-observations");
++    const stat = await fs.lstat(marker, { bigint: true });
++    if (
++      !stat.isFile() ||
++      stat.isSymbolicLink() ||
++      stat.nlink !== 1n ||
++      stat.size !== 42n
++    )
++      return false;
++    // No-follow where supported; nonblocking also prevents a swapped FIFO from
++    // hanging setup. Handle identity is checked on platforms without O_NOFOLLOW.
++    const handle = await fs.open(
++      marker,
++      constants.O_RDONLY |
++        (constants.O_NOFOLLOW ?? 0) |
++        (constants.O_NONBLOCK ?? 0),
++    );
++    try {
++      const same = (other: typeof stat) =>
++        other.isFile() &&
++        !other.isSymbolicLink() &&
++        other.dev === stat.dev &&
++        other.ino === stat.ino &&
++        other.size === stat.size &&
++        other.nlink === stat.nlink &&
++        other.mode === stat.mode &&
++        other.mtimeNs === stat.mtimeNs &&
++        other.ctimeNs === stat.ctimeNs;
++      if (!same(await handle.stat({ bigint: true }))) return false;
++      // One bounded read: an appended/replaced marker never causes an unbounded readFile.
++      const bytes = Buffer.alloc(43);
++      const { bytesRead } = await handle.read(bytes, 0, bytes.length, 0);
++      if (
++        bytesRead !== 42 ||
++        !same(await handle.stat({ bigint: true })) ||
++        !same(await fs.lstat(marker, { bigint: true }))
++      )
++        return false;
++      return (
++        bytes.subarray(0, bytesRead).toString("utf8") ===
++        "agentvac-generated-process-observation-v1\n"
++      );
++    } finally {
++      await handle.close();
++    }
++  } catch {
++    return false;
++  }
++}
+--- a/electron/processes.ts
++++ b/electron/processes.ts
+@@ -6,6 +6,11 @@
+ import { getAdapter } from "./providers/index.js";
+ import { isGenericRuntimeCandidate } from "./providers/runtime-evidence.js";
+ import { collectLinuxArgumentObservations } from "./process-argv-linux/host.js";
++import {
++  observeProcessInspection,
++  type ProcessInspectionObserver,
++  type ProcessInspectionObservation,
++} from "./process-observations.js";
+ const run = promisify(execFile);
+ const limits = { timeout: 5000, maxBuffer: 4_000_000, windowsHide: true };
+ export interface OwnedApplication {
+@@ -107,6 +112,7 @@
+   platform: NodeJS.Platform,
+   ownedPids: readonly number[] = [],
+   withParents = false,
++  observer?: ProcessInspectionObserver,
+ ): ProcessSnapshot {
+   const parse = (stdout: string) => {
+     const result = new Map<
+@@ -134,13 +140,49 @@
+     if (!result.size) throw new Error("Empty process inventory");
+     return result;
+   };
+-  const names = parse(namesText),
+-    commands = parse(commandsText);
++  const observedParse = (
++    text: string,
++    stage: "posix-parse-names" | "posix-parse-commands",
++  ) => {
++    if (!observer) return parse(text);
++    const started = performance.now();
++    try {
++      const result = parse(text);
++      observeProcessInspection(observer, {
++        stage,
++        outcome: "complete",
++        rows: result.size,
++        elapsedMs: performance.now() - started,
++      });
++      return result;
++    } catch (error) {
++      observeProcessInspection(observer, {
++        stage,
++        outcome: "invalid-data",
++        elapsedMs: performance.now() - started,
++      });
++      throw error;
++    }
++  };
++  const names = observedParse(namesText, "posix-parse-names"),
++    commands = observedParse(commandsText, "posix-parse-commands");
++  const started = observer ? performance.now() : 0;
++  let missingRows = 0,
++    parentChanges = 0,
++    stateChanges = 0;
+   let complete = true;
+   const processes: ProcessRecord[] = [];
+   for (const [pid, first] of names) {
+     if (ownedPids.includes(pid) || /(?:^|\/)ps$/.test(first.value)) continue;
+     const second = commands.get(pid);
++    if (observer) {
++      if (!second) missingRows++;
++      else {
++        if (first.state !== second.state) stateChanges++;
++        if (withParents && first.parentPid !== second.parentPid)
++          parentChanges++;
++      }
++    }
+     if (first.state.startsWith("Z")) {
+       if (second && !second.state.startsWith("Z")) complete = false;
+       continue;
+@@ -173,6 +215,28 @@
+     )
+   )
+     complete = false;
++  if (observer) {
++    const extraRows = [...commands].filter(
++      ([pid, row]) =>
++        !ownedPids.includes(pid) &&
++        !names.has(pid) &&
++        !row.state.startsWith("Z") &&
++        !/^\/bin\/ps\s/.test(row.value),
++    ).length;
++    observeProcessInspection(observer, {
++      stage: "posix-reconcile",
++      outcome: complete ? "complete" : "incomplete",
++      complete,
++      namesRows: names.size,
++      commandRows: commands.size,
++      rows: processes.length,
++      missingRows,
++      extraRows,
++      parentChanges,
++      stateChanges,
++      elapsedMs: performance.now() - started,
++    });
++  }
+   return { platform, complete, processes };
+ }
+ /** Darwin -e has legacy environment-output semantics. -A is explicit all-process selection. */
+@@ -192,11 +256,71 @@
+   ownedPids: readonly number[] = [process.pid],
+   application?: OwnedApplication,
+   signal?: AbortSignal,
++  observer?: ProcessInspectionObserver,
+ ): Promise<ProcessSnapshot> {
+   const platform = process.platform;
++  const started = observer ? performance.now() : 0;
++  let refusal: ProcessInspectionObservation["outcome"] = "incomplete";
++  let windowsParsed = false;
++  const finish = (
++    snapshot: ProcessSnapshot,
++    outcome?: ProcessInspectionObservation["outcome"],
++  ) => {
++    if (!observer) return snapshot;
++    observeProcessInspection(observer, {
++      stage: "snapshot",
++      outcome: snapshot.complete ? "complete" : (outcome ?? "incomplete"),
++      complete: snapshot.complete,
++      rows: snapshot.processes.length,
++      elapsedMs: performance.now() - started,
++      cancelled: signal?.aborted === true,
++    });
++    return snapshot;
++  };
++  const enumerate = async (
++    file: string,
++    args: string[],
++    stage: "windows-enumeration" | "posix-names" | "posix-commands",
++  ) => {
++    const began = observer ? performance.now() : 0;
++    try {
++      const result = await run(file, args, { ...limits, signal });
++      if (observer)
++        observeProcessInspection(observer, {
++          stage,
++          outcome: "complete",
++          elapsedMs: performance.now() - began,
++          bytes: Buffer.byteLength(result.stdout),
++          rows: result.stdout.split(/\r?\n/).filter((row) => row.trim()).length,
++        });
++      return result;
++    } catch (error) {
++      const cause = error as { code?: string; signal?: string };
++      // These are execFile's structured error fields, never stderr or error text.
++      refusal =
++        cause?.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
++          ? "truncated"
++          : signal?.aborted || cause?.code === "ABORT_ERR"
++            ? "cancelled"
++            : cause?.code === "ETIMEDOUT"
++              ? "timeout"
++              : typeof cause?.signal === "string" && cause.signal.length > 0
++                ? "command-terminated"
++                : "command-failed";
++      observeProcessInspection(observer, {
++        stage,
++        outcome: refusal,
++        elapsedMs: performance.now() - began,
++        timeout: refusal === "timeout",
++        truncated: refusal === "truncated",
++        cancelled: refusal === "cancelled",
++      });
++      throw error;
++    }
++  };
+   try {
+     if (platform === "win32") {
+-      const { stdout } = await run(
++      const { stdout } = await enumerate(
+         "powershell.exe",
+         [
+           "-NoLogo",
+@@ -205,7 +329,7 @@
+           "-Command",
+           "Get-CimInstance Win32_Process -ErrorAction Stop | Select-Object ProcessId,ParentProcessId,ExecutablePath,Name,CommandLine | ConvertTo-Json -Compress",
+         ],
+-        { ...limits, signal },
++        "windows-enumeration",
+       );
+       const parsed: unknown = JSON.parse(stdout);
+       const rows = Array.isArray(parsed) ? parsed : [parsed];
+@@ -239,29 +363,40 @@
+             : {}),
+         })),
+       };
+-      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
+-    }
+-    if (platform !== "linux" && platform !== "darwin")
++      windowsParsed = true;
++      observeProcessInspection(observer, {
++        stage: "windows-parse",
++        outcome: "complete",
++        rows: rows.length,
++      });
++      return finish(
++        excludeOwnedApplicationProcesses(snapshot, ownedPids, application),
++      );
++    }
++    if (platform !== "linux" && platform !== "darwin") {
++      refusal = "unsupported";
+       throw Error("Unsupported process enumeration");
++    }
+     const withParents = !!application;
+     const snapshot = parsePosixProcessSnapshot(
+       (
+-        await run(
++        await enumerate(
+           "/bin/ps",
+           posixInventoryArguments(platform, withParents, "comm"),
+-          { ...limits, signal },
++          "posix-names",
+         )
+       ).stdout,
+       (
+-        await run(
++        await enumerate(
+           "/bin/ps",
+           posixInventoryArguments(platform, withParents, "args"),
+-          { ...limits, signal },
++          "posix-commands",
+         )
+       ).stdout,
+       platform,
+       application ? [] : ownedPids,
+       withParents,
++      observer,
+     );
+     if (platform === "linux") {
+       // MainThread is Node 24's observed Linux comm name. It is a candidate for
+@@ -275,6 +410,7 @@
+             helperRole(record)),
+       );
+       const selected = candidates.slice(0, 64);
++      const began = observer ? performance.now() : 0;
+       const results = await collectLinuxArgumentObservations(
+         selected.map((record) => ({
+           pid: record.pid!,
+@@ -301,13 +437,42 @@
+         if (record.argumentObservation.status === "verified")
+           record.executablePath = record.argumentObservation.executablePath;
+       }
+-      if (signal?.aborted) return { ...snapshot, complete: false };
++      if (observer)
++        observeProcessInspection(observer, {
++          stage: "linux-arguments",
++          outcome: signal?.aborted ? "cancelled" : "complete",
++          elapsedMs: performance.now() - began,
++          rows: candidates.length,
++          verifiedRows: candidates.filter(
++            (row) => row.argumentObservation?.status === "verified",
++          ).length,
++          unavailableRows: candidates.filter(
++            (row) => row.argumentObservation?.status === "unavailable",
++          ).length,
++          truncatedRows: candidates.filter(
++            (row) =>
++              row.argumentObservation?.status === "unavailable" &&
++              row.argumentObservation.reason === "truncated",
++          ).length,
++          cancelled: signal?.aborted === true,
++        });
++      if (signal?.aborted)
++        return finish({ ...snapshot, complete: false }, "cancelled");
+     }
+     if (application)
+-      return excludeOwnedApplicationProcesses(snapshot, ownedPids, application);
+-    return snapshot;
++      return finish(
++        excludeOwnedApplicationProcesses(snapshot, ownedPids, application),
++      );
++    return finish(snapshot);
+   } catch {
+-    return { platform, complete: false, processes: [] };
++    if (platform === "win32" && !windowsParsed && refusal === "incomplete") {
++      refusal = "invalid-data";
++      observeProcessInspection(observer, {
++        stage: "windows-parse",
++        outcome: "invalid-data",
++      });
++    }
++    return finish({ platform, complete: false, processes: [] }, refusal);
+   }
+ }
+ /** Retry only incomplete observations, never a complete running/unknown result.
+@@ -318,9 +483,34 @@
+     signal?: AbortSignal;
+     deadlineMs?: number;
+     retryDelayMs?: number;
++    observer?: ProcessInspectionObserver;
+   } = {},
+ ): Promise<ProcessSnapshot> {
+   const controller = new AbortController();
++  const started = options.observer ? performance.now() : 0;
++  let attempts = 0;
++  const finish = (snapshot: ProcessSnapshot) => {
++    if (!options.observer) return snapshot;
++    const cancelled = options.signal?.aborted === true;
++    const timeout = controller.signal.aborted && !cancelled;
++    observeProcessInspection(options.observer, {
++      stage: "stable-result",
++      outcome: cancelled
++        ? "cancelled"
++        : timeout
++          ? "timeout"
++          : snapshot.complete
++            ? "complete"
++            : "incomplete",
++      complete: snapshot.complete,
++      rows: snapshot.processes.length,
++      attempts,
++      elapsedMs: performance.now() - started,
++      timeout,
++      cancelled,
++    });
++    return snapshot;
++  };
+   const cancel = () => controller.abort();
+   const budget = Math.max(1, Math.min(options.deadlineMs ?? 5500, 5500));
+   const timer = setTimeout(cancel, budget);
+@@ -338,13 +528,24 @@
+       attempt < 3 && !controller.signal.aborted;
+       attempt++
+     ) {
++      attempts = attempt + 1;
++      const began = options.observer ? performance.now() : 0;
+       try {
+         last = await collect(controller.signal);
+       } catch {
+         last = { ...last, complete: false };
+       }
+-      if (controller.signal.aborted) return { ...last, complete: false };
+-      if (last.complete) return last;
++      observeProcessInspection(options.observer, {
++        stage: "stable-attempt",
++        outcome: last.complete ? "complete" : "incomplete",
++        complete: last.complete,
++        rows: last.processes.length,
++        attempt: attempts,
++        elapsedMs: performance.now() - began,
++      });
++      if (controller.signal.aborted)
++        return finish({ ...last, complete: false });
++      if (last.complete) return finish(last);
+       if (attempt < 2)
+         await new Promise<void>((resolve) => {
+           const finish = () => {
+@@ -360,7 +561,7 @@
+           if (controller.signal.aborted) finish();
+         });
+     }
+-    return { ...last, complete: false };
++    return finish({ ...last, complete: false });
+   } finally {
+     clearTimeout(timer);
+     options.signal?.removeEventListener("abort", cancel);
+@@ -370,18 +571,37 @@
+   provider: ProviderId,
+   ownedPids?: readonly number[],
+   application?: OwnedApplication,
++  observer?: ProcessInspectionObserver,
+ ): Promise<ProcessStatus> {
++  const started = observer ? performance.now() : 0;
+   const adapter = getAdapter(provider);
+-  const snapshot = await collectStableProcessSnapshot((signal) =>
+-    collectProcessSnapshot(ownedPids, application, signal),
++  const snapshot = await collectStableProcessSnapshot(
++    (signal) =>
++      collectProcessSnapshot(ownedPids, application, signal, observer),
++    { observer },
+   );
+-  if (!snapshot.complete)
++  if (!snapshot.complete) {
++    observeProcessInspection(observer, {
++      stage: "provider-result",
++      outcome: "unknown",
++      complete: false,
++      rows: snapshot.processes.length,
++      elapsedMs: performance.now() - started,
++    });
+     return {
+       status: "unknown",
+       details:
+         "进程列表读取不完整或正在变化，已阻止操作；请等待程序启动/退出完成后重新检查。",
+     };
++  }
+   const result = adapter.assessProcesses(snapshot);
++  observeProcessInspection(observer, {
++    stage: "provider-result",
++    outcome: result.status,
++    complete: true,
++    rows: snapshot.processes.length,
++    elapsedMs: performance.now() - started,
++  });
+   if (result.status === "unknown") {
+     const blockers = snapshot.processes
+       .filter(
+@@ -409,6 +629,8 @@
+   }
+   return result;
+ }
+-export async function checkCodexProcesses(): Promise<ProcessStatus> {
+-  return checkProviderProcesses("codex");
+-}
++export async function checkCodexProcesses(
++  observer?: ProcessInspectionObserver,
++): Promise<ProcessStatus> {
++  return checkProviderProcesses("codex", undefined, undefined, observer);
++}
+--- /dev/null
++++ b/tests/helpers/process-observation-child.ts
+@@ -0,0 +1,207 @@
++// Mock the OS boundary before importing the collector. No native process is enumerated.
++import childProcess from "node:child_process";
++import { syncBuiltinESMExports } from "node:module";
++import { promisify } from "node:util";
++import assert from "node:assert/strict";
++import type {
++  ProcessInspectionObservation,
++  ProcessInspectionObserver,
++} from "../../electron/process-observations.js";
++
++let scenario = "clear",
++  commands = 0;
++const names = "101 1 S /sbin/init\n872341 101 S /private/SECRET_NAME";
++const args =
++  "101 1 S /sbin/init\n872341 101 S /private/SECRET_NAME --SECRET_ARG";
++const fakeExec = Object.assign(
++  () => {
++    throw new Error("Callback API not expected");
++  },
++  {
++    [promisify.custom]: async (
++      file: string,
++      parameters: string[],
++      options: { timeout: number; maxBuffer: number; signal: AbortSignal },
++    ) => {
++      commands++;
++      assert.equal(options.timeout, 5000);
++      assert.equal(options.maxBuffer, 4_000_000);
++      assert.ok(options.signal);
++      if (process.platform === "win32") {
++        assert.equal(file, "powershell.exe");
++        assert.equal(parameters[0], "-NoLogo");
++        return {
++          stdout:
++            scenario === "malformed"
++              ? "SECRET_INVALID_JSON"
++              : JSON.stringify([
++                  {
++                    ProcessId: 872341,
++                    ParentProcessId: 1,
++                    Name: "explorer.exe",
++                    ExecutablePath: "C:\\SECRET\\explorer.exe",
++                    CommandLine: "C:\\SECRET\\explorer.exe SECRET_ARG",
++                  },
++                ]),
++          stderr: "SECRET_STDERR",
++        };
++      }
++      assert.equal(file, "/bin/ps");
++      assert.deepEqual(parameters.slice(0, 2), ["-A", "-o"]);
++      const namePass = parameters[2].endsWith("comm=");
++      if (
++        scenario === "timeout" ||
++        scenario === "terminated" ||
++        scenario === "truncated" ||
++        scenario === "command-failed"
++      )
++        throw Object.assign(new Error("SECRET_ERROR /private/SECRET_PATH"), {
++          code:
++            scenario === "timeout"
++              ? "ETIMEDOUT"
++              : scenario === "terminated"
++                ? null
++                : scenario === "truncated"
++                  ? "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
++                  : "ENOENT",
++          stdout: "SECRET_STDOUT",
++          stderr: "SECRET_STDERR",
++          ...(scenario === "terminated"
++            ? { signal: "SIGTERM", killed: true }
++            : {}),
++        });
++      if (scenario === "pending")
++        return await new Promise((_, reject) => {
++          options.signal.addEventListener(
++            "abort",
++            () =>
++              reject(
++                Object.assign(new Error("SECRET_ABORT"), { code: "ABORT_ERR" }),
++              ),
++            { once: true },
++          );
++        });
++      if (scenario === "malformed")
++        return {
++          stdout: namePass ? names : "872341 SECRET_MALFORMED",
++          stderr: "SECRET_STDERR",
++        };
++      if (scenario === "missing")
++        return {
++          stdout: namePass ? names : "101 1 S /sbin/init",
++          stderr: "SECRET_STDERR",
++        };
++      if (scenario === "changed")
++        return {
++          stdout: namePass
++            ? names
++            : "101 1 S /sbin/init\n872341 999 R /private/SECRET_NAME --SECRET_ARG\n872342 101 S /private/SECRET_EXTRA",
++          stderr: "",
++        };
++      if (scenario === "unknown")
++        return {
++          stdout: namePass ? "101 1 S node" : "101 1 S node -e SECRET_INLINE",
++          stderr: "",
++        };
++      if (scenario === "running")
++        return {
++          stdout: namePass ? "101 1 S claude" : "101 1 S claude",
++          stderr: "",
++        };
++      return { stdout: namePass ? names : args, stderr: "SECRET_STDERR" };
++    },
++  },
++);
++childProcess.execFile = fakeExec as unknown as typeof childProcess.execFile;
++syncBuiltinESMExports();
++Object.defineProperty(process, "platform", { value: "darwin" });
++const {
++  checkProviderProcesses,
++  collectStableProcessSnapshot,
++  collectProcessSnapshot,
++} = await import("../../electron/processes.js");
++const application = {
++  pid: 900001,
++  executablePaths: ["/private/SECRET_APPLICATION"],
++};
++const report: Record<string, unknown> = {};
++for (const current of [
++  "clear",
++  "missing",
++  "changed",
++  "malformed",
++  "timeout",
++  "terminated",
++  "truncated",
++  "command-failed",
++  "unknown",
++  "running",
++]) {
++  scenario = current;
++  commands = 0;
++  const plain = await checkProviderProcesses("claude-code", [], application);
++  const plainCommands = commands;
++  for (const mode of ["record", "throw", "reject"]) {
++    commands = 0;
++    const events: ProcessInspectionObservation[] = [];
++    const observer: ProcessInspectionObserver =
++      mode === "throw"
++        ? () => {
++            throw Error("SECRET_OBSERVER");
++          }
++        : mode === "reject"
++          ? async () => {
++              throw Error("SECRET_OBSERVER");
++            }
++          : (event) => {
++              events.push(event);
++            };
++    const observed = await checkProviderProcesses(
++      "claude-code",
++      [],
++      application,
++      observer,
++    );
++    assert.deepEqual(observed, plain);
++    assert.equal(commands, plainCommands);
++    if (mode === "record")
++      report[current] = { status: observed.status, commands, events };
++  }
++}
++scenario = "pending";
++commands = 0;
++const events: ProcessInspectionObservation[] = [];
++const observer = (event: ProcessInspectionObservation) => {
++  events.push(event);
++};
++const keepAlive = setTimeout(() => {}, 1000);
++try {
++  const result = await collectStableProcessSnapshot(
++    (signal) => collectProcessSnapshot([], application, signal, observer),
++    { deadlineMs: 20, observer },
++  );
++  assert.equal(result.complete, false);
++  report.deadline = { complete: result.complete, commands, events };
++} finally {
++  clearTimeout(keepAlive);
++}
++Object.defineProperty(process, "platform", { value: "win32" });
++for (const current of ["clear", "malformed"]) {
++  scenario = current;
++  const plain = await checkProviderProcesses("claude-code", [], application);
++  const events: ProcessInspectionObservation[] = [];
++  commands = 0;
++  const observed = await checkProviderProcesses(
++    "claude-code",
++    [],
++    application,
++    (event) => events.push(event),
++  );
++  assert.deepEqual(observed, plain);
++  report[`windows-${current}`] = { status: observed.status, commands, events };
++}
++assert.doesNotMatch(
++  JSON.stringify(report),
++  /SECRET_|872341|872342|900001|private|\/sbin|stderr|stdout|commandLine|executablePath|parentPid/,
++);
++process.stdout.write(JSON.stringify(report));
+--- /dev/null
++++ b/tests/process-observations.test.ts
+@@ -0,0 +1,430 @@
++import test from "node:test";
++import assert from "node:assert/strict";
++import path from "node:path";
++import os from "node:os";
++import { promises as fs } from "node:fs";
++import { execFile } from "node:child_process";
++import { promisify } from "node:util";
++import {
++  createProcessObservationSink,
++  observeProcessInspection,
++  processObservationProfileEnabled,
++  sanitizeProcessObservation,
++  type ProcessInspectionObservation,
++} from "../electron/process-observations.js";
++import {
++  parsePosixProcessSnapshot,
++  collectStableProcessSnapshot,
++} from "../electron/processes.js";
++
++test("observation boundary accepts only fixed enums, booleans and bounded finite counts", () => {
++  const dirty = {
++    stage: "posix-reconcile",
++    outcome: "incomplete",
++    missingRows: 2.9,
++    rows: Infinity,
++    bytes: 1e20,
++    elapsedMs: -1,
++    complete: false,
++    timeout: "SECRET",
++    commandLine: "SECRET_ARG",
++    pid: 872341,
++    name: "SECRET_NAME",
++    path: "/SECRET",
++    stderr: "SECRET",
++    env: { SECRET: "VALUE" },
++  };
++  assert.deepEqual(
++    sanitizeProcessObservation(
++      dirty as unknown as ProcessInspectionObservation,
++    ),
++    {
++      stage: "posix-reconcile",
++      outcome: "incomplete",
++      missingRows: 2,
++      bytes: 1_000_000_000,
++      complete: false,
++    },
++  );
++  assert.equal(
++    sanitizeProcessObservation({
++      stage: "SECRET",
++      outcome: "complete",
++    } as unknown as ProcessInspectionObservation),
++    undefined,
++  );
++  assert.equal(
++    sanitizeProcessObservation({
++      stage: "snapshot",
++      outcome: "SECRET",
++    } as unknown as ProcessInspectionObservation),
++    undefined,
++  );
++});
++
++test("bounded sink reports drops, detaches read results, drains records and preserves call correlation", () => {
++  const sink = createProcessObservationSink(2);
++  const first = sink.begin("cline", "/SECRET_OPERATION");
++  for (let i = 0; i < 3; i++)
++    first({ stage: "snapshot", outcome: "incomplete", rows: i });
++  const initial = sink.read();
++  assert.equal(initial.dropped, 1);
++  assert.equal(initial.observations.length, 2);
++  assert.deepEqual(
++    initial.observations.map((row) => row.rows),
++    [1, 2],
++  );
++  assert.ok(
++    initial.observations.every(
++      (event) => event.call === 1 && event.operation === "other",
++    ),
++  );
++  const second = sink.begin("cursor", "quarantine");
++  second({ stage: "provider-result", outcome: "unknown" });
++  assert.deepEqual(sink.read(), {
++    version: 1,
++    calls: 2,
++    dropped: 0,
++    observations: [
++      {
++        stage: "provider-result",
++        outcome: "unknown",
++        call: 2,
++        provider: "cursor",
++        operation: "quarantine",
++      },
++    ],
++  });
++  assert.deepEqual(sink.read(), {
++    version: 1,
++    calls: 2,
++    dropped: 0,
++    observations: [],
++  });
++  const capped = createProcessObservationSink(100000);
++  const observe = capped.begin("codex", "preview");
++  for (let i = 0; i < 600; i++)
++    observe({ stage: "snapshot", outcome: "complete" });
++  const result = capped.read();
++  assert.equal(result.observations.length, 512);
++  assert.equal(result.dropped, 88);
++});
++
++test("observer exceptions, rejected promises, invalid getters and event mutation have no authority", async () => {
++  const event: ProcessInspectionObservation = {
++    stage: "snapshot",
++    outcome: "complete",
++  };
++  observeProcessInspection(() => {
++    throw Error("SECRET");
++  }, event);
++  observeProcessInspection(async () => {
++    throw Error("SECRET");
++  }, event);
++  observeProcessInspection((row) => {
++    row.outcome = "incomplete";
++  }, event);
++  observeProcessInspection(
++    () => assert.fail(),
++    Object.defineProperty({}, "stage", {
++      get() {
++        throw Error("SECRET");
++      },
++    }) as ProcessInspectionObservation,
++  );
++  assert.equal(event.outcome, "complete");
++  await new Promise((resolve) => setImmediate(resolve));
++});
++
++test("reconciliation reports missing rows without treating absence as proof of exit", () => {
++  const events: ProcessInspectionObservation[] = [];
++  const names = "101 1 S /SECRET/init\n872341 101 S /SECRET/process";
++  const commands = "101 1 R /SECRET/init\n872342 101 S /SECRET/extra";
++  const plain = parsePosixProcessSnapshot(names, commands, "darwin", [], true);
++  const observed = parsePosixProcessSnapshot(
++    names,
++    commands,
++    "darwin",
++    [],
++    true,
++    (event) => events.push(event),
++  );
++  assert.deepEqual(observed, plain);
++  assert.equal(observed.complete, false);
++  assert.equal(events.at(-1)?.missingRows, 1);
++  assert.equal(events.at(-1)?.extraRows, 1);
++  assert.equal(events.at(-1)?.stateChanges, 1);
++  assert.doesNotMatch(JSON.stringify(events), /SECRET|872341|872342/);
++});
++
++test("complete snapshots retain identity and are never retried into clear with observations", async () => {
++  for (const record of [
++    { name: "claude", commandLine: "claude" },
++    { name: "node", commandLine: "node -e unknown" },
++  ]) {
++    let calls = 0;
++    const snapshot = {
++      platform: "darwin" as const,
++      complete: true,
++      processes: [record],
++    };
++    const result = await collectStableProcessSnapshot(
++      async () => {
++        calls++;
++        return snapshot;
++      },
++      {
++        observer() {
++          throw Error("SECRET");
++        },
++      },
++    );
++    assert.equal(result, snapshot);
++    assert.equal(calls, 1);
++  }
++  const abort = new AbortController();
++  abort.abort();
++  const events: ProcessInspectionObservation[] = [];
++  const result = await collectStableProcessSnapshot(
++    async () => {
++      throw Error("must not collect");
++    },
++    { signal: abort.signal, observer: (event) => events.push(event) },
++  );
++  assert.equal(result.complete, false);
++  assert.equal(events.at(-1)?.outcome, "cancelled");
++  assert.equal(events.at(-1)?.attempts, 0);
++  assert.equal(events.at(-1)?.timeout, false);
++});
++
++test("main sink requires explicit opt-in, unpackaged app and nonsymlink generated profile marker", async (t) => {
++  const base = await fs.realpath(
++    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-native-suite-")),
++  );
++  t.after(() => fs.rm(base, { recursive: true, force: true }));
++  const profile = path.join(base, "profile");
++  await fs.mkdir(profile);
++  const options = {
++    packaged: false,
++    optIn: "1",
++    testUserData: profile,
++    profile,
++  };
++  assert.equal(await processObservationProfileEnabled(options), false);
++  const marker = path.join(profile, ".agentvac-process-observations");
++  await fs.writeFile(marker, "agentvac-generated-process-observation-v1\n", {
++    flag: "wx",
++    mode: 0o600,
++  });
++  assert.equal(await processObservationProfileEnabled(options), true);
++  for (const change of [
++    { packaged: true },
++    { optIn: undefined },
++    { optIn: "true" },
++    { testUserData: undefined },
++    { profile: path.join(base, "real-user-profile") },
++  ])
++    assert.equal(
++      await processObservationProfileEnabled({ ...options, ...change }),
++      false,
++    );
++  const otherProfile = path.join(base, "other");
++  await fs.mkdir(otherProfile);
++  assert.equal(
++    await processObservationProfileEnabled({
++      ...options,
++      testUserData: otherProfile,
++      profile: otherProfile,
++    }),
++    false,
++  );
++  await fs.writeFile(marker, "wrong marker");
++  assert.equal(await processObservationProfileEnabled(options), false);
++  await fs.rm(marker);
++  const outsideMarker = path.join(base, "marker");
++  await fs.writeFile(
++    outsideMarker,
++    "agentvac-generated-process-observation-v1\n",
++  );
++  await fs.link(outsideMarker, marker);
++  assert.equal(await processObservationProfileEnabled(options), false);
++  await fs.rm(marker);
++  if (process.platform !== "win32") {
++    await fs.symlink(outsideMarker, marker);
++    assert.equal(await processObservationProfileEnabled(options), false);
++  }
++});
++
++test("QA marker replacement between lstat and open fails handle identity verification", async (t) => {
++  const base = await fs.realpath(
++    await fs.mkdtemp(path.join(os.tmpdir(), "native-providers-")),
++  );
++  t.after(() => fs.rm(base, { recursive: true, force: true }));
++  const profile = path.join(base, "profile");
++  await fs.mkdir(profile);
++  const marker = path.join(profile, ".agentvac-process-observations");
++  const payload = "agentvac-generated-process-observation-v1\n";
++  await fs.writeFile(marker, payload);
++  const open = fs.open;
++  t.mock.method(fs, "open", async (...args: Parameters<typeof fs.open>) => {
++    if (args[0] === marker) {
++      await fs.rename(marker, path.join(base, "old-marker"));
++      await fs.writeFile(marker, payload);
++    }
++    return open(...args);
++  });
++  assert.equal(
++    await processObservationProfileEnabled({
++      packaged: false,
++      optIn: "1",
++      testUserData: profile,
++      profile,
++    }),
++    false,
++  );
++});
++
++test("QA marker content is read once with a 43-byte cap and rejects concurrent growth", async (t) => {
++  const base = await fs.realpath(
++    await fs.mkdtemp(path.join(os.tmpdir(), "native-providers-")),
++  );
++  t.after(() => fs.rm(base, { recursive: true, force: true }));
++  const profile = path.join(base, "profile");
++  await fs.mkdir(profile);
++  const marker = path.join(profile, ".agentvac-process-observations");
++  await fs.writeFile(marker, "agentvac-generated-process-observation-v1\n");
++  const open = fs.open;
++  let readCalls = 0,
++    requestedBytes = 0;
++  t.mock.method(fs, "readFile", () => {
++    throw Error("unbounded marker read forbidden");
++  });
++  t.mock.method(fs, "open", async (...args: Parameters<typeof fs.open>) => {
++    const handle = await open(...args);
++    if (args[0] === marker) {
++      const read = handle.read.bind(handle);
++      Object.defineProperty(handle, "read", {
++        value: async (
++          buffer: Buffer,
++          offset: number,
++          length: number,
++          position: number,
++        ) => {
++          readCalls++;
++          requestedBytes = length;
++          await fs.appendFile(marker, Buffer.alloc(262144));
++          return read(buffer, offset, length, position);
++        },
++      });
++    }
++    return handle;
++  });
++  assert.equal(
++    await processObservationProfileEnabled({
++      packaged: false,
++      optIn: "1",
++      testUserData: profile,
++      profile,
++    }),
++    false,
++  );
++  assert.equal(readCalls, 1);
++  assert.equal(requestedBytes, 43);
++});
++
++test("actual mocked guard calls report enumeration mismatches, refusals and shared deadline without changing outputs", async () => {
++  const { stdout } = await promisify(execFile)(
++    process.execPath,
++    ["--import", "tsx", "tests/helpers/process-observation-child.ts"],
++    { timeout: 30000, maxBuffer: 1_000_000 },
++  );
++  const report = JSON.parse(stdout) as Record<
++    string,
++    {
++      status?: string;
++      commands: number;
++      events: ProcessInspectionObservation[];
++    }
++  >;
++  assert.equal(report.clear.status, "clear");
++  assert.equal(report.unknown.status, "unknown");
++  assert.equal(report.running.status, "running");
++  assert.equal(report.unknown.commands, 2);
++  assert.equal(report.running.commands, 2);
++  assert.equal(report.missing.status, "unknown");
++  assert.equal(report.missing.commands, 6);
++  assert.equal(
++    report.missing.events.find((event) => event.stage === "posix-reconcile")
++      ?.missingRows,
++    1,
++  );
++  assert.equal(
++    report.changed.events.find((event) => event.stage === "posix-reconcile")
++      ?.parentChanges,
++    1,
++  );
++  assert.equal(
++    report.changed.events.find((event) => event.stage === "posix-reconcile")
++      ?.stateChanges,
++    1,
++  );
++  assert.equal(
++    report.changed.events.find((event) => event.stage === "posix-reconcile")
++      ?.extraRows,
++    1,
++  );
++  assert.ok(
++    report.malformed.events.some(
++      (event) =>
++        event.stage === "posix-parse-commands" &&
++        event.outcome === "invalid-data",
++    ),
++  );
++  for (const outcome of ["timeout", "truncated", "command-failed"])
++    assert.ok(
++      report[outcome].events.some(
++        (event) => event.stage === "posix-names" && event.outcome === outcome,
++      ),
++    );
++  assert.ok(
++    report.terminated.events.some(
++      (event) =>
++        event.stage === "posix-names" &&
++        event.outcome === "command-terminated" &&
++        event.timeout === false,
++    ),
++  );
++  assert.ok(
++    report.deadline.events.some(
++      (event) => event.stage === "posix-names" && event.outcome === "cancelled",
++    ),
++  );
++  assert.ok(
++    report.deadline.events.some(
++      (event) =>
++        event.stage === "stable-result" &&
++        event.outcome === "timeout" &&
++        event.timeout,
++    ),
++  );
++  assert.equal(report.deadline.commands, 1);
++  assert.equal(report["windows-clear"].status, "clear");
++  assert.equal(report["windows-clear"].commands, 1);
++  assert.ok(
++    report["windows-clear"].events.some(
++      (event) => event.stage === "windows-parse" && event.rows === 1,
++    ),
++  );
++  assert.equal(report["windows-malformed"].status, "unknown");
++  assert.equal(report["windows-malformed"].commands, 3);
++  assert.ok(
++    report["windows-malformed"].events.some(
++      (event) =>
++        event.stage === "windows-parse" && event.outcome === "invalid-data",
++    ),
++  );
++  assert.doesNotMatch(
++    stdout,
++    /SECRET_|872341|872342|900001|commandLine|executablePath|parentPid|stderr/,
++  );
++});

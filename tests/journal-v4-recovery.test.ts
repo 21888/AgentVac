@@ -1,4 +1,5 @@
 import { trashFixture } from "./helpers/trash.js";
+import { installSyntheticSafeFileIds } from "./helpers/synthetic-safe-file-ids.js";
 import { test, type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { promises as fs, type PathLike } from "node:fs";
@@ -20,11 +21,12 @@ const hash = (data: Buffer | string) =>
   createHash("sha256").update(data).digest("hex");
 const sign = (j: any, key: Buffer) =>
   createHmac("sha256", key).update(JSON.stringify(j)).digest("hex");
-async function fixture(t: TestContext, cursor = false) {
+async function fixture(t: TestContext, cursor = false, safeIds = false) {
   const base = await fs.mkdtemp(
     path.join(await fs.realpath(os.tmpdir()), "agentvac-v4-independent-"),
   );
   t.after(() => fs.rm(base, { recursive: true, force: true }));
+  if (safeIds) installSyntheticSafeFileIds(t, base);
   const root = path.join(base, cursor ? "Cursor" : "root");
   await fs.mkdir(root);
   if (cursor) {
@@ -48,8 +50,9 @@ async function createBatch(
   interrupted = false,
   session = false,
   cursor = false,
+  safeIds = Engine !== AgentVacEngine,
 ) {
-  const f = await fixture(t, cursor),
+  const f = await fixture(t, cursor, safeIds),
     relative = cursor
       ? "GPUCache"
       : session
@@ -161,7 +164,7 @@ for (const [version, Old] of [
   [2, V123],
 ] as const)
   for (const interrupted of [false, true])
-    test(`actual historical v${version} ${interrupted ? "interrupted" : "completed"} ${version === 1 ? "session" : "ordinary-file"} writer output restores with original recovery key`, async (t) => {
+    test(`historical v${version} ${interrupted ? "interrupted" : "completed"} ${version === 1 ? "session" : "ordinary-file"} writer with synthetic safe IDs restores with original recovery key`, async (t) => {
       const f = await createBatch(t, Old, interrupted, version === 1),
         before = await tree(f.root);
       assert.equal(f.saved.journal.version, version);
@@ -190,6 +193,46 @@ for (const [version, Old] of [
       assert.equal((await fs.lstat(f.original)).nlink, 1);
       await assert.rejects(fs.lstat(f.payload), { code: "ENOENT" });
     });
+for (const [version, Old] of [
+  [1, V1],
+  [2, V123],
+] as const)
+  test(`native historical v${version} unsupported numeric IDs refuse recovery and Trash without mutation`, async (t) => {
+    // Deliberately unmodeled: these bytes come from the historical numeric
+    // writer running against this host's actual generated fixture identities.
+    const f = await createBatch(t, Old, false, version === 1, false, false);
+    const unsupported = f.saved.journal.items.some((item: any) =>
+      [item.before, item.stored].some(
+        (fp) =>
+          fp &&
+          (!Number.isSafeInteger(fp.dev) || !Number.isSafeInteger(fp.ino)),
+      ),
+    );
+    if (!unsupported) {
+      t.skip(
+        "generated native IDs fit safe Numbers; native unsupported-ID rejection not exercised",
+      );
+      return;
+    }
+    const before = await tree(f.root),
+      engine = new AgentVacEngine(f.root, f.key, false, clear);
+    await assert.rejects(engine.restore(f.id, true), {
+      code: "ERR_AGENTVAC_FILE_IDENTITY",
+    });
+    await assert.rejects(
+      trashFixture(engine, f.id, true, true, async () =>
+        assert.fail("unsupported native legacy IDs must not reach Trash"),
+      ),
+      { code: "ERR_AGENTVAC_FILE_IDENTITY" },
+    );
+    assert.equal((await engine.inspectRecovery()).batches[0].verified, false);
+    assert.equal((await engine.history())[0].items[0].status, "failed");
+    assert.deepEqual(await tree(f.root), before);
+    t.diagnostic(
+      "identity-control=native-unsupported; recovery=refused; trash=refused; fixture=unchanged",
+    );
+  });
+
 for (const Old of [V1, V123])
   test(`${Old === V1 ? "v1" : "v123"} reader rejects receipt produced from genuinely interrupted v4 writer batch`, async (t) => {
     const f = await createBatch(t, AgentVacEngine, true),
@@ -227,7 +270,13 @@ for (const fault of [
   "publication",
   "directory-sync",
 ] as const)
-  test(`receipt ${fault} fault after callback reports saved/unsaved commit accurately and retains payload`, async (t) => {
+  test(`synthetic-safe legacy receipt ${fault} fault after callback reports saved/unsaved commit accurately and retains payload`, async (t) => {
+    if (fault === "directory-sync" && process.platform === "win32") {
+      t.skip(
+        "Windows has no directory fsync in the engine; this fault cannot be injected",
+      );
+      return;
+    }
     const f = await createBatch(t, V1, false, true),
       engine = new AgentVacEngine(f.root, f.rotated, false, clear, [f.key]);
     const receipt = path.join(f.q, f.id + ".receipt.json"),
@@ -312,8 +361,8 @@ for (const fault of [
     );
     assert.equal(calls, 1);
   });
-async function interruptedUnit(t: TestContext) {
-  const f = await createBatch(t, AgentVacEngine, false, false, true),
+async function interruptedUnit(t: TestContext, safeIds = false) {
+  const f = await createBatch(t, AgentVacEngine, false, false, true, safeIds),
     unlink = fs.unlink;
   let hit = false;
   const mock = t.mock.method(fs, "unlink", async (p: PathLike) => {
@@ -384,8 +433,14 @@ for (const field of ["directory", "linked"] as const)
       assert.deepEqual(await tree(f.root), before);
     });
 for (const fault of ["before-rename", "after-rename-sync"] as const)
-  test(`preexisting signed v3 unit linked pair survives migration ${fault}, then fresh engine resumes without overwrite`, async (t) => {
-    const f = await interruptedUnit(t),
+  test(`synthetic-safe signed v3 unit linked pair survives migration ${fault}, then fresh engine resumes without overwrite`, async (t) => {
+    if (fault === "after-rename-sync" && process.platform === "win32") {
+      t.skip(
+        "Windows has no directory fsync in the engine; this fault cannot be injected",
+      );
+      return;
+    }
+    const f = await interruptedUnit(t, true),
       j = f.data.journal;
     j.version = 3;
     delete j.recoveryPolicyVersion;

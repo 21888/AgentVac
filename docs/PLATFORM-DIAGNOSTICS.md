@@ -1,0 +1,17 @@
+# Bounded platform diagnostics
+
+This source-only checkpoint prepares a diagnostic run. It does not establish application acceptance or publish an installer. Existing production files are unchanged from public commit `4783d2a027d8be72d757985b98d1072940d49812`.
+
+The previous native run, [37425544766](https://github.com/21888/AgentVac/actions/runs/37425544766), failed on all four jobs. Linux and both Macs passed their applicable unit suites; Windows reported 808 passing, 43 failing and 14 skipped tests. Windows failures separate into 24 private-copy setup failures and 19 recovery-fixture failures. Linux's provider guard remained blocked by unreadable runtime observations. Mac desktop/provider operations need actual guard-call and returned-item evidence. These unresolved results remain visible.
+
+The new dedicated workflow uses standard public Windows 2022 and both macOS architectures. Its default is manual-only. A separately reviewed temporary marker may trigger one diagnostic pass; maintainers then restore the exact manual workflow and source manifest and remove the marker. Existing workflows remain manual-only. There is no cache, artifact upload, binary publication, paid runner or release step.
+
+Windows runs the unchanged engine against generated recovery fixtures and observes the unchanged PowerShell ACL helper's startup. Synthetic safe-ID controls prove compatibility logic only; actual unsupported identifiers remain rejected. Replacement tests require proof that the replacement was installed before testing preservation. Windows directory-fsync cases remain explicitly inapplicable. The startup receipt lists four expected calls and any missing, rejected or failed observations. Helper failure cannot count as ACL rejection or private-copy approval.
+
+The Mac observer builds a separately pinned QA-only source copy. It records actual guard-call stages without changing classification, process arguments, deadlines, retries or mutation admission. Original production files remain byte-identical. Copied-source and compiled-output hashes identify the instrumentation; its results must not be described as exact shipping-build acceptance. Both native harnesses retain their existing mutation assertions.
+
+Local final validation of the original diagnostic tree: 881 unit tests passed, two explicit native-ID controls skipped because generated IDs on this Linux filesystem fit safe Numbers; 75 batch/stage-report checks, 47 Windows observer contracts, and ten copy/provenance checks passed. One Windows-observer test of a prior local archive is explicitly skipped because that archive is excluded from the source-only package. Ordinary build/typecheck and the separate instrumented copy build/verification passed. The copied observer component separately passed 897 of 899 tests with the same two explicit skips. No new native Windows or Mac execution has occurred at this checkpoint.
+
+The prior independent mutation final assessment remains incomplete. OS Trash recovery through the platform UI is still untested. Canonical conversation mutation, the Linux ownership-scope producer and the Windows native copy bridge remain inactive. Diagnostic receipts always distinguish expected cases, failures, platform-inapplicable skips and missing evidence, and explicitly deny application-acceptance status.
+
+See [Windows startup observation](../qa/windows-acl-startup/README.md) and [instrumented Mac build](../qa/process-observation/README.md) for exact commands, bounds and provenance.

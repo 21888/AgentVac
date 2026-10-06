@@ -1,0 +1,145 @@
+name: Bounded platform failure diagnostics
+
+# Default is manual-only. Maintainers restore this exact file after the reviewed one-shot.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/platform-diagnostic-20261006T0739Z-54a22a01.marker"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentvac-platform-diagnostic-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    if: ${{ github.event.repository.private == false }}
+    name: Diagnostic ${{ matrix.platform }} ${{ matrix.arch }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            platform: Windows
+            arch: x64
+          - os: macos-15-intel
+            platform: macOS
+            arch: x64
+          - os: macos-15
+            platform: macOS
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      CI: "true"
+      AGENTVAC_EXPECTED_ARCH: ${{ matrix.arch }}
+      AGENTVAC_NATIVE_EVIDENCE_DIR: ${{ github.workspace }}/.qa/platform-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout reviewed source
+        timeout-minutes: 2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up pinned Node runtime
+        timeout-minutes: 3
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - name: Verify source and unchanged production inventory
+        id: source
+        timeout-minutes: 1
+        run: node qa/platform-diagnostics/verify-source.mjs
+      - name: Install locked dependencies
+        id: install
+        timeout-minutes: 4
+        run: npm ci --no-audit --no-fund
+      - name: Run bounded batch diagnostic contracts
+        id: batch_contracts
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.install.outcome == 'success' }}
+        timeout-minutes: 1
+        run: node --test tests/native-mutation-observation.test.mjs tests/native-provider-observation.test.mjs tests/native-mutation-observation-bounds.test.mjs
+      - name: Verify and build the pinned Windows startup observer
+        id: acl_prepare
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.install.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 1
+        run: node qa/windows-acl-startup/prepare.mjs --source-dir .
+      - name: Verify Windows startup observer contracts
+        id: acl_contracts
+        if: ${{ !cancelled() && steps.acl_prepare.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 1
+        run: node --test qa/windows-acl-startup/tests.mjs
+      - name: Observe unchanged Windows ACL helper startup
+        id: acl_startup
+        if: ${{ !cancelled() && steps.acl_contracts.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 2
+        run: node qa/windows-acl-startup/run.mjs --run-reviewed-windows --source-dir .
+      - name: Exercise Windows generated recovery and replacement fixtures
+        id: recovery_fixtures
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.install.outcome == 'success' && runner.os == 'Windows' }}
+        timeout-minutes: 5
+        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/journal-v4-recovery.test.ts tests/mutation-receipt-ownership.test.ts tests/recovery-exact-file-identity.test.ts tests/replacement-injection.test.ts tests/synthetic-safe-file-ids.test.ts
+      - name: Build unchanged production source on macOS
+        id: build
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.install.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 3
+        run: npm run build
+      - name: Create separately pinned QA instrumented copy
+        id: observed_build
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 3
+        run: |
+          node qa/process-observation/prepare.mjs
+          node qa/process-observation/verify.mjs
+      - name: Verify instrumented observer contracts
+        id: observer_contracts
+        if: ${{ !cancelled() && steps.observed_build.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 2
+        working-directory: .qa/agentvac-process-observed
+        run: node --import tsx --test --test-reporter=tap --test-concurrency=2 tests/process-observations.test.ts tests/native-process-diagnostics.test.ts
+      - name: Diagnose macOS desktop fixture with QA instrumentation
+        id: desktop
+        if: ${{ !cancelled() && steps.observed_build.outcome == 'success' && steps.observer_contracts.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 3
+        working-directory: .qa/agentvac-process-observed
+        run: node scripts/desktop-e2e.mjs
+      - name: Diagnose macOS provider fixtures with QA instrumentation
+        id: providers
+        if: ${{ !cancelled() && steps.observed_build.outcome == 'success' && steps.observer_contracts.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 4
+        working-directory: .qa/agentvac-process-observed
+        run: node "$PWD/.qa/native-harness/native-provider-driver.mjs"
+      - name: Reverify original source after diagnostics
+        id: source_after
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        timeout-minutes: 1
+        run: node qa/platform-diagnostics/verify-source.mjs
+      - name: Reverify the instrumented copy after fixtures
+        id: observed_after
+        if: ${{ !cancelled() && steps.observed_build.outcome == 'success' && runner.os == 'macOS' }}
+        timeout-minutes: 1
+        run: node qa/process-observation/verify.mjs
+      - name: Report expected diagnostic stages and missing evidence
+        if: always()
+        timeout-minutes: 1
+        env:
+          AV_DIAG_SOURCE: ${{ steps.source.outcome }}
+          AV_DIAG_INSTALL: ${{ steps.install.outcome }}
+          AV_DIAG_BATCH: ${{ steps.batch_contracts.outcome }}
+          AV_DIAG_ACL_PREPARE: ${{ steps.acl_prepare.outcome }}
+          AV_DIAG_ACL_CONTRACTS: ${{ steps.acl_contracts.outcome }}
+          AV_DIAG_ACL: ${{ steps.acl_startup.outcome }}
+          AV_DIAG_RECOVERY: ${{ steps.recovery_fixtures.outcome }}
+          AV_DIAG_BUILD: ${{ steps.build.outcome }}
+          AV_DIAG_OBSERVED_BUILD: ${{ steps.observed_build.outcome }}
+          AV_DIAG_OBSERVER: ${{ steps.observer_contracts.outcome }}
+          AV_DIAG_DESKTOP: ${{ steps.desktop.outcome }}
+          AV_DIAG_PROVIDERS: ${{ steps.providers.outcome }}
+          AV_DIAG_SOURCE_AFTER: ${{ steps.source_after.outcome }}
+          AV_DIAG_OBSERVED_AFTER: ${{ steps.observed_after.outcome }}
+        run: node qa/platform-diagnostics/report-stages.mjs
+      # Diagnostic results do not imply production acceptance. No cache, artifact,
+      # binary upload, release, paid runner, permission or security changes.

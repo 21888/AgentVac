@@ -12,11 +12,28 @@ import { execFile, spawn } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { Script } from "node:vm";
+import { createNativeProcessObservationCollector } from "./native-process-diagnostics.mjs";
+import { verifyObservedProject } from "../qa/process-observation/core.mjs";
 import { recordDuplicateMutationObservation } from "./native-mutation-observation.mjs";
 const run = promisify(execFile);
 const project = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
+);
+const instrumentation = await verifyObservedProject(project).catch((error) => {
+  console.error(
+    "AGENTVAC_INSTRUMENTED_EXECUTION " +
+      JSON.stringify({
+        instrumented: true,
+        productionAcceptance: false,
+        status: "PROVENANCE_REFUSED",
+        nativeExecution: false,
+      }),
+  );
+  throw error;
+});
+console.log(
+  "AGENTVAC_INSTRUMENTED_EXECUTION " + JSON.stringify(instrumentation),
 );
 const selfTest = process.argv.includes("--self-test");
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -85,12 +102,20 @@ const sqliteRoot = path.join(ownedRoot, "sqlite-fixture");
 await Promise.all(
   [userData, fixtureRoot, sqliteRoot].map((directory) => fs.mkdir(directory)),
 );
+await fs.writeFile(
+  path.join(userData, ".agentvac-process-observations"),
+  "agentvac-generated-process-observation-v1\n",
+  { flag: "wx", mode: 0o600 },
+);
 const evidenceFile = path.join(
   process.env.AGENTVAC_NATIVE_EVIDENCE_DIR ||
     path.join(project, "docs", "native-ci"),
   `next-${process.platform}-${process.arch}${selfTest ? "-self-test" : ""}.json`,
 );
 const results = {
+  instrumented: true,
+  productionAcceptance: false,
+  instrumentation,
   at: new Date().toISOString(),
   platform: process.platform,
   arch: process.arch,
@@ -143,6 +168,8 @@ async function check(id, fn) {
       return;
     }
     throw error;
+  } finally {
+    await drainProcessObservations();
   }
 }
 const LOG_DDL = `
@@ -218,8 +245,30 @@ function lifecycleFixtureSources() {
   return { blocker, observer };
 }
 let application, page, second, electronMainPid, primaryError;
+const processObservations = createNativeProcessObservationCollector();
+async function drainProcessObservations() {
+  if (!application) return;
+  const observation = await processObservations.drain(application);
+  if (
+    !observation.available ||
+    observation.observations.length ||
+    observation.dropped
+  )
+    console.log(
+      "AGENTVAC_PROCESS_OBSERVATIONS " +
+        JSON.stringify({
+          instrumented: true,
+          productionAcceptance: false,
+          ...observation,
+        }),
+    );
+}
 const observedOwnedHelpers = new Set();
-const env = { ...process.env, AGENTVAC_TEST_USER_DATA: userData };
+const env = {
+  ...process.env,
+  AGENTVAC_TEST_USER_DATA: userData,
+  AGENTVAC_TEST_PROCESS_OBSERVATIONS: "1",
+};
 delete env.ELECTRON_RUN_AS_NODE;
 async function launch() {
   application = await electron.launch({
@@ -228,6 +277,7 @@ async function launch() {
     timeout: 45000,
     env,
   });
+  await drainProcessObservations();
   page = await application.firstWindow();
   page.setDefaultTimeout(20000);
   electronMainPid = await application.evaluate(() => process.pid);
@@ -399,6 +449,7 @@ async function beginStalledDiagnosis(request) {
   return [row.pid, marker.pid];
 }
 async function forceStopOwnedApplication() {
+  await drainProcessObservations();
   const child = application?.process();
   if (!child || child.exitCode !== null || child.signalCode !== null) return;
   if (process.platform === "win32")
@@ -820,6 +871,7 @@ try {
             .theme === "dark",
         "durable theme preference",
       );
+      await drainProcessObservations();
       await deadline(application.close(), 15000, "restart shutdown");
       application = undefined;
       assert.equal(
@@ -913,11 +965,12 @@ try {
       return "One-shot folder-selection adapter targets only generated data; this separately covers application flow, not a native folder-dialog selection.";
     });
     const processPreview = await safePreview();
+    await drainProcessObservations();
     const realProcessClear = processPreview.processStatus.status === "clear";
     await check("duplicate-quarantine-and-restore", async () => {
       if (!realProcessClear)
         throw new CapabilitySkip(
-          `Actual process gate is ${processPreview.processStatus.status}: ${processPreview.processStatus.details}. No detector was mocked; non-demo mutation is not attempted.`,
+          `Actual process gate is ${processPreview.processStatus.status}. No detector was mocked; non-demo mutation is not attempted.`,
         );
       const preview = await safePreview();
       const rows = await page.evaluate(
@@ -1208,6 +1261,7 @@ try {
       });
       const processHandle = application.process(),
         exited = once(processHandle, "exit");
+      await drainProcessObservations();
       await application.evaluate(({ BrowserWindow }) => {
         setTimeout(() => BrowserWindow.getAllWindows()[0].close(), 40);
       });
@@ -1246,6 +1300,7 @@ try {
         "cancel outstanding fixture diagnosis",
       ).catch(() => {});
     try {
+      await drainProcessObservations();
       await deadline(application.close(), 10000, "graceful fixture app close");
     } catch (error) {
       primaryError ??= error;
@@ -1285,6 +1340,7 @@ try {
         ? "PASS_WITH_LIMITATIONS"
         : "PASS";
   if (primaryError) results.error = String(primaryError.stack || primaryError);
+  results.processObservations = processObservations.snapshot();
   results.finishedAt = new Date().toISOString();
   await fs.mkdir(path.dirname(evidenceFile), { recursive: true });
   await fs.writeFile(evidenceFile, JSON.stringify(results, null, 2));

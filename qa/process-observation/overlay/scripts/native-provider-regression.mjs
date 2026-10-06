@@ -5,13 +5,35 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { AppDataServices } from "../electron/app-services.ts";
-import { nativeProcessObservation } from "./native-process-diagnostics.mjs";
+import { createNativeProcessObservationCollector } from "./native-process-diagnostics.mjs";
+import { verifyObservedProject } from "../qa/process-observation/core.mjs";
 import { providerMutationObservationHandlers } from "./native-mutation-observation.mjs";
 const project = await fs.realpath(path.resolve("."));
+const instrumentation = await verifyObservedProject(project).catch((error) => {
+  console.error(
+    "AGENTVAC_INSTRUMENTED_EXECUTION " +
+      JSON.stringify({
+        instrumented: true,
+        productionAcceptance: false,
+        status: "PROVENANCE_REFUSED",
+        nativeExecution: false,
+      }),
+  );
+  throw error;
+});
+console.log(
+  "AGENTVAC_INSTRUMENTED_EXECUTION " + JSON.stringify(instrumentation),
+);
 const qa = path.join(project, ".qa");
 await fs.mkdir(qa, { recursive: true });
 const base = await fs.mkdtemp(path.join(qa, "native-providers-"));
 const profile = path.join(base, "profile");
+await fs.mkdir(profile);
+await fs.writeFile(
+  path.join(profile, ".agentvac-process-observations"),
+  "agentvac-generated-process-observation-v1\n",
+  { flag: "wx", mode: 0o600 },
+);
 const roots = {
   "claude-code": path.join(base, "claude-data"),
   cursor: path.join(base, "Cursor"),
@@ -95,9 +117,30 @@ const ids = Object.fromEntries(
 );
 await services.flush();
 let application, page, security;
+const processObservations = createNativeProcessObservationCollector();
+async function drainProcessObservations() {
+  if (!application) return;
+  const observation = await processObservations.drain(application);
+  if (
+    !observation.available ||
+    observation.observations.length ||
+    observation.dropped
+  )
+    console.log(
+      "AGENTVAC_PROCESS_OBSERVATIONS " +
+        JSON.stringify({
+          instrumented: true,
+          productionAcceptance: false,
+          ...observation,
+        }),
+    );
+}
 const checks = {},
   errors = [];
 const metadata = {
+  instrumented: true,
+  productionAcceptance: false,
+  instrumentation,
   format: "agentvac-native-providers-v1",
   sourceRevision: process.env.GITHUB_SHA || null,
   ciRunId: process.env.GITHUB_RUN_ID || null,
@@ -111,7 +154,11 @@ const metadata = {
   synthetic: true,
 };
 async function launch() {
-  const env = { ...process.env, AGENTVAC_TEST_USER_DATA: profile };
+  const env = {
+    ...process.env,
+    AGENTVAC_TEST_USER_DATA: profile,
+    AGENTVAC_TEST_PROCESS_OBSERVATIONS: "1",
+  };
   delete env.ELECTRON_RUN_AS_NODE;
   application = await electron.launch({
     args: [project],
@@ -119,6 +166,7 @@ async function launch() {
     env,
     timeout: 45000,
   });
+  await drainProcessObservations();
   page = await application.firstWindow();
   page.setDefaultTimeout(20000);
   page.on("pageerror", (error) => errors.push(error.message));
@@ -152,6 +200,7 @@ async function launch() {
   );
 }
 async function close() {
+  await drainProcessObservations();
   await application?.close().catch(() => {});
   application = null;
 }
@@ -167,10 +216,7 @@ async function runProvider(provider, anchor) {
     ids[provider],
   );
   assert.equal(context.provider, provider);
-  console.log(
-    "AGENTVAC_PROCESS_PREFLIGHT " +
-      JSON.stringify(await nativeProcessObservation(application, provider)),
-  );
+  await drainProcessObservations();
   await page.reload();
   await page.waitForFunction(
     () => document.querySelector(".primary-nav button")?.disabled === false,
@@ -192,43 +238,44 @@ async function runProvider(provider, anchor) {
   assert.equal(preview.provider, provider);
   assert.equal(preview.root, roots[provider]);
   assert.equal(preview.totalFiles, row.cleanupUnit.fileCount);
+  await drainProcessObservations();
   if (preview.processStatus.status !== "clear") {
-    console.log(
-      "AGENTVAC_PROCESS_GUARD " +
-        JSON.stringify({
-          provider,
-          previewStatus: preview.processStatus.status,
-          details: preview.processStatus.details,
-          observation: await nativeProcessObservation(application, provider),
-        }),
-    );
     await assert.rejects(
-      page.evaluate(
-        (token) => window.agentvac.quarantine(token, true),
-        preview.token,
-      ).then(...providerMutationObservationHandlers(provider, "GUARD_QUARANTINE")),
+      page
+        .evaluate(
+          (token) => window.agentvac.quarantine(token, true),
+          preview.token,
+        )
+        .then(
+          ...providerMutationObservationHandlers(provider, "GUARD_QUARANTINE"),
+        ),
     );
     await verifyOriginals(provider);
     return {
       status: "FAIL",
       reason: "REQUIRED_MUTATION_GUARD_BLOCKED",
       guard: preview.processStatus.status,
-      details: preview.processStatus.details,
       refusalVerified: true,
       mutationNotTested: true,
     };
   }
-  const moved = await page.evaluate(
-    (token) => window.agentvac.quarantine(token, true),
-    preview.token,
-  ).then(...providerMutationObservationHandlers(provider, "QUARANTINE"));
+  const moved = await page
+    .evaluate((token) => window.agentvac.quarantine(token, true), preview.token)
+    .then(...providerMutationObservationHandlers(provider, "QUARANTINE"));
   assert.equal(moved.completed, 1);
   assert.deepEqual(moved.failed, []);
   await assert.rejects(
-    page.evaluate(
-      (token) => window.agentvac.quarantine(token, true),
-      preview.token,
-    ).then(...providerMutationObservationHandlers(provider, "DUPLICATE_QUARANTINE")),
+    page
+      .evaluate(
+        (token) => window.agentvac.quarantine(token, true),
+        preview.token,
+      )
+      .then(
+        ...providerMutationObservationHandlers(
+          provider,
+          "DUPLICATE_QUARANTINE",
+        ),
+      ),
   );
   await close();
   await launch();
@@ -255,10 +302,11 @@ async function runProvider(provider, anchor) {
   await fs.writeFile(collision, "newly generated destination");
   let conflicted = false;
   try {
-    const result = await page.evaluate(
-      (id) => window.agentvac.restore(id, true),
-      moved.batchId,
-    ).then(...providerMutationObservationHandlers(provider, "RESTORE_CONFLICT"));
+    const result = await page
+      .evaluate((id) => window.agentvac.restore(id, true), moved.batchId)
+      .then(
+        ...providerMutationObservationHandlers(provider, "RESTORE_CONFLICT"),
+      );
     conflicted = result.completed === 0 && result.failed.length > 0;
   } catch {
     conflicted = true;
@@ -271,29 +319,33 @@ async function runProvider(provider, anchor) {
   if (provider === "cursor")
     await fs.rm(path.join(roots[provider], anchor), { recursive: true });
   else await fs.unlink(collision);
-  const restored = await page.evaluate(
-    (id) => window.agentvac.restore(id, true),
-    moved.batchId,
-  ).then(...providerMutationObservationHandlers(provider, "RESTORE"));
+  const restored = await page
+    .evaluate((id) => window.agentvac.restore(id, true), moved.batchId)
+    .then(...providerMutationObservationHandlers(provider, "RESTORE"));
   assert.equal(restored.completed, 1);
   assert.deepEqual(restored.failed, []);
   await verifyOriginals(provider);
   assert.equal(
     (
-      await page.evaluate(
-        (id) => window.agentvac.restore(id, true),
-        moved.batchId,
-      ).then(...providerMutationObservationHandlers(provider, "RESTORE_REPLAY"))
+      await page
+        .evaluate((id) => window.agentvac.restore(id, true), moved.batchId)
+        .then(
+          ...providerMutationObservationHandlers(provider, "RESTORE_REPLAY"),
+        )
     ).completed,
     0,
   );
   // Old IDs/tokens cannot be reused after switching provider/root context.
   await page.evaluate(() => window.agentvac.setProvider("codex"));
   await assert.rejects(
-    page.evaluate(
-      (token) => window.agentvac.quarantine(token, true),
-      preview.token,
-    ).then(...providerMutationObservationHandlers(provider, "SWITCHED_QUARANTINE")),
+    page
+      .evaluate(
+        (token) => window.agentvac.quarantine(token, true),
+        preview.token,
+      )
+      .then(
+        ...providerMutationObservationHandlers(provider, "SWITCHED_QUARANTINE"),
+      ),
   );
   await page.evaluate(
     (id) => window.agentvac.activateWorkspace(id),
@@ -329,19 +381,9 @@ try {
       checks[provider] = await runProvider(provider, anchor);
     } catch (error) {
       checks[provider] = { status: "FAIL", reason: String(error) };
-      if (application) {
-        try {
-          console.log(
-            "AGENTVAC_PROCESS_GUARD " +
-              JSON.stringify(
-                await nativeProcessObservation(application, provider),
-              ),
-          );
-        } catch {
-          console.log("AGENTVAC_PROCESS_GUARD_UNAVAILABLE");
-        }
-      }
       await close();
+    } finally {
+      await drainProcessObservations();
     }
     console.log(
       `${checks[provider].status}: native-provider ${provider}${checks[provider].reason ? " " + checks[provider].reason : ""}`,
@@ -354,7 +396,14 @@ try {
       : "FAIL";
 } finally {
   await close();
-  const result = { ...metadata, status, security, checks, errors };
+  const result = {
+    ...metadata,
+    status,
+    security,
+    checks,
+    errors,
+    processObservations: processObservations.snapshot(),
+  };
   await fs.writeFile(
     path.join(out, `providers-${process.platform}-${process.arch}.json`),
     JSON.stringify(result, null, 2) + "\n",

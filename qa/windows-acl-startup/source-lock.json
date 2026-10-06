@@ -1,0 +1,18 @@
+{
+  "format": "agentvac-acl-startup-source-v1",
+  "revisionProvenance": "hosted-base-revision-from-publication-receipt; helper-bytes-and-manifest-record-pinned",
+  "helperSha256": "497f00ba1caedfccb02e0ac69a1812cfaf6b37b301334c177cffb71f4f6a8dfd",
+  "helperBytes": 20347,
+  "scriptSha256": "cf9755bbe5a4b00043004dfd82a470ee6f3b22205d8688116206ea7fc04d91a1",
+  "scriptUtf16Bytes": 12422,
+  "scriptBase64Chars": 16564,
+  "esbuildVersion": "0.25.12",
+  "sequence": [
+    "PARENT_LOCALITY",
+    "FIXTURE_LOCALITY_BEFORE",
+    "FIXTURE_ACL",
+    "FIXTURE_LOCALITY_AFTER"
+  ],
+  "reviewedInputManifestSha256": "a75e16529f167fe2dd6768b6fb283a16bdda1190193814713521a17d9777260f",
+  "hostedBaseRevision": "ea99609c3fab613cc7b181aac15a6830f3dd6351"
+}
