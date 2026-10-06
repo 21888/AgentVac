@@ -140,6 +140,15 @@ export interface RecoveryInspection {
     irregularEntries: number;
   }[];
 }
+/** Ephemeral, single-attempt consent challenge; never a filesystem authority. */
+export interface TrashConfirmation {
+  token: string;
+  batchId: string;
+  provider: ProviderId;
+  root: string;
+  demo: boolean;
+  expiresAt: number;
+}
 export interface AgentVacAPI extends ConversationAPI {
   getContext(): Promise<AppContext>;
   setProvider(provider: ProviderId): Promise<AppContext>;
@@ -171,7 +180,14 @@ export interface AgentVacAPI extends ConversationAPI {
   quarantine(token: string, confirmedClosed: boolean): Promise<OperationResult>;
   history(): Promise<Batch[]>;
   restore(batchId: string, confirmedClosed: boolean): Promise<OperationResult>;
-  trash(batchId: string, confirmed: boolean): Promise<OperationResult>;
+  prepareTrash(batchId: string): Promise<TrashConfirmation>;
+  cancelTrashConfirmation(token: string): Promise<void>;
+  trash(
+    batchId: string,
+    confirmed: boolean,
+    confirmedClosed: boolean,
+    confirmationToken: string,
+  ): Promise<OperationResult>;
   openQuarantine(): Promise<void>;
   openBatchQuarantine(batchId: string): Promise<void>;
 }

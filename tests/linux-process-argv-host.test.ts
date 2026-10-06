@@ -138,25 +138,40 @@ test("strict wire JSON refuses duplicate keys, escaped aliases and depth/key/ite
 });
 
 test("worker location is fixed for packaged main, source host and native harness layouts", () => {
-  const expected = "/app/root/dist-electron/process-argv-worker.cjs";
-  assert.ok(
-    resolvePackagedWorker("/app/root/dist-electron", true) === expected,
+  const root = path.resolve("synthetic-worker-layout", "app");
+  const expected = path.join(root, "dist-electron", "process-argv-worker.cjs");
+  assert.equal(
+    resolvePackagedWorker(path.join(root, "dist-electron"), true),
+    expected,
   );
-  assert.ok(
-    resolvePackagedWorker("/app/root/electron/process-argv-linux", false) ===
-      expected,
+  assert.equal(
+    resolvePackagedWorker(path.join(root, "electron", "process-argv-linux"), false),
+    expected,
   );
-  assert.ok(
-    resolvePackagedWorker("/app/root/.qa/native-harness", true) === expected,
+  assert.equal(
+    resolvePackagedWorker(path.join(root, ".qa", "native-harness"), true),
+    expected,
   );
-  assert.ok(
-    resolvePackagedWorker("/app/root/.qa/native-harness", false) === expected,
+  assert.equal(
+    resolvePackagedWorker(path.join(root, ".qa", "native-harness"), false),
+    expected,
   );
-  assert.ok(
-    resolvePackagedWorker("/app/resources/app.asar/dist-electron", true) ===
-      "/app/resources/app.asar.unpacked/dist-electron/process-argv-worker.cjs",
+  assert.equal(
+    resolvePackagedWorker(
+      path.join(root, "resources", "app.asar", "dist-electron"),
+      true,
+    ),
+    path.join(
+      root,
+      "resources",
+      "app.asar.unpacked",
+      "dist-electron",
+      "process-argv-worker.cjs",
+    ),
   );
-  assert.throws(() => resolvePackagedWorker("/arbitrary/directory", true));
+  assert.throws(() =>
+    resolvePackagedWorker(path.join(root, "arbitrary", "directory"), true),
+  );
 });
 
 test("result protocol preserves precise vectors and reconstructs accepted fields", () => {

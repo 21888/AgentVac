@@ -1,3 +1,8 @@
+import {
+  handlePrepareTrash,
+  handleCancelTrash,
+  handleTrash,
+} from "./trash-ipc.js";
 import { prepareReadOnlyConversationSource } from "./conversations/sources.js";
 import {
   initializeCursorSnapshotStorage,
@@ -75,12 +80,28 @@ function register(
       throw new Error("不可信 IPC 来源。");
     if (quitting) throw new Error("应用正在退出，请等待文件写入完成。");
     if (allowWhileBusy) return handler(...args);
-    if (operation) throw new Error("请等待当前操作完成。");
+    if (operation) {
+      // Refused retries cannot leave pending Trash consent reusable. Do not
+      // revoke the already admitted operation when a duplicate arrives.
+      if (name === "trash" || name === "prepare-trash")
+        selected().discardTrashConfirmation();
+      throw new Error("请等待当前操作完成。");
+    }
     operation = true;
     operationName = name;
     try {
       await conversations?.cancelAndDrain();
       return await handler(...args);
+    } catch (cause) {
+      // Drain/admission failures must not leave an old dialog's consent reusable.
+      if (name === "trash" || name === "prepare-trash") {
+        try {
+          selected().discardTrashConfirmation();
+        } catch {
+          // Preserve the original failure if the selected engine is unavailable.
+        }
+      }
+      throw cause;
     } finally {
       operation = false;
       operationName = "";
@@ -483,8 +504,21 @@ app
         throw new Error("无效请求。");
       return selected().restore(id, closed);
     });
-    register("trash", async (id: string, confirmed: boolean) =>
-      selected().trash(id, confirmed, (dir) => shell.trashItem(dir)),
+    register("prepare-trash", async (id) => handlePrepareTrash(selected(), id));
+    register("cancel-trash-confirmation", async (token) =>
+      handleCancelTrash(selected(), token),
+    );
+    register(
+      "trash",
+      async (id, confirmed, confirmedClosed, confirmationToken) =>
+        handleTrash(
+          selected(),
+          id,
+          confirmed,
+          confirmedClosed,
+          confirmationToken,
+          (dir) => shell.trashItem(dir),
+        ),
     );
     register("open-batch-quarantine", async (id) => {
       const folder = await selected().getBatchQuarantinePath(id);

@@ -195,8 +195,12 @@ try {
         await engine.getQuarantinePath();
         opened++;
         return;
+      case "prepareTrash":
+        return engine.prepareTrash(args[0]);
+      case "cancelTrashConfirmation":
+        return engine.cancelTrashConfirmation(args[0]);
       case "trash":
-        return engine.trash(args[0], args[1], async (dir) => {
+        return engine.trash(args[0], args[1], args[2], args[3], async (dir) => {
           await fs.mkdir(path.join(base, "mock-system-trash"), {
             recursive: true,
           });
@@ -226,6 +230,8 @@ try {
         "history",
         "restore",
         "openQuarantine",
+        "prepareTrash",
+        "cancelTrashConfirmation",
         "trash",
       ].map((method) => [
         method,

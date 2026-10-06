@@ -1,3 +1,4 @@
+import { trashFixture } from "./helpers/trash.js";
 import { test, type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { promises as fs } from "node:fs";
@@ -537,7 +538,7 @@ test("missing usable primary permits readonly rescue and trusted-key restore, bu
   await write(f.root, "log/codex-tui.log.2", "do not move without signing key");
   await assert.rejects(quarantineOne(next), /钥匙|密钥/);
   await assert.rejects(
-    next.engine().trash(operation.batchId, true, async () => {
+    trashFixture(next.engine(), operation.batchId, true, true, async () => {
       throw new Error("Should not reach OS Trash");
     }),
     /钥匙|密钥/,

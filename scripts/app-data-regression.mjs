@@ -250,10 +250,14 @@ try {
         return services.engine().restore(args[0], args[1]);
       case "openQuarantine":
         return;
+      case "prepareTrash":
+        return services.engine().prepareTrash(args[0]);
+      case "cancelTrashConfirmation":
+        return services.engine().cancelTrashConfirmation(args[0]);
       case "trash":
         return services
           .engine()
-          .trash(args[0], args[1], serviceOptions.trashItem);
+          .trash(args[0], args[1], args[2], args[3], serviceOptions.trashItem);
       default:
         throw Error("unsupported " + method);
     }
@@ -286,6 +290,8 @@ try {
         "history",
         "restore",
         "openQuarantine",
+        "prepareTrash",
+        "cancelTrashConfirmation",
         "trash",
       ].map((method) => [
         method,

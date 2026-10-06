@@ -1,0 +1,103 @@
+{
+  "status": "exact bytes recovered from verified Git history; published pre-v4 fixture differs from lost unpublished scope predecessor",
+  "files": [
+    {
+      "fixture": "v0.1.0",
+      "commit": "9e6322d354059650ad2429923f8375e38d3131c9",
+      "path": "LICENSE",
+      "bytes": 1078,
+      "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+    },
+    {
+      "fixture": "v0.1.0",
+      "commit": "9e6322d354059650ad2429923f8375e38d3131c9",
+      "path": "electron/engine.ts",
+      "bytes": 41940,
+      "sha256": "74e0af70a6c7bcff9af22203b72424f19bbb808f9217e3885473748f207b80dc"
+    },
+    {
+      "fixture": "v0.1.0",
+      "commit": "9e6322d354059650ad2429923f8375e38d3131c9",
+      "path": "shared/types.ts",
+      "bytes": 4385,
+      "sha256": "574f3ab8bfb69b9048396d1a152188a7dccb28395428f9e897e50c52e867bf58"
+    },
+    {
+      "fixture": "v0.1.0",
+      "commit": "9e6322d354059650ad2429923f8375e38d3131c9",
+      "path": "shared/app-data.ts",
+      "bytes": 5264,
+      "sha256": "88d788873e835a8f3ac31ce9436a94128bcc09ad53b3f1ffd8fdf6eea2933d5e"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "LICENSE",
+      "bytes": 1078,
+      "sha256": "46d347040bd9d6e8a3422db0942faeaa97186676835c543ea20e16f5a9ec70bb"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/engine.ts",
+      "bytes": 55773,
+      "sha256": "0003a66f7f28f683ce69411be8844e670978bddc8c527c4474c7c91c197c9473"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "shared/types.ts",
+      "bytes": 5119,
+      "sha256": "f7e802865ed64865383fb3333c91a33aea24c333eaa842e783b8337c4c76c2d4"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "shared/app-data.ts",
+      "bytes": 5527,
+      "sha256": "bfd0dc123c8324a4f5f49940d8d51edd2f469f54fb2df9f8300693468703e4cc"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/cleanup-units.ts",
+      "bytes": 39838,
+      "sha256": "283832ac51c1408c370402d5711566583d91cc486d3eec93a688ad8c94e1a0ea"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/providers/codex.ts",
+      "bytes": 6021,
+      "sha256": "bfa96a6aa0293d38cd244eb10eb62afc47d6902e7684aa5d13d7ae6ac8ccdeb3"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/providers/paths.ts",
+      "bytes": 301,
+      "sha256": "b40c3793c9918d15d5f26cd25106076000761407d6e97be090538beec1d9ea45"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/providers/types.ts",
+      "bytes": 2652,
+      "sha256": "1149e176cb0a0789a3ef6f46a3d0fc5ce8fa8de1a8ccc2ad333cb0f750834102"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "shared/conversations.ts",
+      "bytes": 3488,
+      "sha256": "fa7b672177db1b3ac8f0d5c83e930ff2fb3775227026e61408fefec539c74a42"
+    },
+    {
+      "fixture": "published-pre-v4",
+      "commit": "da565af18cc4940777cafb2483247dd9647a6b56",
+      "path": "electron/process-argv-linux/types.ts",
+      "bytes": 1255,
+      "sha256": "6faec7193b8dca9b8112fd6a33bde8248827a0ef5c9477a31f3670b4e42ddf8b"
+    }
+  ]
+}

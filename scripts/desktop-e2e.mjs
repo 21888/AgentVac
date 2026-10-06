@@ -135,6 +135,12 @@ async function check(id, fn) {
       return;
     }
     record(id, "FAIL", String(error.stack || error));
+    // Preserve this failure and the final nonzero exit, while independent
+    // diagnostic checks report their own capability or runtime outcomes.
+    if (id === "native-trash-generated-batch") {
+      primaryError ??= error;
+      return;
+    }
     throw error;
   }
 }
@@ -991,10 +997,38 @@ try {
       }, batchDirectory);
       let outcome;
       try {
-        outcome = await page.evaluate(
-          (id) => window.agentvac.trash(id, true),
-          quarantine.batchId,
-        );
+        for (const refusal of ["false-closure", "cancelled-token"]) {
+          await assert.rejects(
+            page.evaluate(
+              async ({ id, refusal }) => {
+                const confirmation = await window.agentvac.prepareTrash(id);
+                if (refusal === "cancelled-token")
+                  await window.agentvac.cancelTrashConfirmation(
+                    confirmation.token,
+                  );
+                return window.agentvac.trash(
+                  id,
+                  true,
+                  refusal !== "false-closure",
+                  confirmation.token,
+                );
+              },
+              { id: quarantine.batchId, refusal },
+            ),
+          );
+          assert.equal(
+            await application.evaluate(() => globalThis.__nativeTrashCalls),
+            0,
+          );
+          assert.equal(
+            await digest(path.join(batchDirectory, "manifest.json")),
+            manifestHash,
+          );
+        }
+        outcome = await page.evaluate(async (id) => {
+          const confirmation = await window.agentvac.prepareTrash(id);
+          return window.agentvac.trash(id, true, true, confirmation.token);
+        }, quarantine.batchId);
       } catch (error) {
         // Verify a reported OS failure never uses permanent deletion as a fallback.
         assert.equal(

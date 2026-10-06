@@ -764,10 +764,12 @@ export async function moveUnit(
   record: UnitRecord,
   checkpoint: () => Promise<void>,
   guard: () => Promise<void> = async () => {},
+  fence: () => void = () => {},
 ) {
   const wrapper = unitStoragePath(dir, id);
   await guard();
   await verifyUnitParents(root, record.snapshot);
+  fence();
   await fs.mkdir(wrapper, { mode: 0o700 });
   const container = await unitLstat(wrapper);
   record.container = { dev: container.dev, ino: container.ino };
@@ -789,6 +791,7 @@ export async function moveUnit(
       false,
     );
     if (await unitExists(target)) throw new Error("隔离目标已存在。");
+    fence();
     await fs.rename(source, target);
     await unitSyncDirectory(wrapper);
     await unitSyncDirectory(path.dirname(source));
@@ -814,6 +817,7 @@ export async function restoreUnit(
   record: UnitRecord,
   checkpoint: () => Promise<void>,
   guard: () => Promise<void> = async () => {},
+  fence: () => void = () => {},
 ) {
   await guard();
   await verifyUnitParents(root, record.snapshot);
@@ -938,6 +942,7 @@ export async function restoreUnit(
       let created = state.directories.find((d) => d.path === node.path);
       if (!created) {
         try {
+          fence();
           await fs.mkdir(p, { mode: 0o700 });
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code === "EEXIST")
@@ -996,6 +1001,7 @@ export async function restoreUnit(
         } else {
           if (a.nlink !== 1 || !identical(unitFingerprint(a), node.fingerprint))
             throw new Error("隔离文件已变化或出现额外硬链接。");
+          fence();
           await fs.link(source, dest);
           await verifyRestoreParents(node.path);
           state.linked ??= [];
@@ -1052,6 +1058,7 @@ export async function restoreUnit(
       await verifyRestoreParents(node.path);
       await verifyStoredParents(index, member.path, node.path);
       if (a) {
+        fence();
         await fs.unlink(source);
         await unitSyncDirectory(path.dirname(source));
       }
@@ -1072,6 +1079,7 @@ export async function restoreUnit(
           !sameFileId(sourceStat.ino, node.fingerprint.ino)
         )
           throw new Error("隔离目录标识已变化。");
+        fence();
         await fs.rmdir(source);
         await unitSyncDirectory(path.dirname(source));
       }
@@ -1087,7 +1095,9 @@ export async function restoreUnit(
         !sameFileId(destStat.ino, created.ino)
       )
         throw new Error("恢复目录标识已变化。");
+      fence();
       await fs.chmod(dest, node.fingerprint.mode & 0o777);
+      fence();
       await fs.utimes(
         dest,
         new Date(node.fingerprint.mtimeMs),

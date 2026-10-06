@@ -27,7 +27,18 @@ import {
   randomBytes,
   timingSafeEqual,
 } from "node:crypto";
-import type { Stats } from "node:fs";
+import {
+  fileFingerprint as fp,
+  sameFileFingerprint as same,
+  sameFileIdentity,
+  sameFileId,
+  exactLstat,
+  exactHandleStat,
+  assertFileFingerprint,
+  validFileId,
+  FileIdentityError,
+  type FileFingerprint as Fingerprint,
+} from "./file-identity.js";
 import type {
   Entry,
   ScanOptions,
@@ -39,6 +50,7 @@ import type {
   ScanProgress,
   ScanCoverage,
   RecoveryInspection,
+  TrashConfirmation,
 } from "../shared/types.js";
 
 const DAY = 86_400_000;
@@ -47,28 +59,6 @@ const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 export const errorText = (e: unknown) =>
   e instanceof Error ? e.message : String(e);
-type Fingerprint = {
-  dev: number;
-  ino: number;
-  size: number;
-  mtimeMs: number;
-  ctimeMs: number;
-  nlink: number;
-  mode: number;
-};
-const fp = (s: Stats): Fingerprint => ({
-  dev: s.dev,
-  ino: s.ino,
-  size: s.size,
-  mtimeMs: s.mtimeMs,
-  ctimeMs: s.ctimeMs,
-  nlink: s.nlink,
-  mode: s.mode,
-});
-const same = (a: Fingerprint, b: Fingerprint) =>
-  Object.keys(a).every(
-    (k) => a[k as keyof Fingerprint] === b[k as keyof Fingerprint],
-  );
 interface RecordItem {
   id: string;
   path: string;
@@ -80,9 +70,11 @@ interface RecordItem {
   restorePending?: boolean;
   unit?: UnitRecord;
 }
+type RecoveryPolicyVersion = 1 | 2 | 3 | 4;
 interface Journal {
-  version: 1 | 2 | 3;
+  version: RecoveryPolicyVersion;
   provider?: import("../shared/types.js").ProviderId;
+  recoveryPolicyVersion?: RecoveryPolicyVersion;
   id: string;
   root: string;
   createdAt: string;
@@ -93,7 +85,7 @@ export { classifyCodex as classify } from "./providers/codex.js";
 
 async function exists(p: string) {
   try {
-    return await fs.lstat(p);
+    return await exactLstat(p);
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw e;
@@ -131,10 +123,19 @@ async function plainParents(full: string, includeLeaf = true) {
   let current = parsed.root;
   for (let i = 0; i < segments.length - (includeLeaf ? 0 : 1); i++) {
     current = path.join(current, segments[i]);
-    const s = await fs.lstat(current);
+    const s = await fs.lstat(current, { bigint: true });
     if (s.isSymbolicLink() || !s.isDirectory())
       throw new Error("目录路径含链接或非目录，已拒绝：" + current);
   }
+}
+interface PendingTrashConfirmation {
+  value: Readonly<TrashConfirmation>;
+  journalDigest: string;
+  revision: number;
+  deadline: number;
+  rootIdentity: Fingerprint;
+  batchIdentity: Fingerprint;
+  manifestIdentity: Fingerprint;
 }
 export class AgentVacEngine {
   private rootFingerprint?: Fingerprint;
@@ -149,7 +150,27 @@ export class AgentVacEngine {
   private busy = false;
   private cancelRequested = false;
   private activeScanId?: string;
+  private mutationRevision = 0;
+  private trashGeneration = 0;
+  private trashConfirmation?: PendingTrashConfirmation;
+  private activeMutation?: {
+    revision: number;
+    journal?: Journal;
+    canCheckpoint: boolean;
+    trashConfirmationToken?: string;
+    parents?: { quarantine: Fingerprint; batch: Fingerprint };
+    manifest?: Fingerprint;
+  };
   private journalKeys = new Map<string, Buffer>();
+  private journalBindings = new WeakMap<
+    Journal,
+    {
+      version: RecoveryPolicyVersion;
+      policy: RecoveryPolicyVersion;
+      key: Buffer;
+      manifest?: Fingerprint;
+    }
+  >();
   constructor(
     readonly root: string,
     private key: Buffer | null,
@@ -183,7 +204,7 @@ export class AgentVacEngine {
     )
       throw new Error("请选择规范的 Codex 数据目录，不能选择磁盘根目录。");
     await plainParents(this.root);
-    const s = await fs.lstat(this.root);
+    const s = await exactLstat(this.root);
     const real = await fs.realpath(this.root);
     if (
       process.platform === "win32"
@@ -201,14 +222,17 @@ export class AgentVacEngine {
     await this.rootOK();
   }
   invalidatePreview(token: string): void {
+    this.discardTrashConfirmation();
     this.previews.delete(token);
   }
   get isBusy() {
     return this.busy;
   }
   invalidate(): void {
+    this.discardTrashConfirmation();
     this.invalidated = true;
     this.cancelRequested = true;
+    this.mutationRevision++;
     this.entries.clear();
     this.previews.clear();
     this.latest = undefined;
@@ -236,11 +260,30 @@ export class AgentVacEngine {
     );
   }
   private validJournalProvider(j: Journal): boolean {
-    return j.version === 1
-      ? this.provider === "codex" && j.provider === undefined
-      : (j.version === 2 || j.version === 3) && j.provider === this.provider;
+    if (
+      !j ||
+      !["codex", "claude-code", "cline", "cursor"].includes(this.provider)
+    )
+      return false;
+    if (j.version !== 4) {
+      if (Object.hasOwn(j, "recoveryPolicyVersion")) return false;
+      return j.version === 1
+        ? this.provider === "codex" && !Object.hasOwn(j, "provider")
+        : (j.version === 2 || j.version === 3) && j.provider === this.provider;
+    }
+    return (
+      j.provider === this.provider &&
+      [1, 2, 3, 4].includes(j.recoveryPolicyVersion!) &&
+      (j.recoveryPolicyVersion !== 1 || this.provider === "codex")
+    );
+  }
+  private recoveryPolicy(j: Journal): RecoveryPolicyVersion {
+    if (!this.validJournalProvider(j))
+      throw new Error("隔离清单版本、提供方或恢复策略无效。");
+    return j.version === 4 ? j.recoveryPolicyVersion! : j.version;
   }
   private async requireStopped() {
+    this.assertMutationFence();
     if (this.demo) return;
     let result: ProcessStatus;
     try {
@@ -248,6 +291,7 @@ export class AgentVacEngine {
     } catch {
       throw new Error("无法确认进程状态，已阻止文件操作。");
     }
+    this.assertMutationFence();
     if (result?.status !== "clear")
       throw new Error(
         result?.status === "running"
@@ -255,16 +299,115 @@ export class AgentVacEngine {
           : "无法确认进程状态，已阻止文件操作。",
       );
   }
-  private async rootOK() {
-    if (this.invalidated)
+  private ownsCheckpoint(j?: Journal): boolean {
+    return (
+      !!j &&
+      this.activeMutation?.journal === j &&
+      this.activeMutation.canCheckpoint
+    );
+  }
+  private async bindCheckpointParents(j: Journal, dir: string) {
+    if (this.activeMutation?.journal !== j)
+      throw new Error("操作清单绑定已失效。");
+    this.assertMutationFence();
+    await this.rootOK();
+    await plainParents(dir);
+    const quarantine = await exactLstat(this.full(Q)),
+      batch = await exactLstat(dir);
+    const manifest = await exists(path.join(dir, "manifest.json"));
+    const expected = this.journalBindings.get(j)?.manifest;
+    if (
+      expected
+        ? !manifest ||
+          !manifest.isFile() ||
+          manifest.nlink !== 1 ||
+          !same(fp(manifest), expected)
+        : !!manifest
+    )
+      throw new Error("操作清单已被替换，已拒绝写入。");
+    this.assertMutationFence();
+    this.activeMutation.parents = {
+      quarantine: fp(quarantine),
+      batch: fp(batch),
+    };
+    this.activeMutation.manifest = expected;
+  }
+  private async verifyCheckpointParents(j: Journal, dir?: string) {
+    if (this.activeMutation?.journal !== j || !this.activeMutation.parents)
+      throw new Error("恢复记录的操作目录绑定已失效。");
+    await this.rootOK(j);
+    await plainParents(dir ?? this.full(Q));
+    const q = await exactLstat(this.full(Q));
+    if (
+      !q.isDirectory() ||
+      !sameFileIdentity(q, this.activeMutation.parents.quarantine)
+    )
+      throw new Error("隔离父目录已被替换，恢复记录未覆盖新目录。");
+    if (dir) {
+      const b = await exactLstat(dir);
+      if (
+        !b.isDirectory() ||
+        !sameFileIdentity(b, this.activeMutation.parents.batch)
+      )
+        throw new Error("隔离批次目录已被替换，恢复记录未覆盖新目录。");
+      const manifest = await exists(path.join(dir, "manifest.json"));
+      if (
+        this.activeMutation.manifest
+          ? !manifest ||
+            !manifest.isFile() ||
+            manifest.nlink !== 1 ||
+            !same(fp(manifest), this.activeMutation.manifest)
+          : !!manifest
+      )
+        throw new Error("隔离清单已被替换或改变，恢复记录未覆盖它。");
+    }
+  }
+  private async verifyOwnedTemporary(
+    j: Journal,
+    temp: string,
+    parent: Fingerprint,
+    owner: Fingerprint,
+    complete = false,
+  ) {
+    await this.rootOK(j);
+    const dir = path.dirname(temp);
+    await plainParents(dir);
+    const currentParent = await exactLstat(dir),
+      file = await exactLstat(temp);
+    if (
+      !currentParent.isDirectory() ||
+      !sameFileIdentity(currentParent, parent) ||
+      !file.isFile() ||
+      !sameFileIdentity(file, owner) ||
+      (complete
+        ? file.nlink !== 1 || !same(fp(file), owner)
+        : ![1, 2].includes(file.nlink))
+    )
+      throw new Error("临时记录或其目录已被替换；未知路径保持原样。");
+  }
+  private async removeOwnedTemporary(
+    j: Journal,
+    temp: string,
+    parent: Fingerprint,
+    owner?: Fingerprint,
+  ) {
+    if (!owner) return false;
+    try {
+      await this.verifyOwnedTemporary(j, temp, parent, owner);
+      // This is an observed path/identity fence, not an atomic inode-CAS primitive.
+      await fs.unlink(temp);
+      return true;
+    } catch {
+      return false; /* Preserve changed/unknown paths. */
+    }
+  }
+  private async rootOK(checkpoint?: Journal) {
+    if (this.invalidated && !this.ownsCheckpoint(checkpoint))
       throw new Error("提供方或目录已切换，旧扫描与预览已失效。");
     if (!this.rootFingerprint) await this.initialize();
     await plainParents(this.root);
-    const s = await fs.lstat(this.root);
-    if (
-      s.dev !== this.rootFingerprint!.dev ||
-      s.ino !== this.rootFingerprint!.ino
-    )
+    const s = await exactLstat(this.root);
+    if (!sameFileIdentity(s, this.rootFingerprint!))
       throw new Error("根目录已被替换，请重新选择目录。");
     await this.adapter.validateRoot(this.root);
   }
@@ -276,6 +419,9 @@ export class AgentVacEngine {
     return p;
   }
   private async exclusive<T>(fn: () => Promise<T>): Promise<T> {
+    // Pending consent is invalid after any intervening operation, including a
+    // refused busy attempt. Never revoke already-admitted checkpoint ownership.
+    this.discardTrashConfirmation();
     if (this.busy) throw new Error("另一项操作正在进行，请稍候。");
     this.busy = true;
     try {
@@ -284,9 +430,39 @@ export class AgentVacEngine {
       this.busy = false;
     }
   }
+  private assertMutationFence() {
+    if (this.invalidated) throw new Error("提供方或目录已切换，旧操作已失效。");
+    if (
+      this.activeMutation &&
+      (this.cancelRequested ||
+        this.activeMutation.revision !== this.mutationRevision)
+    )
+      throw new Error(
+        "操作已取消；已停止后续文件修改，已执行步骤保留可恢复记录。",
+      );
+  }
+  private async mutationExclusive<T>(fn: () => Promise<T>): Promise<T> {
+    return this.exclusive(async () => {
+      if (this.invalidated)
+        throw new Error("提供方或目录已切换，旧操作已失效。");
+      this.cancelRequested = false;
+      this.activeMutation = {
+        revision: this.mutationRevision,
+        canCheckpoint: false,
+      };
+      try {
+        return await fn();
+      } finally {
+        this.activeMutation = undefined;
+      }
+    });
+  }
   cancelScan(requestId?: string): void {
     if (requestId !== undefined && requestId !== this.activeScanId) return;
+    this.discardTrashConfirmation();
     this.cancelRequested = true;
+    this.mutationRevision++;
+    this.previews.clear();
   }
   async scan(
     options: ScanOptions,
@@ -397,7 +573,7 @@ export class AgentVacEngine {
           try {
             const full = this.full(rel);
             await plainParents(full, false);
-            const s = await fs.lstat(full);
+            const s = await exactLstat(full);
             const c = this.adapter.classify(rel, this.root);
             const kind: Entry["kind"] = s.isSymbolicLink()
               ? "symlink"
@@ -648,7 +824,7 @@ export class AgentVacEngine {
     const p = this.full(record.entry.path);
     await this.rootOK();
     await plainParents(p, false);
-    const s = await fs.lstat(p);
+    const s = await exactLstat(p);
     if (record.unit) {
       await assertUnitPolicy(this.root, record.unit, this.adapter);
       const current = await captureUnit(
@@ -675,6 +851,7 @@ export class AgentVacEngine {
   }
   async preview(ids: string[]): Promise<Preview> {
     return this.exclusive(async () => {
+      const revision = this.mutationRevision;
       if (
         !Array.isArray(ids) ||
         !ids.length ||
@@ -709,6 +886,8 @@ export class AgentVacEngine {
         processStatus,
         scanStatus: this.latest?.status ?? "partial",
       };
+      if (this.invalidated || this.mutationRevision !== revision)
+        throw new Error("预览期间操作已取消或目录已切换，预览已失效。");
       this.previews.set(value.token, { value, ids });
       return value;
     });
@@ -718,6 +897,7 @@ export class AgentVacEngine {
     const dir = this.full(Q);
     const before = await exists(dir);
     if (!before) {
+      this.assertMutationFence();
       await fs.mkdir(dir, { mode: 0o700 });
       await syncDirectory(this.root);
     }
@@ -729,6 +909,7 @@ export class AgentVacEngine {
     const q = await this.quarantineDir();
     const dir = path.join(q, id);
     if (create && !(await exists(dir))) {
+      this.assertMutationFence();
       await fs.mkdir(dir, { mode: 0o700 });
       await syncDirectory(q);
     }
@@ -758,26 +939,125 @@ export class AgentVacEngine {
     if (!key) throw new Error("恢复密钥暂不可用；请先导入你自己的恢复钥匙。");
     return createHmac("sha256", key).update(JSON.stringify(j)).digest("hex");
   }
-  private async writeJournal(j: Journal, signingKey: Buffer | null = this.key) {
-    if (Buffer.byteLength(JSON.stringify(j), "utf8") > 24_000_000)
+  private async validateJournalItems(j: Journal) {
+    const policy = this.recoveryPolicy(j);
+    if (!Array.isArray(j.items)) throw new Error("隔离清单条目无效。");
+    const ids = new Set<string>();
+    for (const i of j.items) {
+      if (
+        !i ||
+        !UUID.test(i.id) ||
+        ids.has(i.id) ||
+        !validRelative(i.path) ||
+        (Object.hasOwn(i, "unit") &&
+          (!i.unit || typeof i.unit !== "object" || Array.isArray(i.unit))) ||
+        (!i.unit &&
+          !(this.adapter.restoreFileAllowed
+            ? this.adapter.restoreFileAllowed(i.path, policy)
+            : this.adapter.classify(i.path, this.root).risk !== "protected" &&
+              this.adapter.classify(i.path, this.root).category !== "cache")) ||
+        (!!i.unit && policy !== 3 && policy !== 4)
+      )
+        throw new Error("隔离清单包含非法路径或恢复策略。");
+      // Authentication precedes this validation. Never normalize signed legacy IDs.
+      assertFileFingerprint(i.before);
+      if (i.stored !== undefined) assertFileFingerprint(i.stored);
+      if (i.unit) {
+        validateUnitDefinition(i.unit.snapshot.definition, i.path);
+        await assertUnitRecord(this.root, i.unit, this.adapter);
+        const identity = (value: { dev: unknown; ino: unknown }) => {
+          if (
+            typeof value.dev !== typeof value.ino ||
+            !validFileId(value.dev) ||
+            !validFileId(value.ino, true)
+          )
+            throw new FileIdentityError();
+        };
+        for (const snapshot of [i.unit.snapshot, i.unit.stored]) {
+          if (!snapshot) continue;
+          for (const node of snapshot.nodes)
+            assertFileFingerprint(node.fingerprint);
+          for (const parent of snapshot.parents) identity(parent);
+        }
+        if (i.unit.container) identity(i.unit.container);
+        for (const directory of i.unit.restore?.directories ?? [])
+          identity(directory);
+        for (const linked of i.unit.restore?.linked ?? [])
+          assertFileFingerprint(linked.fingerprint);
+        if (i.size !== i.unit.snapshot.size)
+          throw new Error("清理单元占用与签名不一致。");
+      }
+      ids.add(i.id);
+    }
+  }
+  private async durableJournal(j: Journal, signingKey?: Buffer | null) {
+    const binding = this.journalBindings.get(j);
+    if (
+      !binding ||
+      binding.version !== j.version ||
+      binding.policy !== this.recoveryPolicy(j) ||
+      j.root !== this.root ||
+      (signingKey !== undefined &&
+        (!signingKey || !signingKey.equals(binding.key)))
+    )
+      throw new Error("恢复清单认证绑定已失效。");
+    const journal: Journal = {
+      ...j,
+      version: 4,
+      provider: this.provider,
+      recoveryPolicyVersion: binding.policy,
+    };
+    await this.validateJournalItems(journal);
+    if (Buffer.byteLength(JSON.stringify(journal), "utf8") > 24_000_000)
       throw new Error("恢复清单超过 24 MB 安全预算，请减少选择。");
-    const dir = await this.batchDir(j.id, true);
+    return {
+      journal,
+      signature: this.sign(journal, binding.key),
+      keyId: createHash("sha256").update(binding.key).digest("hex"),
+    };
+  }
+  private publishedJournal(j: Journal, published: Journal) {
+    // Rename commits the storage version even if a following directory sync fails.
+    j.version = published.version;
+    j.provider = published.provider;
+    j.recoveryPolicyVersion = published.recoveryPolicyVersion;
+    this.journalBindings.get(j)!.version = 4;
+    if (this.activeMutation?.journal === j)
+      this.activeMutation.canCheckpoint = true;
+  }
+  private async writeJournal(j: Journal, signingKey?: Buffer | null) {
+    const checkpoint = this.ownsCheckpoint(j);
+    const fence = () => {
+      if (!checkpoint) this.assertMutationFence();
+    };
+    fence();
+    const envelope = await this.durableJournal(j, signingKey);
+    let dir: string;
+    if (checkpoint) {
+      // Only finish authenticated state for this still-owned operation. Never
+      // create a replacement root, quarantine directory or batch after invalidation.
+      dir = path.join(this.full(Q), j.id);
+      await this.verifyCheckpointParents(j, dir);
+    } else {
+      dir = await this.batchDir(j.id, true);
+      if (this.activeMutation?.journal === j)
+        await this.bindCheckpointParents(j, dir);
+    }
     const tmp = path.join(dir, randomUUID() + ".tmp");
+    const parent = fp(await exactLstat(dir));
+    fence();
     const h = await fs.open(tmp, "wx", 0o600);
+    let owner: Fingerprint | undefined;
+    let written: Fingerprint | undefined;
     try {
       try {
-        await h.writeFile(
-          JSON.stringify(
-            {
-              journal: j,
-              signature: this.sign(j, signingKey),
-              keyId: createHash("sha256").update(signingKey!).digest("hex"),
-            },
-            null,
-            2,
-          ),
-        );
+        owner = fp(await exactHandleStat(h));
+        await this.verifyOwnedTemporary(j, tmp, parent, owner);
+        await this.verifyCheckpointParents(j, dir);
+        fence();
+        await h.writeFile(JSON.stringify(envelope, null, 2));
         await h.sync();
+        written = fp(await exactHandleStat(h));
       } finally {
         await h.close();
       }
@@ -786,11 +1066,30 @@ export class AgentVacEngine {
       if (s && (!s.isFile() || s.isSymbolicLink() || s.nlink !== 1))
         throw new Error("隔离清单已被替换。");
       await plainParents(dir);
+      await this.verifyCheckpointParents(j, dir);
+      await this.verifyOwnedTemporary(j, tmp, parent, written!, true);
+      fence();
       await fs.rename(tmp, target);
+      this.publishedJournal(j, envelope.journal);
+      if (this.activeMutation?.journal === j) {
+        const published = await exactLstat(target);
+        if (
+          !written ||
+          !published.isFile() ||
+          published.nlink !== 1 ||
+          !sameFileIdentity(published, written) ||
+          published.size !== written.size ||
+          published.mtimeMs !== written.mtimeMs ||
+          published.mode !== written.mode
+        )
+          throw new Error("刚写入的隔离清单已被替换，已停止后续操作。");
+        this.activeMutation.manifest = fp(published);
+        this.journalBindings.get(j)!.manifest = fp(published);
+        await this.verifyCheckpointParents(j, dir);
+      }
       await syncDirectory(dir);
     } finally {
-      // Only remove this operation's own exclusive temporary journal, never source data.
-      await fs.unlink(tmp).catch(() => {});
+      await this.removeOwnedTemporary(j, tmp, parent, owner);
     }
   }
   private async readJournal(
@@ -804,7 +1103,7 @@ export class AgentVacEngine {
       : path.join(this.full(Q), id);
     if (!allowRootCreation) await plainParents(dir);
     const f = path.join(dir, "manifest.json");
-    const before = await fs.lstat(f);
+    const before = await exactLstat(f);
     if (
       !before.isFile() ||
       before.isSymbolicLink() ||
@@ -820,10 +1119,20 @@ export class AgentVacEngine {
     );
     let raw: string;
     try {
-      const s = await h.stat();
-      if (!s.isFile() || s.nlink !== 1 || s.size > 32_000_000)
+      const s = await exactHandleStat(h);
+      if (
+        !s.isFile() ||
+        s.nlink !== 1 ||
+        s.size > 32_000_000 ||
+        !same(fp(s), fp(before))
+      )
         throw new Error("无效隔离清单。");
       raw = await h.readFile("utf8");
+      if (
+        !same(fp(await exactHandleStat(h)), fp(before)) ||
+        !same(fp(await exactLstat(f)), fp(before))
+      )
+        throw new Error("读取期间隔离清单发生变化。");
     } finally {
       await h.close();
     }
@@ -838,29 +1147,15 @@ export class AgentVacEngine {
       !Array.isArray(j.items)
     )
       throw new Error("隔离清单校验失败；拒绝使用被改动或来自其他设备的清单。");
-    const ids = new Set<string>();
-    for (const i of j.items) {
-      if (
-        !UUID.test(i.id) ||
-        ids.has(i.id) ||
-        !validRelative(i.path) ||
-        (!i.unit &&
-          !(this.adapter.restoreFileAllowed
-            ? this.adapter.restoreFileAllowed(i.path, j.version)
-            : this.adapter.classify(i.path, this.root).risk !== "protected" &&
-              this.adapter.classify(i.path, this.root).category !== "cache")) ||
-        (!!i.unit && j.version !== 3)
-      )
-        throw new Error("隔离清单包含非法路径。");
-      if (i.unit) {
-        validateUnitDefinition(i.unit.snapshot.definition, i.path);
-        await assertUnitRecord(this.root, i.unit, this.adapter);
-        if (i.size !== i.unit.snapshot.size)
-          throw new Error("清理单元占用与签名不一致。");
-      }
-      ids.add(i.id);
-    }
-    this.journalKeys.set(j.id, this.keyForSignature(j, sig)!);
+    await this.validateJournalItems(j);
+    const signingKey = this.keyForSignature(j, sig)!;
+    this.journalKeys.set(j.id, signingKey);
+    this.journalBindings.set(j, {
+      version: j.version,
+      policy: this.recoveryPolicy(j),
+      key: signingKey,
+      manifest: fp(before),
+    });
     if (!reconcile) return j;
     // A pending move is recoverable even if the app stopped after rename and before journal update.
     for (const i of j.items.filter((i) => i.status === "pending" && !i.unit)) {
@@ -870,8 +1165,7 @@ export class AgentVacEngine {
         stored &&
         stored.isFile() &&
         stored.nlink === 1 &&
-        stored.dev === i.before.dev &&
-        stored.ino === i.before.ino &&
+        sameFileIdentity(stored, i.before) &&
         stored.size === i.before.size &&
         stored.mtimeMs === i.before.mtimeMs
       ) {
@@ -893,8 +1187,7 @@ export class AgentVacEngine {
         original.isFile() &&
         original.nlink === 1 &&
         i.stored &&
-        original.dev === i.stored.dev &&
-        original.ino === i.stored.ino &&
+        sameFileIdentity(original, i.stored) &&
         original.size === i.stored.size &&
         original.mtimeMs === i.stored.mtimeMs
       ) {
@@ -952,7 +1245,7 @@ export class AgentVacEngine {
     confirmedClosed: boolean,
     assertAuthorized?: () => void,
   ): Promise<OperationResult> {
-    return this.exclusive(async () => {
+    return this.mutationExclusive(async () => {
       assertAuthorized?.();
       this.requireSigningKey();
       const saved = this.previews.get(token);
@@ -966,7 +1259,8 @@ export class AgentVacEngine {
       assertAuthorized?.();
       for (const id of saved.ids) this.assertNewQuarantinePolicy(id);
       const j: Journal = {
-        version: saved.ids.some((id) => this.entries.get(id)?.unit) ? 3 : 2,
+        version: 4,
+        recoveryPolicyVersion: 4,
         provider: this.provider,
         id: randomUUID(),
         root: this.root,
@@ -991,6 +1285,8 @@ export class AgentVacEngine {
           ...(record.unit ? { unit: { snapshot: record.unit } } : {}),
         };
       });
+      this.journalBindings.set(j, { version: 4, policy: 4, key: this.key! });
+      this.activeMutation!.journal = j;
       await this.writeJournal(j); // One durable intent record for the whole batch; pending moves reconcile after interruption.
       for (let index = 0; index < saved.ids.length; index++) {
         const id = saved.ids[index];
@@ -1013,6 +1309,7 @@ export class AgentVacEngine {
                 await this.requireStopped();
                 assertAuthorized?.();
               },
+              () => this.assertMutationFence(),
             );
             item.status = "quarantined";
             result.completed++;
@@ -1028,25 +1325,26 @@ export class AgentVacEngine {
               (constants.O_NONBLOCK ?? 0),
           );
           try {
-            if (!same(fp(await handle.stat()), r.snapshot))
+            if (!same(fp(await exactHandleStat(handle)), r.snapshot))
               throw new Error("源文件已变化。");
             await plainParents(source, false);
             await plainParents(dir);
             if (await exists(target)) throw new Error("隔离目标已存在。");
-            if (!same(fp(await fs.lstat(source)), r.snapshot))
+            if (!same(fp(await exactLstat(source)), r.snapshot))
+              throw new Error("源文件已变化。");
+            await this.requireStopped();
+            await this.rootOK();
+            if (!same(fp(await exactLstat(source)), r.snapshot))
               throw new Error("源文件已变化。");
             assertAuthorized?.();
+            this.assertMutationFence();
             await fs.rename(source, target);
             moved = true;
           } finally {
             await handle.close();
           }
-          const movedStat = await fs.lstat(target);
-          if (
-            movedStat.dev !== r.snapshot.dev ||
-            movedStat.ino !== r.snapshot.ino ||
-            !movedStat.isFile()
-          )
+          const movedStat = await exactLstat(target);
+          if (!sameFileIdentity(movedStat, r.snapshot) || !movedStat.isFile())
             throw new Error("移动后文件标识不一致，请人工检查。");
           item.status = "quarantined";
           item.stored = fp(movedStat);
@@ -1075,6 +1373,7 @@ export class AgentVacEngine {
                   await this.rootOK();
                   await this.requireStopped();
                 },
+                () => this.assertMutationFence(),
               );
               item.status = "restored";
               item.error = "整组隔离失败，已安全恢复原位：" + errorText(e);
@@ -1152,9 +1451,11 @@ export class AgentVacEngine {
             item.verified = true;
             item.explanation =
               "恢复清单已通过可信钥匙认证；恢复前仍会重新检查文件及目标路径。";
-          } catch {
+          } catch (error) {
             item.explanation =
-              "清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。";
+              error instanceof FileIdentityError
+                ? error.message
+                : "清单无法认证：可能缺少原恢复钥匙、来自另一设备，或清单已改变。数据文件仍保留；请导入你自己的钥匙备份后重试。";
           }
           for await (const child of await fs.opendir(dir)) {
             if (child.name === "manifest.json" || child.name.endsWith(".tmp"))
@@ -1175,7 +1476,7 @@ export class AgentVacEngine {
               item.irregularEntries++;
               continue;
             }
-            const data = await fs.lstat(path.join(dir, child.name));
+            const data = await exactLstat(path.join(dir, child.name));
             if (isUnit) {
               if (!data.isDirectory() || data.isSymbolicLink()) {
                 item.irregularEntries++;
@@ -1200,8 +1501,11 @@ export class AgentVacEngine {
                     continue;
                   }
                   await plainParents(p, false);
-                  const stat = await fs.lstat(p);
-                  if (stat.isSymbolicLink() || stat.dev !== data.dev) {
+                  const stat = await exactLstat(p);
+                  if (
+                    stat.isSymbolicLink() ||
+                    !sameFileId(stat.dev, data.dev)
+                  ) {
                     item.irregularEntries++;
                     continue;
                   }
@@ -1289,7 +1593,7 @@ export class AgentVacEngine {
           if (rows.some((r) => r.id === id)) continue;
           try {
             const p = path.join(dir, name);
-            const s = await fs.lstat(p);
+            const s = await exactLstat(p);
             if (!s.isFile() || s.nlink !== 1 || s.size > 32_000_000) continue;
             const h = await fs.open(
               p,
@@ -1299,7 +1603,7 @@ export class AgentVacEngine {
             );
             let raw: string;
             try {
-              const stat = await h.stat();
+              const stat = await exactHandleStat(h);
               if (!stat.isFile() || stat.nlink !== 1)
                 throw new Error("无效记录");
               raw = await h.readFile("utf8");
@@ -1318,6 +1622,7 @@ export class AgentVacEngine {
               j.items.some((i) => !validRelative(i.path))
             )
               throw new Error("记录验证失败");
+            await this.validateJournalItems(j);
             rows.push({
               id: j.id,
               root: j.root,
@@ -1353,17 +1658,160 @@ export class AgentVacEngine {
       return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     });
   }
+  private trashJournalDigest(j: Journal): string {
+    const binding = this.journalBindings.get(j);
+    if (
+      !binding ||
+      binding.version !== j.version ||
+      binding.policy !== this.recoveryPolicy(j) ||
+      j.root !== this.root
+    )
+      throw new Error("恢复清单认证绑定已失效。");
+    // Include the authenticated origin key without exposing it to the renderer.
+    // New primary keys must not re-sign or re-authorize imported legacy journals.
+    return createHash("sha256")
+      .update(
+        JSON.stringify({
+          journal: j,
+          originKeyId: createHash("sha256").update(binding.key).digest("hex"),
+        }),
+      )
+      .digest("hex");
+  }
+  private async verifyTrashConfirmationPaths(
+    saved: PendingTrashConfirmation,
+    dir: string,
+  ) {
+    await this.rootOK();
+    await plainParents(dir);
+    const root = await exactLstat(this.root),
+      batch = await exactLstat(dir),
+      manifest = await exactLstat(path.join(dir, "manifest.json"));
+    if (
+      !root.isDirectory() ||
+      !sameFileIdentity(root, saved.rootIdentity) ||
+      !batch.isDirectory() ||
+      !sameFileIdentity(batch, saved.batchIdentity) ||
+      !manifest.isFile() ||
+      manifest.nlink !== 1 ||
+      !same(fp(manifest), saved.manifestIdentity)
+    )
+      throw new Error("回收站确认已失效；批次或清单已被替换，请重新确认。");
+  }
+  async prepareTrash(batchId: string): Promise<TrashConfirmation> {
+    return this.exclusive(async () => {
+      this.requireSigningKey();
+      if (typeof batchId !== "string" || !UUID.test(batchId))
+        throw new Error("无效的隔离批次。");
+      const revision = this.mutationRevision,
+        generation = this.trashGeneration;
+      await this.rootOK();
+      const journal = await this.readJournal(batchId, false);
+      if (!journal.items.some((item) => item.status === "quarantined"))
+        throw new Error("此批次没有可移入回收站的隔离文件。");
+      const dir = path.join(this.full(Q), batchId),
+        batch = await exactLstat(dir),
+        manifest = await exactLstat(path.join(dir, "manifest.json"));
+      const authenticatedManifest = this.journalBindings.get(journal)?.manifest;
+      if (
+        !batch.isDirectory() ||
+        !manifest.isFile() ||
+        manifest.nlink !== 1 ||
+        !authenticatedManifest ||
+        !same(fp(manifest), authenticatedManifest)
+      )
+        throw new Error("隔离批次或清单不可用；认证读取后文件可能已变化。");
+      if (
+        this.invalidated ||
+        revision !== this.mutationRevision ||
+        generation !== this.trashGeneration
+      )
+        throw new Error("回收站确认已失效；请重新打开此批次并重新确认。");
+      // Starting a new confirmation can acknowledge a prior cancelled attempt;
+      // revision checks above ensure cancellation during preparation never revives it.
+      this.cancelRequested = false;
+      const value: TrashConfirmation = Object.freeze({
+        token: randomUUID(),
+        batchId,
+        provider: this.provider,
+        root: this.root,
+        demo: this.demo,
+        expiresAt: Date.now() + 5 * 60_000,
+      });
+      this.trashConfirmation = {
+        value,
+        journalDigest: this.trashJournalDigest(journal),
+        revision,
+        deadline: performance.now() + 5 * 60_000,
+        rootIdentity: { ...this.rootFingerprint! },
+        batchIdentity: fp(batch),
+        manifestIdentity: fp(manifest),
+      };
+      return value;
+    });
+  }
+  /** Main-only refusal path: revoke pending consent, not admitted work. */
+  discardTrashConfirmation(): void {
+    this.trashGeneration++;
+    this.trashConfirmation = undefined;
+  }
+  cancelTrashConfirmation(token: string): void {
+    if (typeof token !== "string" || !UUID.test(token))
+      throw new Error("无效的回收站确认。");
+    if (this.trashConfirmation?.value.token === token)
+      this.discardTrashConfirmation();
+    if (this.activeMutation?.trashConfirmationToken === token) {
+      this.cancelRequested = true;
+      this.mutationRevision++;
+    }
+  }
   async trash(
     batchId: string,
     confirmed: boolean,
+    confirmedClosed: boolean,
+    confirmationToken: string,
     trashItem: (dir: string) => Promise<void>,
   ): Promise<OperationResult> {
-    return this.exclusive(async () => {
+    // Consume synchronously, before the mutation helper can reset cancellation.
+    const confirmation = this.trashConfirmation;
+    this.trashConfirmation = undefined;
+    const cancelledBeforeAdmission = this.cancelRequested;
+    return this.mutationExclusive(async () => {
       this.requireSigningKey();
       if (confirmed !== true) throw new Error("必须明确确认移入系统回收站。");
+      if (confirmedClosed !== true)
+        throw new Error(
+          "请先确认已退出全部相关程序与后台服务，包括以管理员权限或其他用户身份运行的实例。",
+        );
+      if (
+        typeof batchId !== "string" ||
+        typeof confirmationToken !== "string" ||
+        !confirmation ||
+        confirmation.value.token !== confirmationToken ||
+        confirmation.value.batchId !== batchId ||
+        confirmation.value.provider !== this.provider ||
+        confirmation.value.root !== this.root ||
+        confirmation.value.demo !== this.demo ||
+        confirmation.revision !== this.mutationRevision ||
+        cancelledBeforeAdmission ||
+        performance.now() >= confirmation.deadline
+      )
+        throw new Error("回收站确认已失效；请重新打开此批次并重新确认。");
+      if (typeof trashItem !== "function")
+        throw new Error("系统回收站接口不可用。");
+      this.activeMutation!.trashConfirmationToken = confirmation.value.token;
       await this.rootOK();
-      const j = await this.readJournal(batchId);
-      const dir = await this.batchDir(batchId);
+      const j = await this.readJournal(batchId, false);
+      if (this.trashJournalDigest(j) !== confirmation.journalDigest)
+        throw new Error("回收站确认已失效；批次认证记录发生变化，请重新确认。");
+      this.activeMutation!.journal = j;
+      // Confirmation refers to an existing batch. Never recreate missing storage
+      // while deciding whether that consent is still valid.
+      const dir = path.join(this.full(Q), batchId);
+      await this.bindCheckpointParents(j, dir);
+      await this.verifyTrashConfirmationPaths(confirmation, dir);
+      await this.requireStopped();
+      await this.verifyCheckpointParents(j, dir);
       const candidates = j.items.filter((i) => i.status === "quarantined");
       if (!candidates.length)
         throw new Error("此批次没有可移入回收站的隔离文件。");
@@ -1390,38 +1838,83 @@ export class AgentVacEngine {
           continue;
         }
         const f = path.join(dir, i.id + ".data");
-        const s = await fs.lstat(f);
+        const s = await exactLstat(f);
         if (!i.stored || !s.isFile() || s.nlink !== 1 || !same(fp(s), i.stored))
           throw new Error("隔离文件已变化，已拒绝移入回收站。");
       }
-      await plainParents(dir);
+      await this.verifyCheckpointParents(j, dir);
+      await this.verifyTrashConfirmationPaths(confirmation, dir);
+      if (
+        this.trashJournalDigest(await this.readJournal(batchId, false)) !==
+          confirmation.journalDigest ||
+        confirmation.revision !== this.mutationRevision ||
+        performance.now() >= confirmation.deadline
+      )
+        throw new Error("回收站确认已失效；请重新打开此批次并重新确认。");
+      this.assertMutationFence();
+      // Once the OS callback is admitted, retain the base's exact owned receipt
+      // checkpoint behavior even if cancellation/expiry occurs inside that call.
+      this.activeMutation!.canCheckpoint = true;
       await trashItem(dir);
       if (await exists(dir))
         throw new Error("系统未确认移入回收站；请检查原隔离目录。");
       const failed: { path: string; error: string }[] = [];
       for (const i of candidates) i.status = "trashed";
       try {
-        const q = await this.quarantineDir();
+        const envelope = await this.durableJournal(j);
+        await this.verifyCheckpointParents(j);
+        const q = this.full(Q);
+        await plainParents(q);
         const temp = path.join(q, randomUUID() + ".receipt.tmp");
-        const h = await fs.open(temp, "wx", 0o600);
+        const parent = this.activeMutation!.parents!.quarantine;
+        let owner: Fingerprint | undefined;
+        let written: Fingerprint | undefined;
         try {
-          await h.writeFile(
-            JSON.stringify(
-              {
-                journal: j,
-                signature: this.sign(j),
-                keyId: createHash("sha256").update(this.key!).digest("hex"),
-              },
-              null,
-              2,
-            ),
-          );
-          await h.sync();
+          const h = await fs.open(temp, "wx", 0o600);
+          try {
+            owner = fp(await exactHandleStat(h));
+            await this.verifyCheckpointParents(j);
+            await this.verifyOwnedTemporary(j, temp, parent, owner);
+            await h.writeFile(JSON.stringify(envelope, null, 2));
+            await h.sync();
+            written = fp(await exactHandleStat(h));
+          } finally {
+            await h.close();
+          }
+          await this.verifyCheckpointParents(j);
+          await this.verifyOwnedTemporary(j, temp, parent, written!, true);
+          const receipt = path.join(q, batchId + ".receipt.json");
+          // Atomic no-replace publication preserves any prior receipt. These
+          // path checks are observations, not a general same-user race lock.
+          await fs.link(temp, receipt);
+          this.publishedJournal(j, envelope.journal);
+          const published = await exactLstat(receipt);
+          if (
+            !written ||
+            !published.isFile() ||
+            published.nlink !== 2 ||
+            !sameFileIdentity(published, written) ||
+            published.size !== written.size ||
+            published.mtimeMs !== written.mtimeMs ||
+            published.mode !== written.mode
+          )
+            throw new Error("回收站记录发布时发生变化，未确认记录成功。");
+          await this.verifyCheckpointParents(j);
+          if (!(await this.removeOwnedTemporary(j, temp, parent, owner)))
+            throw new Error(
+              "回收站记录临时链接未能安全移除，请保留现有文件供检查。",
+            );
+          const complete = await exactLstat(receipt);
+          if (
+            !complete.isFile() ||
+            complete.nlink !== 1 ||
+            !sameFileIdentity(complete, written)
+          )
+            throw new Error("回收站记录状态不一致，未确认记录成功。");
+          await syncDirectory(q);
         } finally {
-          await h.close();
+          await this.removeOwnedTemporary(j, temp, parent, owner);
         }
-        await fs.rename(temp, path.join(q, batchId + ".receipt.json"));
-        await syncDirectory(q);
       } catch (e) {
         failed.push({
           path: batchId,
@@ -1440,13 +1933,14 @@ export class AgentVacEngine {
     batchId: string,
     confirmedClosed = false,
   ): Promise<OperationResult> {
-    return this.exclusive(async () => {
+    return this.mutationExclusive(async () => {
       await this.rootOK();
       if (!this.demo && confirmedClosed !== true)
         throw new Error(`请先确认已退出全部 ${this.adapter.label} 相关进程。`);
       await this.requireStopped();
       await this.refreshProtection();
       const j = await this.readJournal(batchId);
+      this.activeMutation!.journal = j;
       const signingKey = this.journalKeys.get(batchId)!;
       const dir = await this.batchDir(batchId);
       const result: OperationResult = {
@@ -1497,6 +1991,7 @@ export class AgentVacEngine {
                 await this.rootOK();
                 await this.requireStopped();
               },
+              () => this.assertMutationFence(),
             );
             i.status = "restored";
             delete i.error;
@@ -1507,9 +2002,11 @@ export class AgentVacEngine {
           }
           const source = path.join(dir, i.id + ".data"),
             target = this.full(i.path);
+          await this.requireStopped();
+          await this.rootOK();
           await plainParents(source, false);
           await plainParents(target, false);
-          const s = await fs.lstat(source);
+          const s = await exactLstat(source);
           const original = await exists(target);
           const interruptedLink = !!(
             previouslyPending.has(i.id) &&
@@ -1519,10 +2016,8 @@ export class AgentVacEngine {
             s.isFile() &&
             s.nlink === 2 &&
             original.nlink === 2 &&
-            original.ino === s.ino &&
-            original.dev === s.dev &&
-            s.ino === i.stored.ino &&
-            s.dev === i.stored.dev &&
+            sameFileIdentity(original, s) &&
+            sameFileIdentity(s, i.stored) &&
             s.size === i.stored.size &&
             s.mtimeMs === i.stored.mtimeMs
           );
@@ -1536,9 +2031,29 @@ export class AgentVacEngine {
               throw new Error("隔离文件已变化；拒绝恢复。");
             if (original) throw new Error("原路径已存在文件；不会覆盖。");
             // link is atomic and fails with EEXIST; unlike rename, it cannot overwrite a concurrent destination.
+            this.assertMutationFence();
             await fs.link(source, target);
           }
           try {
+            await this.requireStopped();
+            await this.rootOK();
+            await plainParents(source, false);
+            await plainParents(target, false);
+            const linkedSource = await exactLstat(source),
+              linkedTarget = await exactLstat(target);
+            if (
+              !linkedSource.isFile() ||
+              !linkedTarget.isFile() ||
+              linkedSource.nlink !== 2 ||
+              linkedTarget.nlink !== 2 ||
+              !sameFileIdentity(linkedSource, s) ||
+              !sameFileIdentity(linkedTarget, s) ||
+              linkedSource.size !== s.size ||
+              linkedSource.mtimeMs !== s.mtimeMs ||
+              linkedSource.mode !== s.mode
+            )
+              throw new Error("恢复链接状态发生变化；隔离数据仍保留。");
+            this.assertMutationFence();
             await fs.unlink(source);
           } catch (e) {
             i.error =
@@ -1589,7 +2104,7 @@ export async function loadKey(stateDir: string): Promise<Buffer> {
       if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
     }
   }
-  const check = await fs.lstat(p);
+  const check = await exactLstat(p);
   if (
     !check.isFile() ||
     check.isSymbolicLink() ||

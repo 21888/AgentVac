@@ -1,3 +1,4 @@
+import { trashFixture } from "./helpers/trash.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { promises as fs } from "node:fs";
@@ -74,7 +75,7 @@ test("unavailable primary blocks new quarantine/trash but permits authenticated 
   let called = false;
   await assert.rejects(
     () =>
-      readonly.trash(result.batchId, true, async () => {
+      trashFixture(readonly, result.batchId, true, true, async () => {
         called = true;
       }),
     /密钥/,

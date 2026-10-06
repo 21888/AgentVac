@@ -174,6 +174,7 @@ test("legacy signed v1 Codex manifests remain recoverable and reject foreign att
   const saved = JSON.parse(await fs.readFile(manifest, "utf8"));
   saved.journal.version = 1;
   delete saved.journal.provider;
+  delete saved.journal.recoveryPolicyVersion;
   saved.signature = createHmac("sha256", key)
     .update(JSON.stringify(saved.journal))
     .digest("hex");

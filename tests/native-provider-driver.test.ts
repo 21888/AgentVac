@@ -10,7 +10,7 @@ import { validateDriverEvidence } from "../scripts/native-ci-summary.mjs";
 
 const digest = (bytes: Buffer | string) =>
   createHash("sha256").update(bytes).digest("hex");
-async function fixture() {
+async function fixture(parentEnv: NodeJS.ProcessEnv = process.env) {
   const root = await fs.realpath(
     await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-plain-driver-")),
   );
@@ -45,8 +45,10 @@ async function fixture() {
   );
   const receipt = await buildNativeProviderHarness(root);
   const entry = path.join(root, receipt.output);
-  const env = { ...process.env };
+  const env = { ...parentEnv };
   delete env.NODE_OPTIONS;
+  // A unit fixture must never overwrite receipts owned by the native CI run.
+  delete env.AGENTVAC_NATIVE_EVIDENCE_DIR;
   return {
     root,
     entry,
@@ -136,6 +138,39 @@ test("driver refuses flags, extra args and NODE_OPTIONS before fixture code", as
   } finally {
     await f.clean();
   }
+});
+
+test("fixture receipts stay local without changing inherited shared evidence", async (t) => {
+  const shared = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "agentvac-shared-evidence-")),
+  );
+  t.after(() => fs.rm(shared, { recursive: true, force: true }));
+  const receiptName = `provider-driver-${process.platform}-${process.arch}.json`;
+  const preserved = new Map([
+    [receiptName, '{"syntheticExternalEvidence":"must-stay-unchanged"}\n'],
+    ["parent-marker.txt", "synthetic CI evidence sentinel\n"],
+  ]);
+  for (const [name, bytes] of preserved)
+    await fs.writeFile(path.join(shared, name), bytes);
+
+  const parentEnv = { ...process.env, AGENTVAC_NATIVE_EVIDENCE_DIR: shared };
+  const f = await fixture(parentEnv);
+  t.after(() => f.clean());
+  const result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(parentEnv.AGENTVAC_NATIVE_EVIDENCE_DIR, shared);
+  assert.deepEqual((await fs.readdir(shared)).sort(), [...preserved.keys()].sort());
+  for (const [name, bytes] of preserved)
+    assert.equal(await fs.readFile(path.join(shared, name), "utf8"), bytes);
+
+  const evidence = JSON.parse(
+    await fs.readFile(
+      path.join(f.root, ".qa/native-provider-evidence", receiptName),
+      "utf8",
+    ),
+  );
+  assert.equal(evidence.bundleSha256, digest(await fs.readFile(f.entry)));
+  assert.deepEqual(evidence.argv, [process.execPath, f.entry]);
 });
 
 test("receipt labels Node-normalized argv rather than claiming raw OS launch arguments", async () => {

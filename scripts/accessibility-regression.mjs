@@ -177,6 +177,10 @@ try {
         return engine.restore(args[0], args[1]);
       case "openQuarantine":
         return;
+      case "prepareTrash":
+        return engine.prepareTrash(args[0]);
+      case "cancelTrashConfirmation":
+        return engine.cancelTrashConfirmation(args[0]);
       case "trash":
         throw new Error(
           "Accessibility audit never executes system-trash actions.",
@@ -201,6 +205,8 @@ try {
         "history",
         "restore",
         "openQuarantine",
+        "prepareTrash",
+        "cancelTrashConfirmation",
         "trash",
       ].map((method) => [
         method,
@@ -347,6 +353,7 @@ try {
   await page
     .getByRole("button", { name: "移入系统回收站", exact: true })
     .click();
+  await idle();
   await audit("trash-confirmation");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "恢复此批次", exact: true }).click();

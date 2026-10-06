@@ -4,6 +4,9 @@ name: Source-native Electron fixture verification
 # may temporarily add a push trigger, then this file is restored byte-for-byte.
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths: [".github/native-recovery-validation-20261006T063142Z-d97ea61d.marker"]
 
 permissions:
   contents: read

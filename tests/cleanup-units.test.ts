@@ -1,3 +1,4 @@
+import { trashFixture } from "./helpers/trash.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { promises as fs } from "node:fs";
@@ -119,7 +120,8 @@ test("directory unit has exact counts/bytes, signed v3 identity, and nonoverwrit
       "utf8",
     ),
   );
-  assert.equal(manifest.journal.version, 3);
+  assert.equal(manifest.journal.version, 4);
+  assert.equal(manifest.journal.recoveryPolicyVersion, 4);
   assert.equal(manifest.journal.provider, "cursor");
   const fresh = new AgentVacEngine(f.root, f.key, true, clear, [], f.provider);
   assert.equal((await fresh.history())[0].items[0].cleanupUnit?.fileCount, 2);
@@ -389,7 +391,7 @@ test("unknown quarantine companions or descendants prevent restore/trash", async
     assert.equal((await f.engine.restore(q.batchId, true)).completed, 0);
     let called = false;
     await assert.rejects(
-      f.engine.trash(q.batchId, true, async () => {
+      trashFixture(f.engine, q.batchId, true, true, async () => {
         called = true;
       }),
     );

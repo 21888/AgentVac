@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ConversationWorkspace from "./ConversationWorkspace.vue";
+import { TrashConsent } from "./trash-consent";
 import type {
   ConversationAPI,
   ConversationArchivePreview,
@@ -7,6 +8,7 @@ import type {
 import { version as appVersion } from "../package.json";
 import {
   computed,
+  reactive,
   defineComponent,
   h,
   onMounted,
@@ -470,8 +472,7 @@ const sessionBulkReview = ref<{
   age: string;
 } | null>(null);
 const sessionBulkAcknowledged = ref(false);
-const trashAcknowledged = ref(false);
-const trashConfirmation = ref("");
+const trashConsent = reactive(new TrashConsent());
 const operation = ref<
   (OperationResult & { type: "quarantine" | "restore" | "trash" }) | null
 >(null);
@@ -798,6 +799,15 @@ const canQuarantine = computed(
     !error.value &&
     !busy.value,
 );
+const canTrash = computed(() =>
+  trashConsent.ready(
+    trashTarget.value,
+    context.value,
+    !!busy.value,
+    canSign.value,
+    now.value,
+  ),
+);
 const modalOpen = computed(
   () =>
     !!preview.value ||
@@ -959,7 +969,7 @@ async function run(label: string, action: () => Promise<void>) {
     } else {
       error.value = message;
       const knownBeforeWrite =
-        /检测到 .+ 正在运行|无法确认进程状态|预览已失效|请先确认已退出全部|当前或活动数据保护范围/.test(
+        /回收站确认已失效|检测到 .+ 正在运行|无法确认进程状态|预览已失效|请先确认已退出全部|当前或活动数据保护范围/.test(
           message,
         );
       operationInterrupted.value =
@@ -997,6 +1007,7 @@ async function refreshHistory() {
   batches.value = await window.agentvac.history();
 }
 function resetRoot(next: AppContext) {
+  resetTrashConsent();
   conversationArchiveIds.value = [];
   conversationArchiveTitles.value = [];
   conversationRevision.value++;
@@ -1376,26 +1387,57 @@ async function quarantine() {
   if (conversationOperation && operationInterrupted.value)
     conversationRevision.value++;
 }
-function requestTrash(batch: Batch) {
+let trashCancellation: Promise<void> = Promise.resolve();
+function resetTrashConsent() {
+  const token = trashConsent.reset();
+  if (token) {
+    trashCancellation = trashCancellation
+      .then(() => window.agentvac.cancelTrashConfirmation(token))
+      .catch(() => {
+        notice.value = "旧的回收站确认未能撤销；请重新打开批次后再确认。";
+      });
+  }
+}
+async function requestTrash(batch: Batch) {
   if (busy.value || !canSign.value) return;
   rememberModalTrigger();
+  resetTrashConsent();
   error.value = "";
   operationInterrupted.value = false;
   trashTarget.value = batch;
-  trashAcknowledged.value = false;
-  trashConfirmation.value = "";
+  const generation = trashConsent.generation();
+  await run("检查回收站批次", async () => {
+    // Preserve main's single-operation gate when a dialog is reopened quickly.
+    await trashCancellation;
+    const challenge = await window.agentvac.prepareTrash(batch.id);
+    if (
+      !trashTarget.value ||
+      !trashConsent.accept(
+        generation,
+        challenge,
+        trashTarget.value,
+        context.value,
+      )
+    ) {
+      await window.agentvac.cancelTrashConfirmation(challenge.token);
+      throw new Error("回收站确认已失效；请重新打开此批次并重新确认。");
+    }
+    now.value = Date.now();
+  });
 }
 async function trash() {
-  if (
-    !canSign.value ||
-    !trashTarget.value ||
-    !trashAcknowledged.value ||
-    trashConfirmation.value.trim() !== "回收站"
-  )
-    return;
-  const id = trashTarget.value.id;
+  const args = trashConsent.consume(
+    trashTarget.value,
+    context.value,
+    !!busy.value,
+    canSign.value,
+    Date.now(),
+  );
+  if (!args) return;
+  // Consume all renderer consent before the first await. Failures and duplicate
+  // clicks can never reuse it; retry requires reopening the batch.
   await run("移入系统回收站", async () => {
-    const result = await window.agentvac.trash(id, true);
+    const result = await window.agentvac.trash(...args);
     trashTarget.value = null;
     operation.value = { ...result, type: "trash" };
     await refreshHistory();
@@ -1429,6 +1471,7 @@ async function openQuarantine() {
 }
 function closeModal() {
   if (busy.value) return;
+  resetTrashConsent();
   conversationArchiveIds.value = [];
   conversationArchiveTitles.value = [];
   preview.value = null;
@@ -4222,7 +4265,9 @@ onUnmounted(() => {
               type="checkbox"
               :disabled="!!busy"
             /><span
-              >我已退出所有 {{ providerLabel }} 相关程序与后台服务。</span
+              >我已退出所有
+              {{ providerLabel }}
+              相关程序与后台服务，包括以管理员权限或其他用户身份运行的实例。</span
             ></label
           >
           <div v-if="previewExpired" class="failure-text expiry-message">
@@ -4484,7 +4529,9 @@ onUnmounted(() => {
               type="checkbox"
               :disabled="!!busy"
             /><span
-              >我已退出所有 {{ providerLabel }} 相关程序与后台服务。</span
+              >我已退出所有
+              {{ providerLabel }}
+              相关程序与后台服务，包括以管理员权限或其他用户身份运行的实例。</span
             ></label
           >
           <div v-if="error" class="modal-error" role="alert" tabindex="-1">
@@ -4551,20 +4598,57 @@ onUnmounted(() => {
               </p>
             </div>
           </div>
+          <p
+            v-if="context.demo"
+            class="restore-safety"
+            data-testid="trash-demo-boundary"
+          >
+            演示模式：本次只处理生成的演示文件，不代表已检查或关闭真实工具程序。
+          </p>
           <label class="acknowledgement"
             ><input
-              v-model="trashAcknowledged"
+              v-model="trashConsent.confirmedClosed"
+              data-testid="trash-closed"
               type="checkbox"
-              :disabled="!!busy"
+              :disabled="!!busy || !trashConsent.challenge"
+            /><span v-if="!context.demo"
+              >我已退出所有
+              {{ providerLabel }}
+              相关程序与后台服务，包括以管理员权限或其他用户身份运行的实例。</span
+            >
+            <span v-else
+              >我确认本次只操作演示数据；处理真实数据前，仍需退出相关程序与后台服务，包括管理员及其他用户的实例。</span
+            >
+          </label>
+          <label class="acknowledgement"
+            ><input
+              v-model="trashConsent.impact"
+              data-testid="trash-impact"
+              type="checkbox"
+              :disabled="!!busy || !trashConsent.challenge"
             /><span>我了解上述影响，并会自行管理系统回收站。</span></label
           ><label class="trash-confirm-label"
             >输入「回收站」以确认此操作<input
-              v-model="trashConfirmation"
+              v-model="trashConsent.phrase"
               type="text"
               placeholder="回收站"
               autocomplete="off"
-              :disabled="!!busy"
+              :disabled="!!busy || !trashConsent.challenge"
           /></label>
+          <p
+            v-if="
+              trashConsent.challenge && now >= trashConsent.challenge.expiresAt
+            "
+            class="restore-safety"
+          >
+            本次确认已过期，请保留在隔离区并重新打开此批次，再次确认。
+          </p>
+          <p
+            v-if="!busy && !trashConsent.challenge && !operationInterrupted"
+            class="restore-safety"
+          >
+            请保留在隔离区并重新打开此批次，重新完成确认后再试。
+          </p>
           <div v-if="error" class="modal-error" role="alert" tabindex="-1">
             {{ error }}
             <p v-if="operationInterrupted">
@@ -4588,12 +4672,8 @@ onUnmounted(() => {
             ><button
               v-else
               class="button danger-button"
-              :disabled="
-                !!busy ||
-                !canSign ||
-                !trashAcknowledged ||
-                trashConfirmation.trim() !== '回收站'
-              "
+              data-testid="trash-submit"
+              :disabled="!canTrash"
               @click="trash"
             >
               <Icon name="trash" :size="17" />{{

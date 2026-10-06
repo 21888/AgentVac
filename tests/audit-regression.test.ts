@@ -1,3 +1,4 @@
+import { trashFixture } from "./helpers/trash.js";
 // Independent regression audit. All roots and file contents are generated fixtures.
 // OS trash operations are injected directory moves; these are not native shell.trashItem tests.
 // No production Codex directory or user transcript is accessed.
@@ -373,7 +374,7 @@ test("trash requires exact explicit confirmation and never invokes callback with
   const r = await run(engine);
   let invoked = false;
   await assert.rejects(
-    engine.trash(r.batchId, false, async () => {
+    trashFixture(engine, r.batchId, false, true, async () => {
       invoked = true;
     }),
     /确认/,
@@ -393,7 +394,7 @@ test("trash rejects unknown added files and preserves whole batch", async (t) =>
   await fs.writeFile(unknown, "unrelated generated fixture");
   let invoked = false;
   await assert.rejects(
-    engine.trash(r.batchId, true, async () => {
+    trashFixture(engine, r.batchId, true, true, async () => {
       invoked = true;
     }),
     /未知文件/,
@@ -418,7 +419,7 @@ test("trash rejects modified isolated files", async (t) => {
   await fs.appendFile(source, "changed");
   let invoked = false;
   await assert.rejects(
-    engine.trash(r.batchId, true, async () => {
+    trashFixture(engine, r.batchId, true, true, async () => {
       invoked = true;
     }),
     /变化/,
@@ -430,7 +431,7 @@ test("trash callback failure cannot trigger permanent deletion fallback", async 
   const { root, engine } = await fixture(t);
   const r = await run(engine);
   await assert.rejects(
-    engine.trash(r.batchId, true, async () => {
+    trashFixture(engine, r.batchId, true, true, async () => {
       throw new Error("injected OS trash unavailable");
     }),
     /unavailable/,
@@ -447,7 +448,7 @@ test("trash callback that does not move batch cannot report success", async (t) 
   const { root, engine } = await fixture(t);
   const r = await run(engine);
   await assert.rejects(
-    engine.trash(r.batchId, true, async () => {}),
+    trashFixture(engine, r.batchId, true, true, async () => {}),
     /未确认/,
   );
   assert.equal(
@@ -464,7 +465,7 @@ test("trash passes exactly selected batch to injected OS adapter; fixture bin by
   const h = (await engine.history())[0];
   const mockBin = path.join(base, "mock-os-recycle-bin");
   let got = "";
-  const out = await engine.trash(r.batchId, true, async (p) => {
+  const out = await trashFixture(engine, r.batchId, true, true, async (p) => {
     got = p;
     await fs.rename(p, mockBin);
   });
@@ -484,7 +485,7 @@ test("trash refuses batch directory replaced by symlink", async (t) => {
   if (!(await symlinkOrSkip(t, original + "-saved", original))) return;
   let called = false;
   await assert.rejects(
-    engine.trash(r.batchId, true, async () => {
+    trashFixture(engine, r.batchId, true, true, async () => {
       called = true;
     }),
     /链接/,
@@ -522,7 +523,7 @@ test("pending quarantine collision remains recoverable after conflict is removed
 test("trash receipt survives engine restart and rejects replay restore", async (t) => {
   const { base, root, key, engine } = await fixture(t);
   const r = await run(engine);
-  await engine.trash(r.batchId, true, (p) =>
+  await trashFixture(engine, r.batchId, true, true, (p) =>
     fs.rename(p, path.join(base, "mock-bin")),
   );
   const fresh = new AgentVacEngine(root, key, true);
@@ -541,7 +542,7 @@ test("trash receipt write failure reports moved bytes and warning, never false f
   };
   let out;
   try {
-    out = await engine.trash(r.batchId, true, (p) =>
+    out = await trashFixture(engine, r.batchId, true, true, (p) =>
       fs.rename(p, path.join(base, "mock-bin")),
     );
   } finally {

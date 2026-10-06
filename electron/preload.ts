@@ -62,7 +62,17 @@ const api: AgentVacAPI = {
   history: () => ipcRenderer.invoke("agentvac:history"),
   restore: (id, confirmedClosed) =>
     ipcRenderer.invoke("agentvac:restore", id, confirmedClosed),
-  trash: (id, confirmed) => ipcRenderer.invoke("agentvac:trash", id, confirmed),
+  prepareTrash: (id) => ipcRenderer.invoke("agentvac:prepare-trash", id),
+  cancelTrashConfirmation: (token) =>
+    ipcRenderer.invoke("agentvac:cancel-trash-confirmation", token),
+  trash: (id, confirmed, confirmedClosed, confirmationToken) =>
+    ipcRenderer.invoke(
+      "agentvac:trash",
+      id,
+      confirmed,
+      confirmedClosed,
+      confirmationToken,
+    ),
   openQuarantine: () => ipcRenderer.invoke("agentvac:open-quarantine"),
   openBatchQuarantine: (id) =>
     ipcRenderer.invoke("agentvac:open-batch-quarantine", id),

@@ -67,13 +67,13 @@ async function fixture(t: TestContext, largeIds = true) {
 
   // Emulate NTFS IDs on every host without changing filesystem operations. IDs are
   // tied to the actual inode, so renames and owned hardlinks keep exact identity.
-  const lstat = fs.lstat;
+  const lstat = fs.lstat,
+    open = fs.open;
   const ids = new Map<string, bigint>();
   const overrides = new Map<string, bigint>();
   const observed = new Map<string, bigint>();
   let next = largeIds ? 1n << 54n : 100n;
-  t.mock.method(fs, "lstat", async (file: PathLike, options?: any) => {
-    const stat = await (lstat as any)(file, options);
+  const patchStat = (stat: any, file: PathLike, options?: any) => {
     const location = String(file);
     if (location !== root && !location.startsWith(root + path.sep)) return stat;
     const original = `${stat.dev}:${stat.ino}`;
@@ -87,6 +87,18 @@ async function fixture(t: TestContext, largeIds = true) {
     stat.ino = options?.bigint ? ino : Number(ino);
     stat.dev = options?.bigint ? dev : Number(dev);
     return stat;
+  };
+  t.mock.method(fs, "lstat", async (file: PathLike, options?: any) =>
+    patchStat(await (lstat as any)(file, options), file, options),
+  );
+  // A generated inode alias describes the same file through lstat and fstat.
+  // Keeping handles native would falsely simulate a publication replacement.
+  t.mock.method(fs, "open", async (...args: Parameters<typeof open>) => {
+    const handle = await open(...args),
+      stat = handle.stat.bind(handle);
+    handle.stat = (async (options?: any) =>
+      patchStat(await stat(options), args[0], options)) as typeof handle.stat;
+    return handle;
   });
   const key = randomBytes(32);
   const engine = () => new AgentVacEngine(root, key, true, clear, [], provider);
@@ -142,7 +154,8 @@ test("large Windows unit IDs survive signed quarantine, restart, interrupted res
   const f = await fixture(t);
   const q = await f.quarantine();
   const record = q.saved.journal.items[0].unit as UnitRecord;
-  assert.equal(q.saved.journal.version, 3);
+  assert.equal(q.saved.journal.version, 4);
+  assert.equal(q.saved.journal.recoveryPolicyVersion, 4);
   for (const node of record.snapshot.nodes) {
     assert.equal(typeof node.fingerprint.ino, "string");
     assert.ok(BigInt(node.fingerprint.ino) > BigInt(Number.MAX_SAFE_INTEGER));
@@ -335,7 +348,8 @@ test("single-sample bigint fingerprints preserve numeric Stats timestamps for le
 test("nonjournaled ancestor IDs do not replace type checks or signed-root identity validation", async (t) => {
   const f = await fixture(t);
   const ancestor = path.dirname(f.root);
-  const lstat = fs.lstat;
+  const lstat = fs.lstat,
+    open = fs.open;
   let linkedAncestor = false;
   t.mock.method(fs, "lstat", async (file: PathLike, options?: any) => {
     const stat = await (lstat as any)(file, options);

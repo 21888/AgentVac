@@ -1,3 +1,4 @@
+import { trashFixture } from "./helpers/trash.js";
 import { test, type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { promises as fs } from "node:fs";
@@ -168,7 +169,7 @@ test("Cursor mixed restored/quarantined batch can dispose only its remaining ver
   assert.equal(restored.completed, 1);
   assert.equal(restored.failed.length, 1);
   let disposalInvoked = false;
-  const trashed = await engine.trash(moved.batchId, true, async (batchDir) => {
+  const trashed = await trashFixture(engine, moved.batchId, true, true, async (batchDir) => {
     disposalInvoked = true;
     // Synthetic fixture trash stand-in. Preserve the complete batch elsewhere.
     await fs.rename(batchDir, batchDir + "-simulated-trash");

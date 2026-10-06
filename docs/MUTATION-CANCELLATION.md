@@ -1,0 +1,15 @@
+# Cancellation and retained recovery records
+
+This development checkpoint adds operation-scoped cancellation and invalidation checks. It is not a released or fully accepted build.
+
+A newly admitted operation gets a fresh cancellation generation. Cancelling an earlier operation does not permanently disable an explicit retry. Switching or invalidating the selected engine still disables that engine, and cancelled previews cannot be reused or published by a late response.
+
+The engine checks before and after process inspection and before each new payload mutation. A filesystem call already admitted may complete after cancellation. Its completed work is counted and retained in an authenticated recovery record; later payload changes are stopped. Interrupted file links and unit links can be resumed without overwriting destinations.
+
+Recovery checkpoint completion is narrower than continuing the cleanup operation. It is bound to the active operation and authenticated journal, the same selected root, the existing quarantine and batch identities, and the expected published manifest. It cannot create replacement directories after invalidation. Temporary records are checked against their opened-file identity and parent before publication and cleanup. Unknown replacement names are preserved.
+
+Trash revalidates its original parents, manifest and payload after process inspection. Receipt publication uses an atomic no-replace hard link; it does not overwrite an existing receipt. A receipt failure after the operating system has accepted the batch is reported separately from the completed Trash action. The batch's original authenticated manifest travels with its payload.
+
+These are observed filesystem checks, not a universal lock against another process using the same account. Node's path-based operations do not provide an atomic inode-conditional rename or unlink. Tests cover substitutions before publication, during an already-admitted publication call, and after owned temporary cleanup. An already-admitted syscall cannot always be cancelled; uncertain files are retained for inspection rather than forcibly removed. Windows directory-fsync limitations and existing archive fidelity limits still apply.
+
+Fresh local Linux validation passed 832 tests with no skips, then TypeScript checking and a production build. Forty-five generated ownership/timing cases include saved review regressions replayed by the implementation owner. The independent mutation review's final assessment is incomplete; these reruns are not presented as completed independent acceptance. The 832 cases describe that preceding core checkpoint. The combined Trash-confirmation logic passed 864 owner-run cases and eight browser/real-engine/mock-Trash scenario groups. A subsequent one-property action-text color correction leaves that engine/TypeScript logic unchanged; its fresh build and bounded keyboard/color results are documented separately. Fresh confirmation is integrated; native OS Trash and completed independent acceptance remain pending. See [Fresh Trash confirmation](TRASH-CONFIRMATION.md) for the exact boundary.
