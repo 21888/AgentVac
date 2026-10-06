@@ -1,6 +1,6 @@
 // QA-only follow-up of the original 4a523 release source. No app files change.
 import assert from "node:assert/strict";
-import { promises as fs } from "node:fs";
+import { promises as fs, createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
@@ -14,6 +14,7 @@ const project = path.resolve(own, "../..");
 const shipping = path.join(project, "release-source");
 const overlay = path.join(shipping, ".qa/windows-asar-verifier");
 const sha = (value) => createHash("sha256").update(value).digest("hex");
+async function hashFile(file) { const hash = createHash("sha256"); for await (const bytes of createReadStream(file)) hash.update(bytes); return hash.digest("hex"); }
 const sourceManifestSha = "bdf46cafa101d517b44fe8a17bbbb5831084b55d4745e0e784fa20fdd17e7b8a";
 const helperSha = "c22c00deefad41ef7107b6917d7d793529c7010fc83e959f509ec8a34e53adbd";
 
@@ -25,9 +26,15 @@ export const PRIOR = Object.freeze({
   stages: { cursorBoundary: "success", units: "success", durability: "success", desktop: "success", providers: "failure", readers: "success" },
   limitations: ["Three provider mutations refused a complete unknown-process inventory; source and protected payload bytes remained unchanged after restart.", "Windows Cursor IDE database reading is disabled; explicit agent-transcripts are supported.", "The original package verifier failed before portable/NSIS execution; this QA run addresses that gate only."],
 });
+export const OMITTED_PORTABLE = Object.freeze({
+  distributed: false, status: "FAIL_NATIVE_ACCEPTANCE", runId: 37540075963, jobId: 112530652671,
+  sourceRevision: SOURCE, failedCheck: "actual-package-native-smoke", nestedFailedCheck: "harness-fatal-error",
+  cause: "Not established by the retained bounded log; launcher/debugger transport is a hypothesis only.",
+  byteVerification: "PASS", installerAcceptance: "NOT_RUN_IN_THAT_JOB", rerun: false,
+});
 
 export function mergeStageEvidence(current) {
-  for (const key of ["overlayTests", "build", "packages", "packageBytes", "portable", "setup"])
+  for (const key of ["overlayTests", "build", "packages", "packageBytes", "setup"])
     assert.equal(current[key], "success", `Current QA stage did not pass: ${key}`);
   return {
     stageResults: { ...PRIOR.stages, build: "success", packages: "success", packageSmoke: "success" },
@@ -42,7 +49,7 @@ const existingNames = [
   "AgentVac-0.2.0-linux-x64.tar.gz", "AgentVac-0.2.0-linux-x64-SHA256SUMS.txt", "AgentVac-0.2.0-linux-x64-verification.json",
   ...["x64", "arm64"].flatMap((arch) => ["zip", "dmg", "SHA256SUMS.txt", "verification.json"].map((suffix) => `AgentVac-0.2.0-macos-${arch}${["zip", "dmg"].includes(suffix) ? "." : "-"}${suffix}`)),
 ].sort();
-const windowsNames = ["portable.exe", "setup.exe", "SHA256SUMS.txt", "verification.json"].map((suffix) => `AgentVac-0.2.0-windows-x64-${suffix}`).sort();
+const windowsNames = ["setup.exe", "SHA256SUMS.txt", "verification.json"].map((suffix) => `AgentVac-0.2.0-windows-x64-${suffix}`).sort();
 
 export function validateExistingDraft(release) {
   assert.equal(release.id, RELEASE_ID); assert.equal(release.tag_name, "v0.2.0");
@@ -62,6 +69,43 @@ export function validatePreservedDraft(release, previous) {
   assert.deepEqual(release.assets.map((row) => row.name).sort(), [...existingNames, ...windowsNames].sort());
   const existing = release.assets.filter((row) => existingNames.includes(row.name));
   assert.deepEqual(validateExistingDraft({ ...release, assets: existing }), previous);
+}
+export function validateSetupAssetList(manifest) {
+  assert.equal(manifest.sourceRevision, SOURCE);
+  assert.equal(manifest.platform, "windows"); assert.equal(manifest.arch, "x64");
+  assert.equal(manifest.allPackagePathsPassed, true); assert.equal(manifest.applicationAcceptance, false);
+  assert.deepEqual(manifest.selectedTargets, ["windows-setup"]);
+  assert.deepEqual(manifest.omittedPortable, OMITTED_PORTABLE);
+  assert.ok(Array.isArray(manifest.files));
+  assert.deepEqual(manifest.files.map((row) => row.name).sort(), windowsNames);
+  for (const row of manifest.files) {
+    assert.equal(path.basename(row.path), row.name);
+    assert.ok(Number.isSafeInteger(row.bytes) && row.bytes > 0);
+    assert.match(row.sha256 ?? "", /^[a-f0-9]{64}$/);
+  }
+}
+export async function uploadSetupAssets(manifest, { shippingRoot, readDraft, uploadFile }) {
+  validateSetupAssetList(manifest);
+  const before = validateExistingDraft(await readDraft());
+  const selected = [];
+  // Validate every file before admitting the first remote upload.
+  for (const row of manifest.files) {
+    const file = path.resolve(shippingRoot, row.path);
+    const expected = row.name.endsWith("-setup.exe") ? path.join(shippingRoot, "release-final/windows", row.name) : path.join(shippingRoot, ".qa/release-assets", row.name);
+    assert.equal(file, expected);
+    const stat = await fs.lstat(file); assert.ok(stat.isFile() && !stat.isSymbolicLink());
+    assert.equal(stat.size, row.bytes); assert.equal(await hashFile(file), row.sha256);
+    selected.push({ file, row });
+  }
+  for (const { file, row } of selected) {
+    await uploadFile(file);
+    const release = await readDraft();
+    assert.equal(release.id, RELEASE_ID); assert.equal(release.draft, true); assert.equal(release.target_commitish, SOURCE); assert.equal(release.tag_name, "v0.2.0");
+    const matches = release.assets.filter((item) => item.name === row.name); assert.equal(matches.length, 1);
+    assert.equal(matches[0].size, row.bytes); assert.equal(matches[0].digest, `sha256:${row.sha256}`);
+    assert.deepEqual(validateExistingDraft({ ...release, assets: release.assets.filter((item) => existingNames.includes(item.name)) }), before);
+  }
+  validatePreservedDraft(await readDraft(), before);
 }
 
 async function inputs() {
@@ -85,15 +129,6 @@ async function verifyShipping() {
   assert.equal(sha(await fs.readFile(path.join(shipping, "scripts/release-draft.mjs"))), helperSha);
   const helper = await import(pathToFileURL(path.join(shipping, "scripts/release-draft.mjs")));
   return helper.verifySourceManifest(shipping);
-}
-export function sourceChildEnvironment(parent, extras = {}) {
-  assert.match(parent.GITHUB_SHA ?? "", /^[a-f0-9]{40}$/);
-  // Only these legacy source helpers consume this child-local value. The actual
-  // workflow revision is recorded separately and is never called the source SHA.
-  return { ...parent, ...extras, GITHUB_SHA: SOURCE, AGENTVAC_WORKFLOW_QA_SHA: parent.GITHUB_SHA };
-}
-function child(script, args = [], extras = {}) {
-  execFileSync(process.execPath, [path.join(shipping, script), ...args], { cwd: shipping, stdio: "inherit", timeout: 360000, env: sourceChildEnvironment(process.env, extras) });
 }
 function canonicalDraft() {
   return JSON.parse(execFileSync("gh", ["api", `repos/${REPO}/releases/${RELEASE_ID}`], { encoding: "utf8", timeout: 30000, maxBuffer: 1024 * 1024 }));
@@ -124,22 +159,45 @@ async function main() {
   if (phase === "prepare") {
     const current = JSON.parse(process.env.AGENTVAC_WINDOWS_QA_STAGES ?? "{}");
     const evidence = mergeStageEvidence(current);
-    child("scripts/prepare-release-assets.mjs", [], { AGENTVAC_RELEASE_STAGE_RESULTS: JSON.stringify(evidence.stageResults) });
-    const dir = path.join(shipping, ".qa/release-assets"), receiptFile = path.join(dir, "AgentVac-0.2.0-windows-x64-verification.json"), manifestFile = path.join(dir, "asset-list.json");
-    const receipt = JSON.parse(await fs.readFile(receiptFile, "utf8")), manifest = JSON.parse(await fs.readFile(manifestFile, "utf8"));
-    const extra = { qaProvenance: provenance, stageOrigins: evidence.stageOrigins, currentQaStages: current, priorSourceStagesRerun: false };
-    Object.assign(receipt, extra); Object.assign(manifest, extra);
-    const content = JSON.stringify(receipt, null, 2) + "\n";
-    const row = manifest.files.find((item) => item.name === path.basename(receiptFile)); assert.ok(row);
-    row.bytes = Buffer.byteLength(content); row.sha256 = sha(content);
-    await fs.writeFile(receiptFile, content); await fs.writeFile(manifestFile, JSON.stringify(manifest, null, 2) + "\n");
-    await verifyShipping(); console.log(JSON.stringify({ phase, ...extra, applicationAcceptance: false })); return;
+    const { validatePackageReceipt } = await import(pathToFileURL(path.join(shipping, "scripts/prepare-release-assets.mjs")));
+    const row = JSON.parse(await fs.readFile(path.join(shipping, ".qa/release-package/windows-setup/result.json"), "utf8"));
+    validatePackageReceipt(row, SOURCE); assert.equal(row.target, "windows-setup");
+    const artifact = path.resolve(row.artifact.path);
+    assert.equal(artifact, path.join(shipping, "release-final/windows/AgentVac-0.2.0-windows-x64-setup.exe"));
+    assert.equal(row.artifact.name, path.basename(artifact));
+    const stat = await fs.lstat(artifact); assert.ok(stat.isFile() && !stat.isSymbolicLink());
+    assert.equal(stat.size, row.artifact.bytes); assert.equal(await hashFile(artifact), row.artifact.sha256);
+    const dir = path.join(shipping, ".qa/release-assets"); await fs.mkdir(dir, { recursive: true });
+    const files = [{ name: row.artifact.name, path: path.relative(shipping, artifact).split(path.sep).join("/"), bytes: stat.size, sha256: row.artifact.sha256 }];
+    const receipt = {
+      format: "agentvac-release-package-verification-v1", sourceRevision: SOURCE, sourceDigest,
+      ciRunId: process.env.GITHUB_RUN_ID, ciRunAttempt: process.env.GITHUB_RUN_ATTEMPT,
+      platform: "windows", arch: "x64", selectedTargets: ["windows-setup"], omittedPortable: OMITTED_PORTABLE,
+      ...evidence, qaProvenance: provenance, currentQaStages: current, priorSourceStagesRerun: false,
+      packages: [{ target: "windows-setup", status: "PASS", artifact: { name: row.artifact.name, bytes: stat.size, sha256: row.artifact.sha256 }, payloadVerification: { status: row.payloadVerification.status, manifestSha256: row.payloadVerification.manifestSha256, fileCount: row.payloadVerification.fileCount, symlinkCount: row.payloadVerification.symlinkCount }, installerTested: true }],
+      allPackagePathsPassed: true, applicationAcceptance: false, publication: false,
+      scope: "Verified Windows NSIS setup only. Optional portable failed native acceptance and is not distributed. Prior provider failures remain explicit; no whole-app acceptance claim.",
+    };
+    const prefix = "AgentVac-0.2.0-windows-x64";
+    for (const [name, content] of [
+      [`${prefix}-verification.json`, JSON.stringify(receipt, null, 2) + "\n"],
+      [`${prefix}-SHA256SUMS.txt`, `${files[0].sha256}  ${files[0].name}\n`],
+    ]) {
+      const file = path.join(dir, name); await fs.writeFile(file, content, { flag: "wx" });
+      files.push({ name, path: path.relative(shipping, file).split(path.sep).join("/"), bytes: Buffer.byteLength(content), sha256: sha(content) });
+    }
+    const manifest = { ...receipt, files }; validateSetupAssetList(manifest);
+    await fs.writeFile(path.join(dir, "asset-list.json"), JSON.stringify(manifest, null, 2) + "\n", { flag: "wx" });
+    await verifyShipping(); console.log(JSON.stringify(receipt)); return;
   }
   assert.ok(process.env.GH_TOKEN);
-  const before = validateExistingDraft(canonicalDraft());
-  child("scripts/release-draft.mjs", ["upload"], { AGENTVAC_DRAFT_RELEASE_ID: String(RELEASE_ID) });
-  validatePreservedDraft(canonicalDraft(), before);
+  const { resolveReleaseTag, requireTagTarget } = await import(pathToFileURL(path.join(shipping, "scripts/release-draft.mjs")));
+  requireTagTarget(resolveReleaseTag(), SOURCE);
+  const manifest = JSON.parse(await fs.readFile(path.join(shipping, ".qa/release-assets/asset-list.json"), "utf8"));
+  validateSetupAssetList(manifest); assert.deepEqual(manifest.qaProvenance, provenance);
+  await uploadSetupAssets(manifest, { shippingRoot: shipping, readDraft: canonicalDraft, uploadFile: (file) => execFileSync("gh", ["release", "upload", "v0.2.0", file, "--repo", REPO], { encoding: "utf8", timeout: 180000, maxBuffer: 2 * 1024 * 1024 }) });
+  for (const row of manifest.files) console.log(JSON.stringify({ draftAsset: row.name, bytes: row.bytes, sha256: row.sha256, verified: true }));
   await verifyShipping();
-  console.log(JSON.stringify({ phase, releaseId: RELEASE_ID, releaseSourceRevision: SOURCE, workflowQaRevision: process.env.GITHUB_SHA, existingAssetsPreserved: 11, newWindowsAssets: 4, published: false }));
+  console.log(JSON.stringify({ phase, releaseId: RELEASE_ID, releaseSourceRevision: SOURCE, workflowQaRevision: process.env.GITHUB_SHA, existingAssetsPreserved: 11, newWindowsAssets: 3, omittedPortable: true, published: false }));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

@@ -1,8 +1,11 @@
-name: AgentVac original-source Windows package verification
+name: AgentVac original-source Windows installer verification
 
 # Maintainers restore this manual workflow and remove only its dedicated marker
 # after the reviewed one-shot validation finishes.
 on:
+  push:
+    branches: [master]
+    paths: [".github/windows-setup-20261006T2232Z-589a5fd1.marker"]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +19,7 @@ jobs:
   windows-package:
     if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false }}
     runs-on: windows-2022
-    timeout-minutes: 40
+    timeout-minutes: 45
     permissions:
       contents: write
     defaults:
@@ -62,21 +65,17 @@ jobs:
         id: package-bytes
         timeout-minutes: 2
         run: node .qa/windows-asar-verifier/scripts/verify-packages.mjs release-final windows x64
-      - name: Launch actual portable with generated recovery and supported readers
-        id: portable
-        timeout-minutes: 5
-        run: node scripts/release-package-smoke.mjs --target windows-portable --release-root release-final --source-revision 4a523b95c1098eeb3e220cc58d290819ef97a01f
       - name: Install launch and uninstall actual generated NSIS package
         id: setup
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: node scripts/release-package-smoke.mjs --target windows-setup --release-root release-final --source-revision 4a523b95c1098eeb3e220cc58d290819ef97a01f
       - name: Prepare receipts with explicit prior and current evidence
         timeout-minutes: 2
         env:
           AGENTVAC_WINDOWS_QA_STAGES: >-
-            {"overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","portable":"${{ steps.portable.outcome }}","setup":"${{ steps.setup.outcome }}"}
+            {"overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","setup":"${{ steps.setup.outcome }}"}
         run: node ../qa/windows-package-verifier/run.mjs prepare
-      - name: Upload only missing Windows assets while preserving original draft
+      - name: Upload only verified Windows setup assets while preserving original draft
         id: upload
         timeout-minutes: 6
         env:
@@ -87,7 +86,7 @@ jobs:
         timeout-minutes: 1
         env:
           AGENTVAC_WINDOWS_QA_SUMMARY: >-
-            {"sourceRevision":"4a523b95c1098eeb3e220cc58d290819ef97a01f","workflowQaRevision":"${{ github.sha }}","priorRun":37536722747,"priorJob":112519594642,"priorUnits":{"passed":1026,"failed":0,"skipped":44,"rerun":false},"priorProviderLifecycle":"failure-preserved","overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","portable":"${{ steps.portable.outcome }}","setup":"${{ steps.setup.outcome }}","upload":"${{ steps.upload.outcome }}","applicationAcceptance":false,"publication":false}
+            {"sourceRevision":"4a523b95c1098eeb3e220cc58d290819ef97a01f","workflowQaRevision":"${{ github.sha }}","priorRun":37536722747,"priorJob":112519594642,"priorUnits":{"passed":1026,"failed":0,"skipped":44,"rerun":false},"priorProviderLifecycle":"failure-preserved","overlayTests":"${{ steps.overlay-tests.outcome }}","build":"${{ steps.build.outcome }}","packages":"${{ steps.packages.outcome }}","packageBytes":"${{ steps.package-bytes.outcome }}","selectedTargets":["windows-setup"],"portable":"EXCLUDED_UNVERIFIED_PRIOR_FAILURE_NOT_RERUN","setup":"${{ steps.setup.outcome }}","upload":"${{ steps.upload.outcome }}","applicationAcceptance":false,"publication":false}
         working-directory: .
         run: node -e "console.log(process.env.AGENTVAC_WINDOWS_QA_SUMMARY)"
       # No application source changes, new draft, retarget, clobber, publication,

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SOURCE, RELEASE_ID, PRIOR, mergeStageEvidence, validateExistingDraft, validatePreservedDraft, sourceChildEnvironment } from "../run.mjs";
+import { SOURCE, RELEASE_ID, PRIOR, OMITTED_PORTABLE, mergeStageEvidence, validateExistingDraft, validatePreservedDraft, validateSetupAssetList } from "../run.mjs";
 
 const priorNames = [
   "AgentVac-0.2.0-linux-x64.tar.gz", "AgentVac-0.2.0-linux-x64-SHA256SUMS.txt", "AgentVac-0.2.0-linux-x64-verification.json",
@@ -8,7 +8,7 @@ const priorNames = [
 ];
 const asset = (name, index) => ({ id: index + 1, name, size: 100 + index, digest: `sha256:${String(index % 10).repeat(64)}` });
 const draft = () => ({ id: RELEASE_ID, target_commitish: SOURCE, tag_name: "v0.2.0", draft: true, assets: priorNames.map(asset) });
-const current = { overlayTests: "success", build: "success", packages: "success", packageBytes: "success", portable: "success", setup: "success" };
+const current = { overlayTests: "success", build: "success", packages: "success", packageBytes: "success", setup: "success" };
 
 test("receipt separates prior unchanged-source checks from newly executed package checks", () => {
   const result = mergeStageEvidence(current);
@@ -20,15 +20,15 @@ test("receipt separates prior unchanged-source checks from newly executed packag
   for (const field of Object.keys(current)) for (const status of [undefined, "failure", "skipped", "cancelled"])
     assert.throws(() => mergeStageEvidence({ ...current, [field]: status }));
 });
-test("child helper source revision does not replace the actual QA workflow provenance", () => {
-  const parent = { GITHUB_SHA: "a".repeat(40), GITHUB_RUN_ID: "new-qa-run", ORDINARY_FIXTURE: "kept" };
-  const result = sourceChildEnvironment(parent);
-  assert.equal(result.GITHUB_SHA, SOURCE);
-  assert.equal(result.AGENTVAC_WORKFLOW_QA_SHA, parent.GITHUB_SHA);
-  assert.equal(result.GITHUB_RUN_ID, "new-qa-run");
-  assert.equal(result.ORDINARY_FIXTURE, "kept");
-  assert.equal(parent.GITHUB_SHA, "a".repeat(40));
-  assert.throws(() => sourceChildEnvironment({}));
+test("setup-only selection cannot include or relabel the failed optional portable", () => {
+  const manifest = { sourceRevision: SOURCE, platform: "windows", arch: "x64", allPackagePathsPassed: true, applicationAcceptance: false, selectedTargets: ["windows-setup"], omittedPortable: OMITTED_PORTABLE,
+    files: ["setup.exe", "SHA256SUMS.txt", "verification.json"].map((suffix) => ({ name: `AgentVac-0.2.0-windows-x64-${suffix}`, path: `generated/AgentVac-0.2.0-windows-x64-${suffix}`, bytes: 10, sha256: "a".repeat(64) })) };
+  assert.doesNotThrow(() => validateSetupAssetList(manifest));
+  for (const delta of [{ sourceRevision: "b".repeat(40) }, { selectedTargets: ["windows-setup", "windows-portable"] }, { omittedPortable: { ...OMITTED_PORTABLE, distributed: true } }, { omittedPortable: { ...OMITTED_PORTABLE, status: "PASS" } }, { applicationAcceptance: true }, { files: manifest.files.slice(1) }])
+    assert.throws(() => validateSetupAssetList({ ...manifest, ...delta }));
+  const portable = structuredClone(manifest); portable.files[0].name = "AgentVac-0.2.0-windows-x64-portable.exe"; portable.files[0].path = "generated/" + portable.files[0].name;
+  assert.throws(() => validateSetupAssetList(portable));
+  assert.equal(OMITTED_PORTABLE.rerun, false);
 });
 test("upload admission requires exact unpublished original-source draft and all eleven existing assets", () => {
   assert.equal(validateExistingDraft(draft()).length, 11);
@@ -42,10 +42,10 @@ test("upload admission requires exact unpublished original-source draft and all 
     (r) => r.assets[0].name = r.assets[1].name,
   ]) { const row = draft(); change(row); assert.throws(() => validateExistingDraft(row)); }
 });
-test("successful upload requires four Windows assets and byte-identical existing asset receipts", () => {
+test("successful upload requires three setup-only assets and byte-identical existing asset receipts", () => {
   const before = draft(), original = validateExistingDraft(before);
   const after = structuredClone(before);
-  after.assets.push(...["portable.exe", "setup.exe", "SHA256SUMS.txt", "verification.json"].map((suffix, index) => asset(`AgentVac-0.2.0-windows-x64-${suffix}`, index + 20)));
+  after.assets.push(...["setup.exe", "SHA256SUMS.txt", "verification.json"].map((suffix, index) => asset(`AgentVac-0.2.0-windows-x64-${suffix}`, index + 20)));
   assert.doesNotThrow(() => validatePreservedDraft(after, original));
   for (const field of ["id", "size", "digest"]) { const changed = structuredClone(after); changed.assets[0][field] = field === "digest" ? "sha256:" + "f".repeat(64) : 999; assert.throws(() => validatePreservedDraft(changed, original)); }
   const missing = structuredClone(after); missing.assets.pop(); assert.throws(() => validatePreservedDraft(missing, original));
