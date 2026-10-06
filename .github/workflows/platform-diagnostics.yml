@@ -3,9 +3,6 @@ name: Bounded platform failure diagnostics
 # Default is manual-only. Maintainers restore this exact file after the reviewed one-shot.
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths: [".github/platform-diagnostic-20261006T0739Z-54a22a01.marker"]
 
 permissions:
   contents: read

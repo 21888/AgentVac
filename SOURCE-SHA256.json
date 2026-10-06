@@ -2,7 +2,7 @@
   "format": "agentvac-source-sha256-v1",
   "scope": "bounded-platform-diagnostics-unreleased",
   "baseCommit": "4783d2a027d8be72d757985b98d1072940d49812",
-  "sourceDigest": "67c2f284a8d6f44488b59f3fdf4de7f93334b320a8b4eaa5dbfab9391c40397f",
+  "sourceDigest": "b64549b4d96df43af8f507007c7ddc97f33415b6f49991610b6393c3fdbcfc53",
   "productionDigest": "260021d77224da299a7aa0ca9a69440c61a853965cb2a8fa8eeb60255397190b",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -2211,8 +2211,8 @@
     },
     {
       "path": ".github/workflows/platform-diagnostics.yml",
-      "sha256": "f4babdb7709e90a0dc2d52f9f39db8aa2e38dc775a98243a03f7cdf894a28bfe",
-      "bytes": 7066
+      "sha256": "a5220d1f48fc181fb7d9c44d8e325d8e61461a3b92fa562fd37398f4255fa96f",
+      "bytes": 6961
     },
     {
       "path": "docs/PLATFORM-DIAGNOSTICS.md",
@@ -2418,11 +2418,6 @@
       "path": "tests/synthetic-safe-file-ids.test.ts",
       "sha256": "697ae56fe54dff192e07cf96278451c3e517c923fe181f73a9490938baf7c0ec",
       "bytes": 3643
-    },
-    {
-      "path": ".github/platform-diagnostic-20261006T0739Z-54a22a01.marker",
-      "sha256": "55a85a059c7bece173e3f586cc12af561517893ede95d9c8936ea7aa509185b6",
-      "bytes": 121
     }
   ]
 }
