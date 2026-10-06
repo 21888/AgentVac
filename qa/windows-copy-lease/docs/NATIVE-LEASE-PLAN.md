@@ -6,7 +6,7 @@ Use one standard public windows-2022 runner, contents:read, no dependency instal
 
 ## Build and local tests
 
-Run scripts/build-lease-windows.ps1 with explicit absolute Microsoft compiler, x64 architecture, exact SDK and reviewed source-tree pin. Run the generated core, inherited-policy and lease-core executables plus the36 Node lease unit cases. Windows unit fixtures close their own descriptors but are left for runner disposal. No old baseline build script is the lease build.
+Run scripts/build-lease-windows.ps1 with explicit absolute Microsoft compiler, x64 architecture, exact SDK and reviewed source-tree pin. Before compilation it executes tests/source-inputs.test.ps1 under the same Windows PowerShell5.1 process. The suite checks the historical nested-array pipeline shape, direct top-level parsing, strict types/counts, duplicate/case aliases and path rejection. This parsing-only variant preserves the14-case native plan unchanged. Run the generated core, inherited-policy and lease-core executables plus the36 Node lease unit cases. Windows unit fixtures close their own descriptors but are left for runner disposal. No old baseline build script is the lease build.
 
 ## Native runner
 

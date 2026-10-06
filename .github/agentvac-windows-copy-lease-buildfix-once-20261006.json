@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "purpose": "PowerShell5.1 source-array correction and reviewed generated Windows sentinel-copy lease probe only",
+  "sourcePin": "5f667f5c436db41483100cc703d81d0975cfa49646ec23a7656bd054b3a4182e",
+  "appActivation": false,
+  "release": false
+}

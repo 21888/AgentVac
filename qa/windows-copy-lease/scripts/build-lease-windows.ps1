@@ -18,9 +18,9 @@ $fixture=Join-Path $output 'agentvac-initial-fixtures-research.exe'
 $holder=Join-Path $output 'agentvac-delete-holder-fixture.exe'
 $manifest=Join-Path $root 'src\helper.manifest'
 $fixtureBuild='not-attempted'
-$inputs=@(Get-Content -LiteralPath (Join-Path $root 'SOURCE-INPUTS.json') -Raw | ConvertFrom-Json)
-if ($inputs.Count -lt 10 -or $inputs.Count -gt 100 -or @($inputs | Select-Object -Unique).Count -ne $inputs.Count) { throw 'invalid-source-inputs' }
-foreach ($relative in $inputs) { if ($relative -notmatch '^[A-Za-z0-9_./-]+$' -or $relative.StartsWith('/') -or $relative.Split('/') -contains '..') { throw 'invalid-source-inputs' } }
+. (Join-Path $PSScriptRoot 'source-inputs.ps1')
+& (Join-Path $root 'tests\source-inputs.test.ps1')
+$inputs=Read-ReviewedSourceInputs -Json (Get-Content -LiteralPath (Join-Path $root 'SOURCE-INPUTS.json') -Raw)
 
 [Array]::Sort($inputs,[StringComparer]::Ordinal)
 function Get-SourceHashes {

@@ -9,3 +9,7 @@ The baseline native receipt applies only to the earlier18-case inherited-context
 Build only with scripts/build-lease-windows.ps1 and the reviewed SOURCE-INPUTS.json source pin. Run scripts/native-lease.mjs only under the generated14-case native plan. Earlier copied baseline files are provenance material, not an alternative lease runner.
 
 The helper is read-only. Node copies only bounded generated sentinels after held-descriptor validation. The DELETE actor requests an existing ordinary right but never deletes, renames, alters ACLs or writes content. No privileges/accounts/UAC/settings change. Leave generated Windows fixtures for disposable-runner inspection. SQLite reconstruction, arbitrary app paths and actual app activation remain later gates.
+
+## PowerShell build compatibility correction
+
+The preceding fce source was refused before compilation in Windows PowerShell5.1 because collecting ConvertFrom-Json output with @() nested its top-level array. This separate variant uses direct assignment, validates actual array/string elements and canonical unique paths, and runs native PowerShell parser regressions before compiling. No lease/helper/holder/transport behavior changed. Actual PowerShell5.1 and new-binary native validation remain NOT_RUN locally; no PowerShell executable is installed here.

@@ -8,3 +8,9 @@ Original pin7bbc6b1d49b5b1a324f559461da63296c33c9989d6f1beb3308e72838355fdf9 rem
 - F4: outer protocol magic compares every bit with Buffer.equals; ASCII high-bit aliases are rejected.
 
 The distinct v2 framing prevents silently treating old responses as the corrected schema. The new generated DELETE holder and its exact binary/source provenance are included in the next native plan. All source/app activation gates remain closed.
+
+## Build-only follow-up after the first Windows attempt
+
+Run37401250088 failed at source-input validation before any compiler or native lease test. The fce checkpoint remains preserved. The buildfix variant assigns ConvertFrom-Json directly and returns the validated array without pipeline enumeration; PowerShell versions exposing NoEnumerate use it explicitly. It rejects nested/non-string values, malformed counts, relative-path aliases and ordinal-ignore-case duplicates before conversion or hashing. SOURCE-INPUTS now also pins the pure parser and native PowerShell tests. The source hash algorithm and native code are unchanged. Windows5.1 execution remains the next hosted gate, not a claimed local pass.
+
+Primary references: https://github.com/PowerShell/PowerShell/issues/3424 and https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-5.1 .

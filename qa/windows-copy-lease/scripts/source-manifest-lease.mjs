@@ -9,13 +9,14 @@ if (
   !Array.isArray(inputs) ||
   inputs.length < 10 ||
   inputs.length > 100 ||
-  new Set(inputs).size !== inputs.length ||
+  new Set(inputs.map((p) => typeof p === "string" ? p.toLowerCase() : p)).size !== inputs.length ||
   inputs.some(
     (p) =>
       typeof p !== "string" ||
-      !/^[A-Za-z0-9_./-]+$/.test(p) ||
+      p.length > 256 ||
+      /[^A-Za-z0-9_./-]/.test(p) ||
       p.startsWith("/") ||
-      p.split("/").includes(".."),
+      p.split("/").some((part) => !part || part === "." || part === ".." || part.endsWith(".") || /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(part)),
   )
 )
   throw Error("INVALID_SOURCE_INPUTS");
