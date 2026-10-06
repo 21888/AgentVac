@@ -1,10 +1,6 @@
 name: Standalone generated Windows copy-lease research
 # Default is manual only. A reviewed temporary marker may trigger one source-only generated-fixture run.
 on:
-  push:
-    branches: [master]
-    paths:
-      - '.github/agentvac-windows-copy-lease-buildfix-once-20261006.json'
   workflow_dispatch:
 permissions:
   contents: read
