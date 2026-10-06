@@ -1,7 +1,0 @@
-{
-  "schema": 1,
-  "purpose": "reviewed native share-participating file-read and directory-traverse generated-fixture probe",
-  "sourcePin": "05e1a6a6ce74c67073436e14c1e57b1f94504d2d5c0e187f472164381ea93385",
-  "appActivation": false,
-  "release": false
-}
