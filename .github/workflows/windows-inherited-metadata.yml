@@ -2,9 +2,6 @@ name: Standalone inherited-context metadata research
 # Default is manual only. A reviewed temporary marker may trigger one source-only generated-fixture run.
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths: [".github/agentvac-windows-inherited-once-20261006.json"]
 permissions:
   contents: read
 concurrency:
