@@ -1,0 +1,44 @@
+name: AgentVac reviewed final publication
+
+# Restore this manual trigger after the reviewed one-shot publication is terminal.
+on:
+  push:
+    branches: [master]
+    paths: [".github/final-publication-20261006T2255Z-6be26a90.marker"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentvac-release-draft-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ github.repository == '21888/AgentVac' && github.event.repository.private == false && github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact publication revision without stored credentials
+        uses: actions/checkout@v4
+        timeout-minutes: 1
+        with:
+          persist-credentials: false
+      - name: Use bounded publication tooling
+        uses: actions/setup-node@v4
+        timeout-minutes: 1
+        with:
+          node-version: "24.19.0"
+      - name: Run pure guards and offline fake-gh publication regressions
+        timeout-minutes: 2
+        run: node --test tests/final-publication.test.mjs
+      - name: Verify unchanged shipping source and publish the exact reviewed draft once
+        timeout-minutes: 4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node qa/final-publication/publish.mjs publish
+      # No npm install/build, Actions cache/artifacts, package downloads/uploads,
+      # new release, asset replacement, tag writes, or credential persistence.

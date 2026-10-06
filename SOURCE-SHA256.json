@@ -1,8 +1,9 @@
 {
   "format": "agentvac-source-sha256-v1",
-  "scope": "limited-release-candidate-unpublished",
-  "baseCommit": "ad529d22c67ce34b0526a40d9458f2722acc7c56",
-  "sourceDigest": "a8e9425348faa23486e79de81a8a5f5f29bb282b2e6a531563152adad08b23dd",
+  "scope": "v0.2.0-verified-binary-source-with-reviewed-nonshipping-publication-metadata",
+  "baseCommit": "4e0784b26d1cccca645d782e9fb457b0eefe182e",
+  "binarySourceCommit": "4a523b95c1098eeb3e220cc58d290819ef97a01f",
+  "sourceDigest": "6324c5ae9a7628b4457e1d01606d33d25bf971927c621c0d1e6dc779de55c9bd",
   "productionDigest": "078042cfa25d9bf0a8a9a16961e0536cc0a75ef67b644382f00bd0332ded841d",
   "digestAlgorithms": {
     "sourceDigest": "SHA-256 of UTF-8 JSON.stringify(files), preserving listed record order and key order",
@@ -13,6 +14,11 @@
       "path": ".gitattributes",
       "sha256": "23302dd90b8bb74b44d365fafef8df20f809b61cb347023951ecf60a88a29651",
       "bytes": 32
+    },
+    {
+      "path": ".github/workflows/final-publication.yml",
+      "sha256": "ade4a5a28ce95d573cde381849a74e34a466def24913bd9a296b226c6ddc4248",
+      "bytes": 1511
     },
     {
       "path": ".github/workflows/native-desktop.yml",
@@ -43,6 +49,11 @@
       "path": ".github/workflows/windows-metadata-smoke.yml",
       "sha256": "dc466df81e1a4da8da4ac49055fbe635e3270aa13ce84c67551f1256f0497268",
       "bytes": 2365
+    },
+    {
+      "path": ".github/workflows/windows-package-verifier.yml",
+      "sha256": "249e08fcef9c6255870bfa9faded76f1010e209beefeecc58fb40149bf569be4",
+      "bytes": 4268
     },
     {
       "path": ".gitignore",
@@ -726,13 +737,13 @@
     },
     {
       "path": "docs/RELEASE-NOTES-0.2.0.md",
-      "sha256": "15f02c7b496bd5bf805eb0c7cbfaabfaf0cd21e4eabfaa3b1183eb215cc7e797",
-      "bytes": 11912
+      "sha256": "ec7b0289e3f56b933a2fbe933c2b8400c956c9eff7a4066578d9b7c5526887cb",
+      "bytes": 7506
     },
     {
       "path": "docs/RELEASE-SUPPORT-MATRIX.md",
-      "sha256": "7d4dbef6ed61db17528bb8b78d6dca57a0ecc78c37ff300b0560fa47cd14c39c",
-      "bytes": 11566
+      "sha256": "bb89ecef1c2933814b10b1ad48af5ff13576679b2bf9d9d474204180b11d3c92",
+      "bytes": 9716
     },
     {
       "path": "docs/REPOSITORY-CONTENTS.md",
@@ -1128,6 +1139,16 @@
       "path": "package.json",
       "sha256": "8781df01a6caba69b6db82b5e0181a3f9a7b5c828b6a8842093edda029bdf400",
       "bytes": 3625
+    },
+    {
+      "path": "qa/final-publication/lock.json",
+      "sha256": "9035622ee19a1c79f171618cc2b1a315eda4c06cb246589db1895d5ceda3c2b4",
+      "bytes": 4386
+    },
+    {
+      "path": "qa/final-publication/publish.mjs",
+      "sha256": "49a1eac2351d889fc162f8f7ce989f97c33528c129e52f83d44e9d555e75ace6",
+      "bytes": 17408
     },
     {
       "path": "qa/packaged-acceptance/core.mjs",
@@ -1775,24 +1796,69 @@
       "bytes": 5048
     },
     {
+      "path": "qa/windows-package-verifier/INPUTS.json",
+      "sha256": "405bceb97d95e81a5af134e24954a1df249dd48066817dd4393b42c59941e705",
+      "bytes": 1421
+    },
+    {
+      "path": "qa/windows-package-verifier/README.md",
+      "sha256": "8fb21437e2db9ba3dead5f277afe4b6585880ebb9c1c2ab502b4cb2cbdecb6e1",
+      "bytes": 3772
+    },
+    {
+      "path": "qa/windows-package-verifier/run.mjs",
+      "sha256": "8e15b22ca058521d13847e6f39364e8de547210d1c34d1d6d296fb7e8ee30f63",
+      "bytes": 14636
+    },
+    {
+      "path": "qa/windows-package-verifier/scripts/package-asar-paths.mjs",
+      "sha256": "79ff9f9109b634b62b784b3eaf1690862b128d80ff2f501ff3a2b853d1345204",
+      "bytes": 452
+    },
+    {
+      "path": "qa/windows-package-verifier/scripts/package-targets.mjs",
+      "sha256": "77c785c61d596ebcd3c39c3a66542e40426538ef38b4b6ec29f68e291ac0c1c3",
+      "bytes": 1294
+    },
+    {
+      "path": "qa/windows-package-verifier/scripts/verify-packages.mjs",
+      "sha256": "3a64abeccf78ff697da75dafa25fb4daa6b8e86e982156150f231f1707ea458f",
+      "bytes": 4657
+    },
+    {
+      "path": "qa/windows-package-verifier/tests/package-asar-paths.test.mjs",
+      "sha256": "c611d223f0c1d2013597129aaa806baa12e6cd80dd58c147c91303dccd1fa9d9",
+      "bytes": 4354
+    },
+    {
+      "path": "qa/windows-package-verifier/tests/provenance.test.mjs",
+      "sha256": "cfae50f469558599b0ef7d9653f0f076378a9eac7a86d506e17ea5c204e78df0",
+      "bytes": 4643
+    },
+    {
+      "path": "qa/windows-package-verifier/tests/setup-upload.test.mjs",
+      "sha256": "abd0c7b99d63eb2eefbc9d5c405f40288f11775b561414b235dbac741a30deea",
+      "bytes": 4069
+    },
+    {
       "path": "README.en.md",
-      "sha256": "f820d93bbc7ecb94955c475fb135005e723f0b81e31ac9e0167db011818be6bf",
-      "bytes": 21407
+      "sha256": "2ecbeaba6461b36e7b3355c8ee8c99e2a2caf6971678e8fde09f55e59c581ff3",
+      "bytes": 22413
     },
     {
       "path": "README.ja.md",
-      "sha256": "2b36233f6806bbb2feacb944b12ec9e1f40c1cddf6e45b89c58103a54c321206",
-      "bytes": 28329
+      "sha256": "95931baace28d653ea1d29ed0e85f54f9df061ed587b5ef98f5865862803c2a1",
+      "bytes": 30056
     },
     {
       "path": "README.md",
-      "sha256": "1e366e321a2970ec7f47d279020dd98eedaa94c96da14253e1c88ca952f15e9c",
-      "bytes": 18595
+      "sha256": "5e6a39c0b790d092e1380967cdb25fd6d674aa1007770dd5a02546a0322efb54",
+      "bytes": 19699
     },
     {
       "path": "README.zh-TW.md",
-      "sha256": "8e750931313679c12b2be8f377dd50eebc03bb623eca6132e061043daad74a53",
-      "bytes": 19681
+      "sha256": "8c9b688db2fe8b4e336ec77266401ec3c49ac754dd9ad50a1fa37f3ff43d1ab5",
+      "bytes": 20789
     },
     {
       "path": "scripts/accessibility-regression.mjs",
@@ -1945,6 +2011,11 @@
       "bytes": 7404
     },
     {
+      "path": "scripts/package-asar-paths.mjs",
+      "sha256": "79ff9f9109b634b62b784b3eaf1690862b128d80ff2f501ff3a2b853d1345204",
+      "bytes": 452
+    },
+    {
       "path": "scripts/package-targets.mjs",
       "sha256": "77c785c61d596ebcd3c39c3a66542e40426538ef38b4b6ec29f68e291ac0c1c3",
       "bytes": 1294
@@ -1991,8 +2062,8 @@
     },
     {
       "path": "scripts/verify-packages.mjs",
-      "sha256": "e52631da41d491c1d20733930d20ea178acab43753977160ced7648246c291bd",
-      "bytes": 4532
+      "sha256": "3a64abeccf78ff697da75dafa25fb4daa6b8e86e982156150f231f1707ea458f",
+      "bytes": 4657
     },
     {
       "path": "shared/app-data.ts",
@@ -2163,6 +2234,11 @@
       "path": "tests/engine.test.ts",
       "sha256": "1e003c76020e946d9372325839d615a934328cb00c253cdaa7e3a87cdbe20b26",
       "bytes": 16395
+    },
+    {
+      "path": "tests/final-publication.test.mjs",
+      "sha256": "e3c07d9f6736528631451f65b67452410fe7e506de76ddc78738d1b0c18a199e",
+      "bytes": 21437
     },
     {
       "path": "tests/fixtures/historical-journal-readers/published-pre-v4/electron/cleanup-units.ts",
@@ -2345,6 +2421,11 @@
       "bytes": 6062
     },
     {
+      "path": "tests/package-asar-paths.test.mjs",
+      "sha256": "c611d223f0c1d2013597129aaa806baa12e6cd80dd58c147c91303dccd1fa9d9",
+      "bytes": 4354
+    },
+    {
       "path": "tests/package-targets.test.mjs",
       "sha256": "e89d353c6cce1d59cc64855bdcb4a0e1f0e23fa7179df0d9367b6eca826d360f",
       "bytes": 1725
@@ -2503,6 +2584,11 @@
       "path": "vite.config.ts",
       "sha256": "2c2488c726e47c9bfc3d2d219fb28ebce520370de621f17a0436701a0dfcddbd",
       "bytes": 235
+    },
+    {
+      "path": ".github/final-publication-20261006T2255Z-6be26a90.marker",
+      "sha256": "a958e9ba640725d02da69e4883b413de3764036cd04a32a731b142cf755ed524",
+      "bytes": 188
     }
   ]
 }

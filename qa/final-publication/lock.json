@@ -1,0 +1,124 @@
+{
+  "format": "agentvac-final-publication-lock-v1",
+  "reviewed": true,
+  "repository": "21888/AgentVac",
+  "releaseId": 405138314,
+  "tag": "v0.2.0",
+  "sourceRevision": "4a523b95c1098eeb3e220cc58d290819ef97a01f",
+  "notesSha256": "ec7b0289e3f56b933a2fbe933c2b8400c956c9eff7a4066578d9b7c5526887cb",
+  "allowedPaths": [
+    ".github/final-publication-20261006T2255Z-6be26a90.marker",
+    ".github/release-candidate-20261006T2147Z-e211aa74.marker",
+    ".github/workflows/final-publication.yml",
+    ".github/workflows/release-candidate.yml",
+    ".github/workflows/windows-package-verifier.yml",
+    "README.en.md",
+    "README.ja.md",
+    "README.md",
+    "README.zh-TW.md",
+    "SOURCE-SHA256.json",
+    "docs/RELEASE-NOTES-0.2.0.md",
+    "docs/RELEASE-SUPPORT-MATRIX.md",
+    "qa/final-publication/lock.json",
+    "qa/final-publication/publish.mjs",
+    "qa/windows-package-verifier/INPUTS.json",
+    "qa/windows-package-verifier/README.md",
+    "qa/windows-package-verifier/run.mjs",
+    "qa/windows-package-verifier/scripts/package-asar-paths.mjs",
+    "qa/windows-package-verifier/scripts/package-targets.mjs",
+    "qa/windows-package-verifier/scripts/verify-packages.mjs",
+    "qa/windows-package-verifier/tests/package-asar-paths.test.mjs",
+    "qa/windows-package-verifier/tests/provenance.test.mjs",
+    "qa/windows-package-verifier/tests/setup-upload.test.mjs",
+    "scripts/package-asar-paths.mjs",
+    "scripts/verify-packages.mjs",
+    "tests/final-publication.test.mjs",
+    "tests/package-asar-paths.test.mjs"
+  ],
+  "assets": [
+    {
+      "id": 616763223,
+      "name": "AgentVac-0.2.0-linux-x64-SHA256SUMS.txt",
+      "size": 98,
+      "digest": "sha256:faa93d3f56b6ec65cb4eaf6bf1186177918204c25bd8ca6fb6989701c79a9b37"
+    },
+    {
+      "id": 616763157,
+      "name": "AgentVac-0.2.0-linux-x64-verification.json",
+      "size": 1347,
+      "digest": "sha256:35599f7adff333576c903ff8f3638585ea03a81ff0148a6f3b83319b7791dc4f"
+    },
+    {
+      "id": 616762945,
+      "name": "AgentVac-0.2.0-linux-x64.tar.gz",
+      "size": 121083796,
+      "digest": "sha256:d3f571f78c64dcb64143ef79642f4d3ec29cf0d58d3a1132521f7a0fa9069251"
+    },
+    {
+      "id": 616760412,
+      "name": "AgentVac-0.2.0-macos-arm64-SHA256SUMS.txt",
+      "size": 194,
+      "digest": "sha256:1e576100f0ad6f27f7e4ec2b707d86b63a2849b3c33783498cab767892c7f7a2"
+    },
+    {
+      "id": 616760333,
+      "name": "AgentVac-0.2.0-macos-arm64-verification.json",
+      "size": 1864,
+      "digest": "sha256:ac995ac5f24cb19b259963ac255afdd429543b4f63dc68b69e2a8b0fa1c72822"
+    },
+    {
+      "id": 616760071,
+      "name": "AgentVac-0.2.0-macos-arm64.dmg",
+      "size": 130071606,
+      "digest": "sha256:15ac82172630b1205fe704b9800af3d1e7a35a21f33293bec705e103f55bf0d8"
+    },
+    {
+      "id": 616759784,
+      "name": "AgentVac-0.2.0-macos-arm64.zip",
+      "size": 130023911,
+      "digest": "sha256:30764c98e162717e6af54c7a0be503d5a4444418d0c479fc218ac21991c4bc90"
+    },
+    {
+      "id": 616771431,
+      "name": "AgentVac-0.2.0-macos-x64-SHA256SUMS.txt",
+      "size": 190,
+      "digest": "sha256:0f87f7ed2f35bf7e060fb51ebb8a496c358e0f4639c33af9e60beb8ec9196eb8"
+    },
+    {
+      "id": 616771379,
+      "name": "AgentVac-0.2.0-macos-x64-verification.json",
+      "size": 1854,
+      "digest": "sha256:1ca5057a29c1d9b7b11425fabcf4cb0259c77726c1c31299aa6d0cf2a02a990c"
+    },
+    {
+      "id": 616771054,
+      "name": "AgentVac-0.2.0-macos-x64.dmg",
+      "size": 133930276,
+      "digest": "sha256:2ce5c3a90e9dd524cb96363348fc1b7dd6a441a001866eef2dafce1fdb8ebd3e"
+    },
+    {
+      "id": 616770767,
+      "name": "AgentVac-0.2.0-macos-x64.zip",
+      "size": 133925177,
+      "digest": "sha256:1dc1b32eb3bcc7a83f3c048a8696dc4b019300d11ecb879b0ea330be36c5168c"
+    },
+    {
+      "id": 616849150,
+      "name": "AgentVac-0.2.0-windows-x64-setup.exe",
+      "size": 112023089,
+      "digest": "sha256:051f78023a378c124aa34e944316e0beb0caa1f4ff24b261fb7f6294bf2ecf69"
+    },
+    {
+      "id": 616849401,
+      "name": "AgentVac-0.2.0-windows-x64-SHA256SUMS.txt",
+      "size": 103,
+      "digest": "sha256:b78fd8d82d7b706079d68ab6f042a2ed1fb3c92793ac1fb2513cd6346566d86b"
+    },
+    {
+      "id": 616849342,
+      "name": "AgentVac-0.2.0-windows-x64-verification.json",
+      "size": 6201,
+      "digest": "sha256:4e8c648ac6fb08dd194eadc6c70d34a2096e2901085a68f495c658fec59661ea"
+    }
+  ]
+}

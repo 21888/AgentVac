@@ -4,7 +4,7 @@
 
 面向 Codex、Claude Code、Cline 和 Cursor 的开源桌面工具：本地查看和搜索受支持的会话，分析磁盘用量，并预览符合条件的日志、缓存或完整 Claude Code 会话组。
 
-**版本状态：** 此源码用于准备**尚未发布的 v0.2.0 有限范围候选版本**。部分会话不可归档，部分平台读取、隔离与恢复受限；不提供四种工具的完整会话管理或删除。最终源码检查、原生平台及安装包验收仍待完成。**当前 v0.1.0 下载版仅支持 Codex**，尚无已验证并发布的 v0.2.0 安装包。见[候选发布说明](docs/RELEASE-NOTES-0.2.0.md)和[发布范围矩阵](docs/RELEASE-SUPPORT-MATRIX.md)（英文）。
+**v0.2.0 范围：** 本地会话查看与搜索，以及有限范围的清理和恢复。部分会话不可归档或删除，各平台仍有限制。Linux／macOS 的安装包与读取检查已在下述范围内通过；Windows NSIS 安装版已通过实际安装、已安装应用启动／读取／恢复及卸载检查。Windows 便携版未经验证，不列入发行范围。见[发布说明](docs/RELEASE-NOTES-0.2.0.md)和[发布范围矩阵](docs/RELEASE-SUPPORT-MATRIX.md)（英文）。
 
 - **先看清数据**：查看文件逻辑大小、分类、整理候选与保护原因。
 - **操作前先预览**：选择工具和数据目录，核对具体文件或完整整理单元。
@@ -13,7 +13,7 @@
 
 本文档提供四种语言；**应用界面目前仅支持简体中文**。AgentVac 是独立项目，不是所支持工具厂商的官方产品。
 
-## v0.2.0 候选范围
+## v0.2.0 范围
 
 下表是源码允许进入复核的范围，不代表每个平台都已通过发行验收；还需满足下方的平台限制。
 
@@ -34,39 +34,42 @@
 
 内容授权限定于当前工具、目录和本次应用会话；撤回授权会停止读取并清空显示。正文以纯文本显示，不执行命令或自动加载外部媒体。Cline SDK 目录和 Cursor agent-transcripts 可单独选择为只读来源，不因此获得清理权限。只有符合条件且识别完整的 Claude Code 本地会话组可请求隔离预览；Codex、Cline、Cursor 的正式会话删除或归档保持停用。
 
-在 macOS 和 Linux 上，Cursor 数据库读取需要建立私有本地临时副本，可能包含未查询的设置或认证页；每次请求默认累计上限为 512 MiB。无法验证位置或权限时不会读取数据库，也不会静默改用其他复制位置；这些平台的最终支持路径仍待原生验收。Windows 在 v0.2.0 中明确停用 Cursor IDE 数据库读取。[完整范围、隐私与限制](docs/CONVERSATION-MANAGEMENT.md)。
+在 macOS 和 Linux 上，Cursor 数据库读取需要建立私有本地临时副本，可能包含未查询的设置或认证页；每次请求默认累计上限为 512 MiB。无法验证位置或权限时不会读取数据库，也不会静默改用其他复制位置；macOS 和 Linux 的源码原生与打包读取检查已使用生成数据通过，但不代表完整兼容所有已安装的厂商版本。Windows 在 v0.2.0 中明确停用 Cursor IDE 数据库读取。[完整范围、隐私与限制](docs/CONVERSATION-MANAGEMENT.md)。
 
-### 平台限制与待验收项
+### 平台验证结果与剩余限制
 
-- **所有平台：** 相关工具及全部 CLI、桌面、IDE、SDK 和后台进程必须退出；进程仍在运行、观察不完整或状态不明时，隔离、恢复及移入系统回收站会被阻止。受保护或被阻止不等于清理成功。
-- **Windows x64：** v0.2.0 明确停用 Cursor IDE 数据库读取，不会因辅助检查成功而启用。支持的替代入口是单独选择 agent-transcripts 进行只读查看；最终安装包中的原生正向验收仍待完成。
-- **Linux x64：** 无法归属的外部运行时可能保持“状态不明”，阻止 Claude Code、Cline 或 Cursor 的隔离与恢复；不能宣称这些操作在普通 Linux 安装中均可用。
-- **macOS Intel / Apple Silicon：** 常规隔离与恢复失败仍在专项诊断中，两种架构的最终原生与安装包验收尚未完成。此处不承诺这些操作已获 macOS 发行验收。
+- **所有平台：** 相关工具及全部 CLI、桌面、IDE、SDK 和后台进程必须退出；进程仍在运行、观察不完整或状态不明时，隔离、恢复及移入系统回收站会被阻止。拒绝或跳过不等于清理成功。
+- **Windows x64：** Cursor IDE 数据库读取停用，明确选定的 agent-transcripts 是受支持的只读替代来源。源码原生桌面、回收站、持久性与受支持读取检查已通过；Claude Code、Cline、Cursor 的修改操作因未知进程被拒绝，文件字节保持不变。单独的 NSIS 安装版检查已通过实际按用户安装、已安装应用启动／读取、生成数据恢复／重启、精确载荷绑定及卸载。便携版原生附加检查失败，原因尚未证实，已排除。
+- **Linux x64：** 源码与安装包读取、tar.gz 安装包检查已通过。Claude Code、Cline、Cursor 的修改操作因未知运行时被拒绝，字节保持不变；不能据此宣称隔离与恢复成功。
+- **macOS Intel：** 源码原生读取、三个提供方的隔离／恢复生命周期，以及实际 ZIP／DMG 安装包检查已通过。
+- **macOS Apple Silicon：** 读取、三个提供方生命周期及 ZIP／DMG 检查已通过。另一个经真实目录路径执行的重复隔离／恢复检查因进程清单不完整，在修改前跳过；原生回收站检查使用生成的演示数据。
+
+这些检查使用可丢弃的生成数据。受测应用源码为 `4a523b95c1098eeb3e220cc58d290819ef97a01f`，范围矩阵区分其结果与后续仅用于 QA 的运行。安装版专项运行 `37541701609` 已通过，但没有重跑或改写此前源码检查的进程保护失败与跳过结果。已验证的附件共 14 个。普通首次启动的系统信任行为，以及操作系统回收站界面的还原，仍未测试。
 
 **v0.1.0 安全提示：** 建议仅整理旧日志，不启用会话文件隔离。当前 Codex 分页历史可能引用其他记录；新版源码已停止新的会话文件隔离。已有签名记录也只有通过旧版身份与恢复校验才能恢复。
 
 ## 下载与安装
 
-当前下载版，**仅支持 Codex**：[v0.1.0](https://github.com/21888/AgentVac/releases/tag/v0.1.0)。以下均为既有 v0.1.0 文件，不包含本文所述 v0.2.0 候选功能；候选源码或本地构建不等于已发布安装包。预构建应用不需要另装 Node.js。
+选择匹配操作系统和处理器的安装包。Windows 使用按用户安装的 NSIS 安装版，不提供便携版。预构建应用不需要另装 Node.js。
 
-| 平台                  | 下载                                                                                                                                          | 要求                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| macOS · Apple Silicon | [AgentVac-0.1.0-macos-arm64.dmg](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-macos-arm64.dmg)                   | macOS 13+，M 系列芯片    |
-| macOS · Intel         | [AgentVac-0.1.0-macos-x64.dmg](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-macos-x64.dmg)                       | macOS 13+，Intel 处理器  |
-| Windows               | [AgentVac-0.1.0-windows-x64-portable.exe](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-windows-x64-portable.exe) | Windows 10+，x64；便携版 |
-| Linux                 | [AgentVac-0.1.0-linux-x64.tar.gz](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-linux-x64.tar.gz)                 | 受支持的 Linux x64 桌面  |
+| 平台 | 下载 | 校验 | 要求 |
+| --- | --- | --- | --- |
+| macOS · Apple Silicon | [AgentVac-0.2.0-macos-arm64.dmg](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-arm64.dmg) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-arm64-SHA256SUMS.txt) | macOS 13+，M 系列芯片 |
+| macOS · Intel | [AgentVac-0.2.0-macos-x64.dmg](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-x64.dmg) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-x64-SHA256SUMS.txt) | macOS 13+，Intel 处理器 |
+| Windows | [AgentVac-0.2.0-windows-x64-setup.exe](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-windows-x64-setup.exe) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-windows-x64-SHA256SUMS.txt) | Windows 10+，x64；按用户安装的 NSIS 安装版 |
+| Linux | [AgentVac-0.2.0-linux-x64.tar.gz](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-linux-x64.tar.gz) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-linux-x64-SHA256SUMS.txt) | 受支持的 Linux x64 桌面 |
 
-下载后可对照 [SHA256SUMS.txt](https://github.com/21888/AgentVac/releases/download/v0.1.0/SHA256SUMS.txt) 核验文件。仓库若仍为私有，访问源码和下载需要有权限的 GitHub 账号。请使用仍有安全更新的操作系统。
+macOS ZIP 备选文件和各平台验证报告见 [v0.2.0 发行页](https://github.com/21888/AgentVac/releases/tag/v0.2.0)。请使用对应平台的校验文件核验下载。已验证附件共 14 个：11 个 Linux／macOS 文件，加 Windows 安装 EXE、校验文件与验证报告。仓库若为私有，访问源码和下载需要有权限的 GitHub 账号。请使用仍有安全更新的操作系统。
 
 - **macOS**：选择匹配芯片的 DMG，打开后将 AgentVac 拖入「应用程序」文件夹，再从那里启动。
-- **Windows**：保存便携 EXE 后运行。本次提供的是便携启动器，不是安装向导。
+- **Windows**：运行 setup EXE 按用户安装，再启动已安装应用。移除时使用已安装的卸载程序。
 - **Linux**：完整解压 tar.gz，在正常桌面会话中运行其中的应用。依赖通过发行版正规包管理器安装；系统回收站需要可用的桌面 Trash 后端，缺失时操作失败并保留文件。本版不提供 AppImage。
 
-**当前 macOS 未完成 Developer ID 签名与 Apple 公证，Windows 未完成 Authenticode 签名。** Gatekeeper 或 SmartScreen 可能提示或阻止启动。不要关闭系统防护、Chromium sandbox 或 AppArmor 来绕过警告。构建成功或归档完整不代表普通首次启动的系统信任验收已完成；建议先使用演示数据。
+**当前 macOS 未完成 Developer ID 签名与 Apple 公证，Windows 未完成 Authenticode 签名。** Gatekeeper 或 SmartScreen 可能提示或阻止启动。不要关闭系统防护、Chromium sandbox 或 AppArmor 来绕过警告。普通首次启动的系统信任行为尚未测试，安装包检查通过不代表此项已验证；建议先使用演示数据。
 
 ## 界面预览
 
-以下截图展示**尚未发布的 v0.2.0 开发界面与合成测试数据**，预览中的进程检查为模拟状态。图表显示已发现文件的逻辑大小，不代表用户实际用量或可释放空间。截图用于展示界面，不代表已安装工具的兼容性、原生平台、签名或首次启动系统信任验收完成。
+以下截图展示**v0.2.0 界面与合成测试数据**，预览中的进程检查为模拟状态。图表显示已发现文件的逻辑大小，不代表用户实际用量或可释放空间。截图用于展示界面，不代表已安装工具的兼容性、原生平台、签名或首次启动系统信任验收完成。
 
 ### 空间分析 · 浅色
 
@@ -118,7 +121,7 @@ Claude Code 批次记录展示已隔离的调试日志与已完整恢复的本�
 ## 第一次使用
 
 1. **先试演示。** 点击「体验演示扫描」，在独立 Codex 演示工作区练习预览、隔离和恢复。演示工作区会保留上次的操作状态。
-2. **选择工具和数据目录。** 开发版先在顶部选择 Codex、Claude Code、Cline 或 Cursor，再使用原生文件夹对话框连接目录。v0.1.0 仅支持 Codex，通常为 `~/.codex` 或 `CODEX_HOME` 指定位置。请选择对应工具的数据根目录，不要选择项目目录或磁盘根目录；Cursor IDE 的数据目录与 `.cursor` 不同。建议位置只是提示，不会自动扫描。
+2. **选择工具和数据目录。** v0.2.0 先在顶部选择 Codex、Claude Code、Cline 或 Cursor，再使用原生文件夹对话框连接目录。v0.1.0 仅支持 Codex，通常为 `~/.codex` 或 `CODEX_HOME` 指定位置。请选择对应工具的数据根目录，不要选择项目目录或磁盘根目录；Cursor IDE 的数据目录与 `.cursor` 不同。建议位置只是提示，不会自动扫描。
 3. **备份文件与恢复钥匙。** 先备份数据，再到「目录与恢复」选择「导出恢复备份」。备份包含敏感钥匙材料，应离线妥善保管，不要上传或分享；钥匙不能替代文件备份。
 4. **扫描并检查预览。** 默认保护最近 **30 天**的文件。先选少量符合条件的旧日志，查看保护原因、扫描完整性，以及所选会话或缓存单元的全部成员。真实操作前退出对应工具及全部相关 CLI、桌面、IDE、SDK 和后台进程，并在应用中确认；进程仍在运行或状态不明时会阻止操作。
 5. **试着恢复。** 在「隔离记录」恢复刚才的批次。已有文件和目录不会被覆盖或合并；发生冲突、数据变化或父目录缺失时保留相关项，处理后可在对应工具仍关闭的情况下重试。
@@ -140,7 +143,7 @@ Claude Code 批次记录展示已隔离的调试日志与已完整恢复的本�
 
 恢复还会核对文件快照。清单通过钥匙认证不代表文件正文已逐字或哈希核验。跨卷复制、换机或系统回收站还原可能改变文件身份，导致自动恢复被拒绝；请保留完整批次和原钥匙备份，不要手改清单。要从系统回收站恢复，先通过操作系统将整个批次文件夹放回原 `.agentvac-quarantine/<批次ID>`，再由 AgentVac 校验并恢复原位置。
 
-完整目录恢复不保证保留所有平台特有 ACL、扩展属性或创建时间。新建的多成员文件组使用 v4 签名恢复记录，不等于一次原子文件系统重命名；Windows 不提供目录 fsync 保证。旧清单中的不安全舍入标识不能通过重新导入钥匙修复，应保留整批数据而不是强制恢复。最终候选包经操作系统回收站还原的路径仍未完成原生验收。
+完整目录恢复不保证保留所有平台特有 ACL、扩展属性或创建时间。新建的多成员文件组使用 v4 签名恢复记录，不等于一次原子文件系统重命名；Windows 不提供目录 fsync 保证。旧清单中的不安全舍入标识不能通过重新导入钥匙修复，应保留整批数据而不是强制恢复。操作系统回收站界面的还原仍未测试。
 
 ## 隐私与运行限制
 
@@ -190,7 +193,7 @@ npm run pack       # 当前平台的未归档应用目录
 
 以上为构建目标，实际发布文件以下载区为准。GitHub Actions 原生验证通常按需手动执行；特定源码验收可能使用临时触发条件，请以当前工作流文件为准。验证不会自动发布 Release。
 
-`SOURCE-SHA256.json` 记录特定源码快照的哈希，包含代码、测试、文档与截图；它不证明当前候选版本已通过验收，也不用于校验发行安装包。下载应用请使用对应发行版的 `SHA256SUMS.txt`。
+`SOURCE-SHA256.json` 记录特定源码快照的哈希，包含代码、测试、文档与截图；它不证明发行验收完成，也不用于校验发行安装包。v0.2.0 下载应使用匹配平台与架构的校验文件；v0.1.0 继续使用该版的 `SHA256SUMS.txt`。
 
 ## 许可
 

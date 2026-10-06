@@ -1,56 +1,66 @@
-# AgentVac 0.2.0 limited release support matrix
+# AgentVac 0.2.0 support matrix
 
-**As of 2026-10-06: accepted scope boundary, unpublished candidate source.** This matrix separates intended source capability from observed platform restrictions and final release acceptance. It does not label unsupported, blocked, skipped or pending cases as passed. No v0.2.0 package is accepted or published by this document.
+**Evidence current to 2026-10-06.** This matrix separates source policy from operations actually exercised on each platform. Passed, blocked, skipped, failed and untested results are distinct. No complete four-tool conversation deletion or universal platform coverage is claimed.
 
-## Provider boundary
+## Source policy
 
-All reading below requires explicit content consent. All cleanup/restore entries require a complete recognized layout and the shared process, age, identity, filesystem and no-overwrite checks. Platform restrictions in the next table further narrow these entries.
+All reading requires content consent. Cleanup and restore require complete recognized layouts plus process, age, identity, filesystem and no-overwrite checks. The platform evidence below further limits what can be claimed.
 
-| Provider/source                              | Supported reading in source                                                                                                                         | Possible cleanup/recovery candidates                                                                                         | Outside this release boundary                                                                                                 |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Codex JSONL                                  | Supported native rollouts; title/project/body/native-time filters; bounded messages and provenance                                                  | Old rotated logs; signed legacy session batches only when legacy identity and recovery checks pass                           | New session quarantine; complete canonical-history archive/deletion; guaranteed reconstruction of inherited/compacted history |
-| Claude Code local projects                   | Supported SDK-compatible main history and bounded companion subagent content                                                                        | Standard old debug logs; eligible complete local session bundles                                                             | Active/newest/recent or incomplete/unknown bundles; global prompt history, memory, credentials; Desktop/Cowork/cloud cleanup  |
-| Cline current SDK / supported legacy history | Supported manifest/index metadata and messages, including separately attributed child artifacts                                                     | Derived search-cache units; checkpoint scratch caches; known legacy model catalogs; eligible aged per-session hook telemetry | Canonical conversations, tasks, manifests, indexes, real Git checkpoints, current shared logs and unknown data                |
-| Cursor IDE databases                         | Supported composer/bubble records on non-Windows platforms where private-copy locality and permission gates pass; **disabled on Windows in v0.2.0** | Recognized old diagnostic logs; complete supported `Cache`, `Code Cache`, `GPUCache`, `CachedData` units                     | Canonical chat/state database mutation, account/network state, profiles, extensions, workspace/index data and unknown caches  |
-| Explicit Cursor agent-transcripts            | Supported plain local transcript text/tool blocks; unavailable native time remains unknown                                                          | None; this is a separate read-only selection                                                                                 | Implicit discovery, database access permission, transcript deletion or any cleanup authority                                  |
-| Explicit Cline SDK source                    | Supported SDK-only/file-index history through a separate read-only selection                                                                        | None from this selection                                                                                                     | Changing the cleaner root or granting cleanup authority                                                                       |
+| Provider or source | Supported reading | Eligible cleanup or recovery | Excluded |
+| --- | --- | --- | --- |
+| Codex JSONL | Supported native rollouts, bounded messages, native times and provenance | Old rotated logs; eligible authenticated legacy batches | New session quarantine; complete canonical-history archive/deletion; guaranteed inherited or compacted history reconstruction |
+| Claude Code local projects | Supported SDK-compatible main history and bounded companion subagent content | Old standard debug logs; eligible complete local session bundles | Active/newest/recent or incomplete/unknown bundles; global history, memory, credentials; Desktop/Cowork/cloud cleanup |
+| Cline current SDK and supported legacy history | Supported metadata/messages with separate child-artifact attribution | Derived search caches, checkpoint scratch caches, known legacy model catalogs and eligible aged per-session hook telemetry | Canonical tasks, conversations, manifests, indexes, real Git checkpoints and unknown data |
+| Cursor IDE databases | Supported composer/bubble records through private-copy checks on macOS/Linux; **disabled on Windows** | Recognized old logs and complete supported `Cache`, `Code Cache`, `GPUCache`, `CachedData` units | Chat/state database mutation, canonical conversation archive/deletion, account/network state, profiles, extensions and workspace/index data |
+| Explicit Cursor agent-transcripts | Supported plain local transcript text/tool blocks; missing native time stays unknown | None | Implicit discovery, database permission or transcript cleanup |
+| Explicit Cline SDK folder | Supported SDK/file-index history | None from this selection | Changing the cleaner root or granting cleanup authority |
 
-Only the Claude Code row admits new conversation archival, and only as a complete eligible local bundle. Read/search support for Codex, Cline or Cursor does not imply that their histories can be archived or deleted. Unknown/safety-limited content must remain visibly partial.
+Only eligible Claude Code local bundles support new conversation archival. Codex, Cline and Cursor read/search support does not imply their canonical histories can be archived or deleted.
 
-## Platform and artifact status
+## Exact application and QA provenance
 
-| Target              | Known limit for this candidate                                                                                                                                                                                                                           | Final native/package status                                                                                                                           | Planned format                       |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| Windows x64         | Cursor IDE database reader explicitly disabled in v0.2.0, before database filesystem/copy/helper access and regardless of helper results. Supported alternative: explicitly selected read-only agent-transcripts; final native positive control pending. | **Pending.** Reading, available mutations, disabled-feature reasons, packaged workers, recovery and first launch require candidate-specific evidence. | Portable/NSIS setup EXE, unpublished |
-| Linux x64           | Unattributed foreign runtimes can yield unknown process state and block Claude Code/Cline/Cursor quarantine and restore. No assumption that those runtimes are unrelated.                                                                                | **Pending.** Earlier source/sandboxed or synthetic results do not accept the final tar.gz or establish ordinary-host mutation availability.           | tar.gz, unpublished                  |
-| macOS Apple Silicon | The previous exact-source run passed native desktop, readers and all three provider quarantine/restore lifecycles. Current application bytes are unchanged by the test/harness fixes; final package acceptance is pending.                               | **Package pending.** Previous arm64 source-native operations passed; the actual final DMG/ZIP still require verification.                             | arm64 DMG/ZIP, unpublished           |
-| macOS Intel         | The previous exact-source run passed native desktop, readers and all three provider quarantine/restore lifecycles. Current application bytes are unchanged by the test/harness fixes; final package acceptance is pending.                               | **Package pending.** Previous x64 source-native operations passed; the actual final DMG/ZIP still require verification.                               | x64 DMG/ZIP, unpublished             |
+- **Application source:** `4a523b95c1098eeb3e220cc58d290819ef97a01f`.
+- **Release source tag:** includes later reviewed documentation, QA, verifier and publication metadata. The complete-tree publication check permits only the explicit nonshipping path list; all application and build inputs must match the tested source. Package receipts continue to identify the original build source rather than the later tag commit.
+- **Original platform run:** `37536722747`. Unit totals below belong to this run and source, not to a later rerun.
+- **Windows package QA run:** `37540075963`, job `112530652671`, QA revision `ca0a753e1108587391260a0943113d2a6f5c589f`. It built and checked the original application source with separate QA inputs; that QA revision is not the claimed shipping application revision. It did not rerun the source unit suite. Portable failed; NSIS execution and upload did not run in this attempt.
+- **Windows setup QA run:** `37541701609`, job `112535997318`, QA revision `6da2a960a2034b43595f9fbdbe0a44447f3514d8`. It built the original application source and passed actual per-user NSIS install, installed launch, supported packaged readers, generated-data recovery/restart, exact payload binding and uninstall. It did not rerun the source unit suite or prior provider lifecycles.
+- **Windows distribution:** verified NSIS setup only. Portable is unverified and excluded; its failed native check was not rerun.
 
-On **every OS**, a running or unknown related process, an incomplete process observation or a failed inspection blocks mutation, including restore and moving batches to system Trash. A clear result also requires closing all related CLI, desktop, IDE, SDK and background clients. A guard refusal verifies only that the action was refused; it is not a positive cleanup/restore test.
+Native application checks used disposable/generated data. They establish the reported AgentVac behavior, not comprehensive testing of installed vendor applications or real user histories.
 
-The platform table does not accept outstanding defects. Before an affected action is published as supported, its confirmed normal-use defect must be fixed and retested or its unavailability must be explicit. Native OS-Trash recovery and the prior independent mutation final assessment remain incomplete. A package can be built successfully while these gates are still pending.
+## Platform results
 
-## Common operating limits
+Unit totals are **passed / failed / skipped**. A zero unit-failure count does not mean every native or package stage passed.
 
-- Content consent applies to the effective provider/root and this app session; revocation stops work and clears the view. Separately selected reader sources do not grant cleanup authority.
-- On macOS and Linux, Cursor's private copy may contain unqueried settings/authentication pages; final native acceptance of supported paths remains pending. The default cumulative budget is 512 MiB per request. Unverified locality/permissions block database reading; no source-database mutation, relaxed ACL or silent alternate destination is substituted. Windows IDE database reading is disabled in v0.2.0. Explicit plain transcript reading is independent and is the supported Windows alternative.
-- Dates use source conversation time; missing time stays unknown. Unknown formats, inherited/compacted history, malformed records and safety bounds can leave partial results. V8 heap limits are not a proven hard bound on native SQLite memory.
-- Ordinary scans are metadata-only: 50,000 entries by default, optionally 100,000; depth 12 and result budget 24 MiB. Incomplete scans disable bulk selection. Each batch/unit is bounded to 5,000 items/nodes; unit descendant depth is 12.
-- Default age protection is 30 days, with additional provider-specific current/newest rules. Unknown members or layouts protect an entire bundle/cache unit. Symlinks, multiple hardlinks, special files and cross-volume unit members are not admitted.
-- Quarantine and system Trash do not themselves guarantee reclaimed disk space. There is no permanent-delete fallback. Restore does not overwrite or merge regenerated data.
-- Exact identities and signed v4 journals improve recoverability but do not guarantee safety under every hostile same-user race, power loss or disk failure. Windows directory fsync is absent; directory ACL/xattr/creation-metadata fidelity is limited. Unsupported rounded legacy identities require preserving the batch, not forced import or manifest edits.
-- The UI is Simplified Chinese only. README translations and synthetic screenshots are documentation, not evidence of native acceptance. Signing/notarization and normal first-launch trust checks are not complete; system protections must stay enabled.
+| Target | Source unit results | Native operations observed | Actual package status |
+| --- | --- | --- | --- |
+| Linux x64 | **1066 / 0 / 4** | Source readers passed. Claude Code, Cline and Cursor mutations were refused for unknown runtimes, with bytes preserved; their positive lifecycles did not pass. | tar.gz checks and all packaged readers passed. Assets verified. The provider stage failed its positive lifecycle requirement. |
+| macOS Intel x64 | **1049 / 0 / 21** | Readers and all three Claude Code/Cline/Cursor quarantine/restore lifecycles passed. The platform job passed. | ZIP and DMG package checks passed; assets verified. |
+| macOS Apple Silicon arm64 | **1049 / 0 / 21** | Readers and all three provider lifecycles passed. Separate real-root duplicate quarantine/restore check **skipped before mutation** for incomplete process inventory; native Trash used generated demo data. | ZIP and DMG package checks passed; assets verified. The skipped real-root case remains unverified. |
+| Windows x64 | **1026 / 0 / 44** | Source-native desktop, Trash, durability and supported readers passed. All three provider guards refused a complete but unknown process inventory; source/protected bytes remained unchanged. | Package ASAR, architecture and byte verification passed. **NSIS install, installed launch/readers, generated recovery/restart, exact payload binding and uninstall passed.** Three Windows assets verified. Portable native attachment failed and is excluded. |
 
-## Publication boundary and references
+The Windows portable failure reports `actual-package-native-smoke` with nested `harness-fatal-error`; no cause is proven. Portable remains unverified and excluded. Setup acceptance comes from the separate successful installed-package run, not from earlier source-native successes. The setup run does not convert the prior three guarded provider lifecycles into passes.
 
-Final results must identify the exact tested source and package bytes, distinguish passes from failures/skips/blocked cases, and retain the limits above. Verified v0.2.0 release assets and checksums do not yet exist in the download documentation. The [README downloads](../README.en.md#download-and-install) remain the existing Codex-only v0.1.0 assets.
+Windows Cursor IDE database reading is intentionally disabled before database filesystem access, copying or helper invocation, regardless of helper capability. Explicit agent-transcripts are the supported read-only alternative and passed the installed-package reader checks.
 
-- [Candidate release notes](RELEASE-NOTES-0.2.0.md)
-- [Conversation reading, consent and coverage](CONVERSATION-MANAGEMENT.md)
-- [Claude Code scope](CLAUDE-CODE-SCOPE.md), [Cline scope](CLINE-SCOPE.md), [Cursor scope](CURSOR-SCOPE.md)
-- [Complete cleanup units and recovery](SAFE-CLEANUP-UNITS.md)
-- [Exact identities and v4 journals](RECOVERY-JOURNAL-V4.md)
-- [Cancellation and retained records](MUTATION-CANCELLATION.md), [fresh Trash confirmation](TRASH-CONFIRMATION.md)
-- [Historical acceptance matrix](MULTI-AGENT-ACCEPTANCE.md), [platform diagnostic checkpoint](PLATFORM-DIAGNOSTICS.md)
+On all platforms, unknown/running related processes, incomplete observations or failed inspection block quarantine, restore and system Trash. The tested pre-mutation refusals preserved the checked source and protected bytes; they are not successful cleanup runs. Other interrupted operations can leave authenticated recovery records and already-admitted moves. Passing provider lifecycles in a separate check does not retroactively pass a skipped case.
 
-The historical documents describe their own source checkpoints. Their test totals and diagnostic evidence do not transfer automatically to this candidate or its eventual release assets.
+## Common limits
+
+- Consent covers the effective provider/root for the current app session. Revocation aborts reading and clears content. Separate reader selections confer no cleanup authority.
+- Unknown formats, malformed records, incomplete/compacted history and safety bounds can produce partial results. Missing conversation times remain unknown.
+- macOS/Linux Cursor reading requires a private local database/WAL copy. It can contain unqueried settings/authentication pages; the default cumulative budget is 512 MiB per request. Failed locality/permission checks block reading. Worker heap limits are not a proven hard bound on native SQLite memory.
+- Metadata scans default to 50,000 entries, optionally 100,000, with depth 12 and a 24 MiB result budget. Incomplete scans disable bulk selection. A cleanup unit/batch is bounded to 5,000 nodes/items; unit descendant depth is 12.
+- Default age protection is 30 days, with provider-specific current/newest rules. Unknown members protect the whole unit. Links, special files and cross-volume unit members are rejected.
+- Quarantine and Trash do not guarantee reclaimed disk space. There is no permanent-delete function. Restore never overwrites or merges regenerated data.
+- Signed v4 journals and exact identities do not guarantee recovery after every race, power loss or disk failure. Windows directory fsync is absent; ACL, extended-attribute and creation-time fidelity is limited. Preserve unsupported legacy batches and their original key.
+- OS Trash restore UI and ordinary first-launch trust behavior remain **untested**. The apps are unsigned and macOS notarization is incomplete. Native Trash API success is not proof of a successful OS Trash restore.
+- The UI is Simplified Chinese only. Synthetic screenshots and source/browser tests do not establish native package acceptance.
+
+## Verified distribution scope
+
+The verified asset set has **14 files**: the existing eleven Linux/macOS files, preserved unchanged, plus the Windows setup EXE, Windows checksums and verification report. Server digest checks verified the three Windows uploads and the complete inventory. This evidence supports the named package paths only; the guarded source cases, skipped Apple Silicon case, unsigned status and untested trust/Trash-restore behavior above remain limits.
+
+Windows setup artifact: `AgentVac-0.2.0-windows-x64-setup.exe`, **112,023,089 bytes**, SHA-256 `051f78023a378c124aa34e944316e0beb0caa1f4ff24b261fb7f6294bf2ecf69`. Use each platform's matching `AgentVac-0.2.0-<platform>-<arch>-SHA256SUMS.txt` to verify its downloads. Portable is not included.
+
+See the [release notes](RELEASE-NOTES-0.2.0.md) for the user-facing changes and recovery guidance. Historical source checkpoints and later QA revisions cannot silently replace the application or package evidence recorded here.

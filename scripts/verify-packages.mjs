@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url);
 const asar = require("@electron/asar");
 const base = path.resolve(process.argv[2] || "release-final");
 import { selectPackageTargets } from "./package-targets.mjs";
+import { asarMemberPath, portableAsarEntry } from "./package-asar-paths.mjs";
 const hash = (b) => createHash("sha256").update(b).digest("hex");
 async function files(dir) {
   let out = [];
@@ -36,7 +37,7 @@ for (const target of selectPackageTargets(onlyPlatform, onlyArch)) {
   const archive = path.join(resources, "app.asar");
   for (const file of expected)
     assert.deepEqual(
-      asar.extractFile(archive, file.replaceAll(path.sep, "/")),
+      asar.extractFile(archive, asarMemberPath(file)),
       await fs.readFile(file),
       `${target.platform}/${target.arch}: ${file} differs from tested build`,
     );
@@ -49,7 +50,7 @@ for (const target of selectPackageTargets(onlyPlatform, onlyArch)) {
   ]) {
     const relative = "dist-electron/" + name;
     assert.equal(
-      asar.statFile(archive, relative).unpacked,
+      asar.statFile(archive, asarMemberPath(relative)).unpacked,
       true,
       `${target.platform}/${target.arch}: helper must be outside ASAR`,
     );
@@ -63,7 +64,7 @@ for (const target of selectPackageTargets(onlyPlatform, onlyArch)) {
     );
     unpackedHelpers[name] = { bytes: helper.length, sha256: hash(helper) };
   }
-  const entries = asar.listPackage(archive);
+  const entries = asar.listPackage(archive).map((entry) => portableAsarEntry(entry));
   assert.ok(
     entries.every((entry) =>
       /^\/(dist(?:-electron)?(?:\/|$)|build(?:\/|$)|package\.json$)/.test(

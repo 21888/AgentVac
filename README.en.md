@@ -4,7 +4,7 @@
 
 An open-source desktop tool for Codex, Claude Code, Cline and Cursor: view and search supported local conversations, analyze disk usage, and preview eligible logs, caches or complete Claude Code session bundles.
 
-**Release status:** this source prepares an **unpublished, limited-scope v0.2.0 candidate**. Some sessions cannot be archived, and reading, quarantine and restore are restricted on some platforms. It does not provide complete conversation management or deletion across all four tools. Final source checks, native platform acceptance and package verification remain pending. **Current v0.1.0 downloads support Codex only.** No verified v0.2.0 package has been published. See the [candidate release notes](docs/RELEASE-NOTES-0.2.0.md) and [release support matrix](docs/RELEASE-SUPPORT-MATRIX.md).
+**v0.2.0 scope:** local conversation viewing and search, plus limited cleanup and recovery. Some conversations cannot be archived or deleted, and platform restrictions remain. Linux/macOS package and reader checks passed within the limits below. Windows NSIS setup passed actual install, installed-app launch/readers/recovery and uninstall checks. The Windows portable executable is unverified and excluded. See the [release notes](docs/RELEASE-NOTES-0.2.0.md) and [release support matrix](docs/RELEASE-SUPPORT-MATRIX.md).
 
 - **See what is on disk**: inspect logical file sizes, categories, cleanup candidates, and protection reasons.
 - **Review before changing anything**: choose a tool and data folder, then preview the exact files or complete cleanup units.
@@ -13,7 +13,7 @@ An open-source desktop tool for Codex, Claude Code, Cline and Cursor: view and s
 
 This README is available in four languages. **The app interface is currently available only in Simplified Chinese.** AgentVac is an independent project, not an official product of the supported tool vendors.
 
-## v0.2.0 candidate scope
+## v0.2.0 scope
 
 The table describes what the source may admit for review, subject to the platform limits below. It is not a completed release-acceptance result for every platform.
 
@@ -34,39 +34,42 @@ After separate content consent, readers cover supported Codex JSONL, Claude Code
 
 Consent is limited to the current provider, folder and app session. Revoking it stops reading and clears displayed content. Messages are inert text: commands are not executed and external media is not loaded automatically. Cline SDK folders and Cursor agent-transcripts can be selected separately for read-only access; this grants no cleanup authority. Only eligible, completely recognized Claude Code local session bundles can request quarantine previews. Canonical conversation deletion or archival remains disabled for Codex, Cline and Cursor.
 
-On macOS and Linux, Cursor database reading requires a private local temporary copy, which may include unqueried settings/authentication pages, with a default cumulative limit of 512 MiB per request. If location or permission checks cannot be verified, the database reader is unavailable; it does not silently choose another copy destination. Final native acceptance of the supported paths on these platforms remains pending. Cursor IDE database reading is explicitly disabled on Windows in v0.2.0. See [scope, privacy and limits](docs/CONVERSATION-MANAGEMENT.md).
+On macOS and Linux, Cursor database reading requires a private local temporary copy, which may include unqueried settings/authentication pages, with a default cumulative limit of 512 MiB per request. If location or permission checks cannot be verified, the database reader is unavailable; it does not silently choose another copy destination. Source-native and packaged reader checks passed on macOS and Linux using generated data; this does not establish complete coverage of every installed vendor version. Cursor IDE database reading is explicitly disabled on Windows in v0.2.0. See [scope, privacy and limits](docs/CONVERSATION-MANAGEMENT.md).
 
-### Platform limits and pending acceptance
+### Platform evidence and remaining limits
 
-- **All platforms:** quit the tool and every related CLI, desktop, IDE, SDK and background process. Running processes, incomplete observations or an unknown state block quarantine, restore and moving batches to system Trash. A protection block is not a successful cleanup.
-- **Windows x64:** Cursor IDE database reading is explicitly disabled in v0.2.0; a successful helper check cannot enable it. The supported alternative is explicitly selecting agent-transcripts for read-only viewing. Its final packaged native positive test remains pending.
-- **Linux x64:** unattributed foreign runtimes can remain unknown and block Claude Code, Cline or Cursor quarantine and restore. These actions are not promised to work on every ordinary Linux installation.
-- **macOS Intel / Apple Silicon:** ordinary quarantine/restore failures are still under targeted diagnosis. Final native and package acceptance for both architectures remains pending; these operations are not yet accepted macOS release capabilities.
+- **All platforms:** quit the tool and every related CLI, desktop, IDE, SDK and background process. Running processes, incomplete observations or an unknown state block quarantine, restore and moving batches to system Trash. A refusal or skipped case is not a successful cleanup.
+- **Windows x64:** Cursor IDE database reading is disabled; explicitly selected agent-transcripts are the supported read-only alternative. Source-native desktop, Trash, durability and supported reader checks passed. Claude Code, Cline and Cursor mutations were refused for unknown processes, with bytes preserved. Separately, NSIS setup passed actual per-user install, installed launch/readers, generated-data recovery/restart, exact payload binding and uninstall. Portable failed native attachment and remains excluded; its cause is not proven.
+- **Linux x64:** source and packaged readers and tar.gz package checks passed. Claude Code, Cline and Cursor mutations were refused for unknown runtimes, with bytes preserved; positive cleanup/restore lifecycles were not established.
+- **macOS Intel:** source/native readers, all three provider quarantine/restore lifecycles, and actual ZIP/DMG package checks passed.
+- **macOS Apple Silicon:** readers, all three provider lifecycles and ZIP/DMG checks passed. A separate duplicate quarantine/restore check through the real-root path was skipped before mutation for incomplete process inventory. The native Trash check used generated demo data.
+
+These checks used disposable/generated data. The tested application source is `4a523b95c1098eeb3e220cc58d290819ef97a01f`; the support matrix separates its results from later QA-only runs. Setup-only run `37541701609` passed without rerunning or relabeling the earlier source guard failures and skips. The verified asset set contains 14 files. Ordinary first-launch trust behavior and restoration through the OS Trash interface remain untested.
 
 **v0.1.0 safety note:** use old-log cleanup only and leave session-file quarantine disabled. Current Codex paginated history can reference other rollouts. New session-file quarantine is disabled in this source. Existing signed archives can be restored only when legacy identity and recovery checks pass.
 
 ## Download and install
 
-Current download, **Codex only**: [v0.1.0](https://github.com/21888/AgentVac/releases/tag/v0.1.0). All files below are existing v0.1.0 assets and do not include the v0.2.0 candidate features described here. Candidate source or a local build is not a published package. Prebuilt apps do not require a separate Node.js installation.
+Choose the package for your operating system and processor. Windows distribution is the per-user NSIS setup installer; portable is excluded. Prebuilt apps do not require a separate Node.js installation.
 
-| Platform              | Download                                                                                                                                      | Requirements                   |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| macOS · Apple Silicon | [AgentVac-0.1.0-macos-arm64.dmg](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-macos-arm64.dmg)                   | macOS 13+, M-series chip       |
-| macOS · Intel         | [AgentVac-0.1.0-macos-x64.dmg](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-macos-x64.dmg)                       | macOS 13+, Intel processor     |
-| Windows               | [AgentVac-0.1.0-windows-x64-portable.exe](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-windows-x64-portable.exe) | Windows 10+, x64; portable app |
-| Linux                 | [AgentVac-0.1.0-linux-x64.tar.gz](https://github.com/21888/AgentVac/releases/download/v0.1.0/AgentVac-0.1.0-linux-x64.tar.gz)                 | A supported Linux x64 desktop  |
+| Platform | Download | Checksum | Requirements |
+| --- | --- | --- | --- |
+| macOS · Apple Silicon | [AgentVac-0.2.0-macos-arm64.dmg](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-arm64.dmg) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-arm64-SHA256SUMS.txt) | macOS 13+, M-series chip |
+| macOS · Intel | [AgentVac-0.2.0-macos-x64.dmg](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-x64.dmg) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-macos-x64-SHA256SUMS.txt) | macOS 13+, Intel processor |
+| Windows | [AgentVac-0.2.0-windows-x64-setup.exe](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-windows-x64-setup.exe) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-windows-x64-SHA256SUMS.txt) | Windows 10+, x64; per-user NSIS installer |
+| Linux | [AgentVac-0.2.0-linux-x64.tar.gz](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-linux-x64.tar.gz) | [SHA-256](https://github.com/21888/AgentVac/releases/download/v0.2.0/AgentVac-0.2.0-linux-x64-SHA256SUMS.txt) | A supported Linux x64 desktop |
 
-Verify downloaded files against [SHA256SUMS.txt](https://github.com/21888/AgentVac/releases/download/v0.1.0/SHA256SUMS.txt). If the repository is private, source and downloads require a GitHub account with access. Use an operating system that still receives security updates.
+macOS ZIP alternatives and platform verification reports are listed on the [v0.2.0 release page](https://github.com/21888/AgentVac/releases/tag/v0.2.0). Verify each download against its matching platform checksum file. The verified set contains 14 assets: eleven Linux/macOS files and the Windows setup EXE, checksums and verification report. If the repository is private, source and downloads require a GitHub account with access. Use an operating system that still receives security updates.
 
 - **macOS**: choose the DMG for your processor, open it, drag AgentVac into Applications, and launch it from there.
-- **Windows**: save and run the portable EXE. This release provides a portable launcher, not an installation wizard.
+- **Windows**: run the setup EXE for a per-user installation, then launch the installed app. Use the installed uninstaller to remove it.
 - **Linux**: extract the entire tar.gz archive and run the included app in a normal desktop session. Install dependencies through your distribution's official package manager. Moving files to Trash requires a working desktop Trash backend; if it is unavailable, the operation fails and files are kept. This release does not include an AppImage.
 
-**The macOS app does not yet have Developer ID signing or Apple notarization; the Windows app does not yet have Authenticode signing.** Gatekeeper or SmartScreen may warn or block startup. Do not disable system protections, the Chromium sandbox, or AppArmor to bypass warnings. A successful build or intact archive does not establish that the normal first-launch trust checks have passed. Start with demo data.
+**The macOS app does not yet have Developer ID signing or Apple notarization; the Windows app does not yet have Authenticode signing.** Gatekeeper or SmartScreen may warn or block startup. Do not disable system protections, the Chromium sandbox, or AppArmor to bypass warnings. Ordinary first-launch trust behavior remains untested; successful package checks do not establish it. Start with demo data.
 
 ## Screenshots
 
-These screenshots show the **unreleased v0.2.0 development UI with synthetic test data**. Process checks in the previews are simulated. Charts show logical sizes of discovered files, not a user's actual usage or reclaimable space. The images illustrate the interface; they do not establish installed-tool compatibility, native platform acceptance, signing, or first-launch system trust.
+These screenshots show the **v0.2.0 UI with synthetic test data**. Process checks in the previews are simulated. Charts show logical sizes of discovered files, not a user's actual usage or reclaimable space. The images illustrate the interface; they do not establish installed-tool compatibility, native platform acceptance, signing, or first-launch system trust.
 
 ### Space analysis · Light
 
@@ -120,7 +123,7 @@ Review a recognized GPUCache directory as one unit, with a warning that the cach
 Chinese labels below match the current app interface.
 
 1. **Try the demo first.** Click “体验演示扫描” (Try demo scan) to practice previewing, quarantining, and restoring in a separate Codex demo workspace. The workspace preserves your previous actions.
-2. **Choose the tool and its data folder.** In the development build, select Codex, Claude Code, Cline, or Cursor at the top, then use the native folder picker. v0.1.0 supports only the Codex root, usually `~/.codex` or the location set by `CODEX_HOME`. Use the matching tool's data root, not a project folder or disk root. Cursor's IDE data folder is different from `.cursor`. Suggested locations are hints and are not scanned automatically.
+2. **Choose the tool and its data folder.** In v0.2.0, select Codex, Claude Code, Cline, or Cursor at the top, then use the native folder picker. v0.1.0 supports only the Codex root, usually `~/.codex` or the location set by `CODEX_HOME`. Use the matching tool's data root, not a project folder or disk root. Cursor's IDE data folder is different from `.cursor`. Suggested locations are hints and are not scanned automatically.
 3. **Back up files and the recovery key.** Back up your data, then open “目录与恢复” (Folders and recovery) and choose “导出恢复备份” (Export recovery backup). This backup contains sensitive key material. Keep it safely offline; do not upload or share it. A key backup does not replace a file backup.
 4. **Scan and review the preview.** Files from the last **30 days** are protected by default. Start with a few eligible old logs. Check protection reasons, scan completeness, and every member of a selected session or cache unit. Before changing real data, quit the selected tool and all related CLI, desktop, IDE, SDK, and background processes, then confirm this in the app. An unknown or running process state blocks the operation.
 5. **Test a restore.** Restore the batch from “隔离记录” (Quarantine history). Existing files and directories are never overwritten or merged. Conflicts, changed data, or missing parent folders keep the affected items available for recovery; resolve the issue and retry with the relevant tool still closed.
@@ -142,7 +145,7 @@ Scans visit up to **50,000 entries** by default, optionally 100,000. Entries inc
 
 Restores also check file snapshots. An authenticated manifest does not mean file contents have been compared byte-for-byte or verified by hash. Copying across volumes, changing computers, or restoring from the system Trash may change file identity and prevent automatic recovery. Keep the entire batch and the original key backup; do not edit manifests to bypass checks. To recover a trashed batch, first use your operating system to put the whole batch folder back at its original `.agentvac-quarantine/<batch-ID>` location, then let AgentVac validate and restore the files.
 
-Whole-directory recovery does not guarantee preservation of every platform-specific ACL, extended attribute, or creation timestamp. New multi-member bundles use a signed v4 recovery journal; they are not one atomic filesystem rename. Windows has no directory-fsync guarantee. Importing a key cannot repair unsafe rounded identities in old manifests; preserve the whole batch instead of forcing recovery. Native recovery through the operating system's Trash remains unaccepted for the final candidate packages.
+Whole-directory recovery does not guarantee preservation of every platform-specific ACL, extended attribute, or creation timestamp. New multi-member bundles use a signed v4 recovery journal; they are not one atomic filesystem rename. Windows has no directory-fsync guarantee. Importing a key cannot repair unsafe rounded identities in old manifests; preserve the whole batch instead of forcing recovery. Restoration through the operating system's Trash interface remains untested.
 
 ## Privacy and operating limits
 
@@ -192,7 +195,7 @@ npm run pack       # Unarchived app directory for the current platform
 
 These are build targets; see the download section for files actually released. Native GitHub Actions verification normally runs on demand. Temporary triggers may be enabled for a specific source validation; check the current workflow file for its exact triggers. Verification does not automatically publish releases.
 
-`SOURCE-SHA256.json` records hashes for a particular source snapshot, including code, tests, documentation and screenshots. It does not establish acceptance of the current candidate or verify release binaries. Use the matching release's `SHA256SUMS.txt` for downloaded apps.
+`SOURCE-SHA256.json` records hashes for a particular source snapshot, including code, tests, documentation and screenshots. It does not establish release acceptance or verify binaries. For v0.2.0 downloads, use the matching platform and architecture's checksum file; v0.1.0 uses its existing `SHA256SUMS.txt`.
 
 ## License
 
